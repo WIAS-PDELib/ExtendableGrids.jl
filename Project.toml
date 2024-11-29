@@ -1,7 +1,7 @@
 name = "ExtendableGrids"
 uuid = "cfc395e8-590f-11e8-1f13-43a2532b2fa8"
 authors = ["Juergen Fuhrmann <juergen.fuhrmann@wias-berlin.de>", "Christian Merdon  <christian.merdon@wias-berlin.de>", "Johannes Taraz  <johannes.taraz@gmail.com>", "Patrick Jaap <patrick.jaap@wias-berlin.de>"]
-version = "1.11"
+version = "1.12"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
@@ -50,7 +50,7 @@ Random = "1.9"
 SparseArrays = "1.9"
 StaticArrays = "1"
 StatsBase = "0.34"
-TetGen = "1.5.1"
+TetGen = "1.5.1, 2"
 Triangulate = "2.3.2"
 UUIDs = "1.6"
 WriteVTK = "1.14"
