@@ -98,12 +98,14 @@ end
 
 Create and initialize binned point list
 """
-function BinnedPointList(::Type{T}, dim;
-                         tol = 1.0e-12,
-                         number_of_directional_bins = 10,
-                         binning_region_increase_factor = 0.01,
-                         num_allowed_unbinned_points = 5,
-                         max_unbinned_ratio = 0.05) where {T}
+function BinnedPointList(
+        ::Type{T}, dim;
+        tol = 1.0e-12,
+        number_of_directional_bins = 10,
+        binning_region_increase_factor = 0.01,
+        num_allowed_unbinned_points = 5,
+        max_unbinned_ratio = 0.05
+    ) where {T}
     bpl = BinnedPointList{T}(nothing)
 
     bpl.dim = dim
@@ -122,7 +124,7 @@ function BinnedPointList(::Type{T}, dim;
     bpl.bins = Array{Vector{Int32}, dim}(undef, zeros(Int32, dim)...)
 
     bpl.current_bin = zeros(Int32, bpl.dim)
-    bpl
+    return bpl
 end
 
 """
@@ -140,7 +142,7 @@ Find point in index list (by linear search)
 Return its index, or zero if not found
 """
 function _findpoint(bpl, index, p)
-    for i = 1:length(index)
+    for i in 1:length(index)
         @views if norm(bpl.points[:, index[i]] - p) < bpl.tol
             return index[i]
         end
@@ -153,9 +155,9 @@ end
 
 Calculate the bin of the point. Result is stored
 in bpl.current_bin
-""" 
+"""
 function _bin_of_point!(bpl, p)
-    for idim = 1:(bpl.dim)
+    for idim in 1:(bpl.dim)
         # scaled value for particular dimension
         s = (p[idim] - bpl.binning_region_min[idim]) / (bpl.binning_region_max[idim] - bpl.binning_region_min[idim])
         if s > 1 || s < 0
@@ -166,6 +168,7 @@ function _bin_of_point!(bpl, p)
             bpl.current_bin[idim] = ceil(Int32, bpl.number_of_directional_bins * s)
         end
     end
+    return
 end
 
 """
@@ -177,13 +180,15 @@ This amounts to two steps:
 - Re-calculate all point bins
 """
 function _rebin_all_points!(bpl)
-    if length(bpl.unbinned) > max(bpl.num_allowed_unbinned_points,
-                                  bpl.max_unbinned_ratio * size(bpl.points, 2))
+    if length(bpl.unbinned) > max(
+            bpl.num_allowed_unbinned_points,
+            bpl.max_unbinned_ratio * size(bpl.points, 2)
+        )
 
         # Calculate extrema of unbinned points
         @views e = extrema(bpl.points[:, bpl.unbinned]; dims = 2)
 
-        for i = 1:(bpl.dim)
+        for i in 1:(bpl.dim)
             # Increase binning region according to unbinned extrema
             bpl.binning_region_min[i] = min(bpl.binning_region_min[i], e[i][1])
             bpl.binning_region_max[i] = max(bpl.binning_region_max[i], e[i][2])
@@ -197,17 +202,24 @@ function _rebin_all_points!(bpl)
 
         # Re-allocate all bins
         if bpl.dim == 1
-            bpl.bins = [zeros(Int32, 0) for i = 1:(bpl.number_of_directional_bins)]
+            bpl.bins = [zeros(Int32, 0) for i in 1:(bpl.number_of_directional_bins)]
         elseif bpl.dim == 2
-            bpl.bins = [zeros(Int32, 0) for i = 1:(bpl.number_of_directional_bins), j = 1:(bpl.number_of_directional_bins)]
+            bpl.bins = [
+                zeros(Int32, 0)
+                    for i in 1:(bpl.number_of_directional_bins),
+                    j in 1:(bpl.number_of_directional_bins)
+            ]
         elseif bpl.dim == 3
-            bpl.bins = [zeros(Int32, 0)
-                        for i = 1:(bpl.number_of_directional_bins), j = 1:(bpl.number_of_directional_bins),
-                            k = 1:(bpl.number_of_directional_bins)]
+            bpl.bins = [
+                zeros(Int32, 0)
+                    for i in 1:(bpl.number_of_directional_bins),
+                    j in 1:(bpl.number_of_directional_bins),
+                    k in 1:(bpl.number_of_directional_bins)
+            ]
         end
 
         # Register all points in their respctive bins
-        for i = 1:size(bpl.points, 2)
+        for i in 1:size(bpl.points, 2)
             @views _bin_of_point!(bpl, bpl.points[:, i])
             push!(bpl.bins[bpl.current_bin...], i)
         end
@@ -215,6 +227,7 @@ function _rebin_all_points!(bpl)
         # Re-allocate unbinned index
         bpl.unbinned = zeros(Int32, 0)
     end
+    return
 end
 
 
@@ -265,6 +278,7 @@ function Base.insert!(bpl::BinnedPointList{T}, p) where {T}
             return i
         end
     end
+    return
 end
 
 """
@@ -296,11 +310,11 @@ Insert via linear search, without any binning.
 Just for being able to check of all of the above was worth the effort...
 """
 function naiveinsert!(bpl::BinnedPointList{T}, p) where {T}
-    for i = 1:size(bpl.points, 2)
+    for i in 1:size(bpl.points, 2)
         @views if norm(bpl.points[:, i] - p) < bpl.tol
             return i
         end
     end
     append!(bpl.points, p)
-    size(bpl.points, 2)
+    return size(bpl.points, 2)
 end

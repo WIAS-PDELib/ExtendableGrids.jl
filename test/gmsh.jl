@@ -9,7 +9,7 @@ using Gmsh: gmsh
     gmsh.option.setNumber("General.Terminal", 1)
     gmsh.model.add("t1")
 
-    lc = 1e-2
+    lc = 1.0e-2
     gmsh.model.geo.addPoint(0, 0, 0, lc, 1)
     gmsh.model.geo.addPoint(0.1, 0, 0, lc, 2)
     gmsh.model.geo.addPoint(0.1, 0.3, 0, lc, 3)
@@ -43,48 +43,48 @@ using Gmsh: gmsh
 end
 
 @testset "Read/write simplex gmsh 2d / 3d" begin
-    path = joinpath(pkgdir(ExtendableGrids),"test")
+    path = joinpath(pkgdir(ExtendableGrids), "test")
 
     X = collect(0:0.02:2)
     Y = collect(0:2:4)
     grid1 = simplexgrid(X, Y) #ExtendableGrids.simplexgrid_from_gmsh(path*"sto_2d.msh")
-    ExtendableGrids.simplexgrid_to_gmsh(grid1; filename = joinpath(path,"testfile.msh"))
+    ExtendableGrids.simplexgrid_to_gmsh(grid1; filename = joinpath(path, "testfile.msh"))
 
-    grid2 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path,"testfile.msh"); Tc = Float32, Ti = Int64)
+    grid2 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "testfile.msh"); Tc = Float32, Ti = Int64)
 
     @test seemingly_equal(grid2, grid1; sort = true, confidence = :low)
     @test seemingly_equal(grid2, grid1; sort = true, confidence = :full)
 
-    grid1 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path,"sto_2d.msh"); Tc = Float64, Ti = Int64)
+    grid1 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "sto_2d.msh"); Tc = Float64, Ti = Int64)
 
-    ExtendableGrids.simplexgrid_to_gmsh(grid1; filename = joinpath(path,"testfile.msh"))
-    grid2 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path,"testfile.msh"); Tc = Float64, Ti = Int64)
-
-    @test seemingly_equal(grid1, grid2; sort = true, confidence = :low)
-    @test seemingly_equal(grid1, grid2; sort = true, confidence = :full)
-
-    grid1 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path,"sto_3d.msh"); Tc = Float32, Ti = Int64)
-
-    ExtendableGrids.simplexgrid_to_gmsh(grid1; filename = joinpath(path,"testfile.msh"))
-    grid2 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path,"testfile.msh"); Tc = Float64, Ti = Int32)
+    ExtendableGrids.simplexgrid_to_gmsh(grid1; filename = joinpath(path, "testfile.msh"))
+    grid2 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "testfile.msh"); Tc = Float64, Ti = Int64)
 
     @test seemingly_equal(grid1, grid2; sort = true, confidence = :low)
     @test seemingly_equal(grid1, grid2; sort = true, confidence = :full)
 
-    grid1 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path,"sto_2d.msh"))
+    grid1 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "sto_3d.msh"); Tc = Float32, Ti = Int64)
 
-    grid2 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path,"sto_3d.msh"); Tc = Float32, Ti = Int32)
+    ExtendableGrids.simplexgrid_to_gmsh(grid1; filename = joinpath(path, "testfile.msh"))
+    grid2 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "testfile.msh"); Tc = Float64, Ti = Int32)
+
+    @test seemingly_equal(grid1, grid2; sort = true, confidence = :low)
+    @test seemingly_equal(grid1, grid2; sort = true, confidence = :full)
+
+    grid1 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "sto_2d.msh"))
+
+    grid2 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "sto_3d.msh"); Tc = Float32, Ti = Int32)
 
     @test !seemingly_equal(grid1, grid2; sort = true, confidence = :low)
     @test !seemingly_equal(grid1, grid2; sort = true, confidence = :full)
 
-    grid1 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path,"testmesh.gmsh"); incomplete = true)
+    grid1 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "testmesh.gmsh"); incomplete = true)
     ExtendableGrids.seal!(grid1; encode = false)
 
-    ExtendableGrids.simplexgrid_to_gmsh(grid1; filename = joinpath(path,"completed_testfile.msh"))
-    grid2 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path,"completed_testfile.msh"))
+    ExtendableGrids.simplexgrid_to_gmsh(grid1; filename = joinpath(path, "completed_testfile.msh"))
+    grid2 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "completed_testfile.msh"))
 
-    grid3 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path,"testmesh.gmsh"); incomplete = true)
+    grid3 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "testmesh.gmsh"); incomplete = true)
     ExtendableGrids.seal!(grid3; encode = true)
 
     @test seemingly_equal(grid1, grid2; sort = true, confidence = :low)
@@ -107,20 +107,20 @@ end
 end
 
 @testset "Read/write mixed gmsh 2d" begin
-    path = joinpath(pkgdir(ExtendableGrids),"test")
-    grid1 = ExtendableGrids.mixedgrid_from_gmsh(joinpath(path,"mixedgrid_2d.msh"); Tc = Float64, Ti = Int64)
+    path = joinpath(pkgdir(ExtendableGrids), "test")
+    grid1 = ExtendableGrids.mixedgrid_from_gmsh(joinpath(path, "mixedgrid_2d.msh"); Tc = Float64, Ti = Int64)
 
     ExtendableGrids.mixedgrid_to_gmsh(grid1; filename = joinpath(path, "testfile.msh"))
-    grid2 = ExtendableGrids.mixedgrid_from_gmsh(joinpath(path,"testfile.msh"); Tc = Float32, Ti = UInt64)
+    grid2 = ExtendableGrids.mixedgrid_from_gmsh(joinpath(path, "testfile.msh"); Tc = Float32, Ti = UInt64)
 
     @test seemingly_equal(grid1, grid2; sort = true, confidence = :low)
     @test seemingly_equal(grid1, grid2; sort = true, confidence = :full)
 end
 
 @testset "Read .geo files" begin
-    path = joinpath(pkgdir(ExtendableGrids),"test")
-    grid = simplexgrid(joinpath(path,"disk1hole.geo"))
+    path = joinpath(pkgdir(ExtendableGrids), "test")
+    grid = simplexgrid(joinpath(path, "disk1hole.geo"))
     @test num_cells(grid) > 0
-    grid = simplexgrid(joinpath(path,"cube6.geo"))
+    grid = simplexgrid(joinpath(path, "cube6.geo"))
     @test num_cells(grid) > 0
 end

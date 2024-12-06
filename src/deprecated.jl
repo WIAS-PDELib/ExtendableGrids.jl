@@ -1,8 +1,8 @@
 ## NodeInParent was renamed to NodeParents in v1.3
 abstract type NodeInParent <: AbstractGridIntegerArray1D end
-export NodeInParent 
+export NodeInParent
 
 function ExtendableGrids.instantiate(xgrid::ExtendableGrid, ::Type{NodeInParent})
     @warn "NodeInParents is deprecated, use NodeParents instead"
-    xgrid[NodeParents]
+    return xgrid[NodeParents]
 end

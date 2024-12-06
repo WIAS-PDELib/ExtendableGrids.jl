@@ -7,20 +7,20 @@ using ExtendableGrids: seal!
 using AbstractTrees, StatsBase
 
 @testset "Aqua" begin
-Aqua.test_ambiguities([ExtendableGrids, Base, Core], exclude=[view, ==, StatsBase.TestStat, copyto!])
-Aqua.test_unbound_args(ExtendableGrids)
-Aqua.test_undefined_exports(ExtendableGrids)
-Aqua.test_project_extras(ExtendableGrids)
-Aqua.test_stale_deps(ExtendableGrids,ignore=[:Requires,:Bijections])
-Aqua.test_deps_compat(ExtendableGrids)
-Aqua.test_piracies(ExtendableGrids,treat_as_own=[AbstractTrees.children])
-Aqua.test_persistent_tasks(ExtendableGrids)
+    Aqua.test_ambiguities([ExtendableGrids, Base, Core], exclude = [view, ==, StatsBase.TestStat, copyto!])
+    Aqua.test_unbound_args(ExtendableGrids)
+    Aqua.test_undefined_exports(ExtendableGrids)
+    Aqua.test_project_extras(ExtendableGrids)
+    Aqua.test_stale_deps(ExtendableGrids, ignore = [:Requires, :Bijections])
+    Aqua.test_deps_compat(ExtendableGrids)
+    Aqua.test_piracies(ExtendableGrids, treat_as_own = [AbstractTrees.children])
+    Aqua.test_persistent_tasks(ExtendableGrids)
 end
 
 
 @testset "Constructors" begin
     # test whether the show() function throws an error
-    @test show( ExtendableGrid{Float64,Int32}() ) === nothing
+    @test show(ExtendableGrid{Float64, Int32}()) === nothing
 end
 
 @testset "Geomspace" begin
@@ -38,7 +38,7 @@ end
     end
 
     function test_geomspace1(n, h0, h1)
-        for i = 1:n
+        for i in 1:n
             X = geomspace(0, 1, h0 * rand(), h1 * rand())
         end
         true
@@ -57,21 +57,27 @@ end
 end
 
 @testset "Basic" begin
-    nodes = [0.0 1;
-             1 0;
-             0 1;
-             1 1]'
-    
-    cells = [1 2 3;
-             2 3 4]'
-    
+    nodes = [
+        0.0 1;
+        1 0;
+        0 1;
+        1 1
+    ]'
+
+    cells = [
+        1 2 3;
+        2 3 4
+    ]'
+
     cellmat = [1, 1]
-    bfaces = [1 2;
-              1 3;
-              2 4]'
-    
+    bfaces = [
+        1 2;
+        1 3;
+        2 4
+    ]'
+
     bfacemat = [1, 1]
-    
+
     grid = simplexgrid(nodes, cells, cellmat, bfaces, bfacemat)
     @test isconsistent(grid)
 
@@ -79,53 +85,65 @@ end
     @test isconsistent(grid)
     seal!(grid)
     @test isconsistent(grid)
-    
+
     grid = simplexgrid(nodes, cells, cellmat)
     @test isconsistent(grid)
     seal!(grid)
     @test isconsistent(grid)
-    
+
     grid = simplexgrid(nodes, cells)
     @test isconsistent(grid)
     seal!(grid)
     @test isconsistent(grid)
-    
-    @test let
-        nodes = [0.0 1;
-                 1 0;
-                 0 1;
-                 1 1;
-                 1 2;
-                 2 4]'
 
-        cells = [1 2 3;
-                 2 3 4]'
+    @test let
+        nodes = [
+            0.0 1;
+            1 0;
+            0 1;
+            1 1;
+            1 2;
+            2 4
+        ]'
+
+        cells = [
+            1 2 3;
+            2 3 4
+        ]'
 
         cellmat = [1, 1]
-        bfaces = [1 2;
-                  1 3;
-                  2 4]'
+        bfaces = [
+            1 2;
+            1 3;
+            2 4
+        ]'
 
         bfacemat = [1, 1]
 
         grid = simplexgrid(nodes, cells, cellmat, bfaces, bfacemat)
-        !isconsistent(grid;warnonly=true)
+        !isconsistent(grid; warnonly = true)
     end
 
     function test_prepare_edges()
         ## Compared with pdelib; have more of these
-        nodes = [0.0 1;
-                 1 0;
-                 0 1;
-                 1 1]'
+        nodes = [
+            0.0 1;
+            1 0;
+            0 1;
+            1 1
+        ]'
 
-        cells = [1 2 3;
-                 2 3 4]'
+        cells = [
+            1 2 3;
+            2 3 4
+        ]'
 
         cellmat = [1, 1]
-        bfaces = [1 2;
-                  1 3;
-                  2 4]'
+        bfaces = [
+            1 2;
+            1 3;
+            2 4
+        ]'
 
         bfacemat = [1, 1]
 
@@ -152,14 +170,16 @@ end
     @test let
         g = simplexgrid(0:2, 0:2)
         bfn = g[BFaceNormals]
-        bfn == [0.0 -1.0;
-                -1.0 0.0;
-                0.0 -1.0;
-                1.0 0.0;
-                0.0 1.0;
-                -1.0 0.0;
-                1.0 0.0;
-                0.0 1.0]'
+        bfn == [
+            0.0 -1.0;
+            -1.0 0.0;
+            0.0 -1.0;
+            1.0 0.0;
+            0.0 1.0;
+            -1.0 0.0;
+            1.0 0.0;
+            0.0 1.0
+        ]'
     end
 
     @test let
@@ -181,25 +201,25 @@ end
 end
 
 @testset "Base.map" begin
-    X=0:0.1:1
-    fx(x)=x
-    fxy(x,y)=x+y
-    fxyz(x,y,z)=x+y+z
-    fv(v)=sum(v)
-    gx=simplexgrid(X)
-    gxy=simplexgrid(X,X)
-    gxyz=simplexgrid(X,X,X)
-    @test map(fx,gx)==map(fv,gx)
-    @test map(fxy,gxy)==map(fv,gxy)
-    @test map(fxyz,gxyz)==map(fv,gxyz)    
-    
-    vfx(x)=[x]
-    vfxy(x,y)=[x,y]
-    vfxyz(x,y,z)=[x,y,z]
-    vfv(v)=v
-    @test map(vfx,gx)==map(x->[vfv(x)],gx)
-    @test map(vfxy,gxy)==map(vfv,gxy)
-    @test map(vfxyz,gxyz)==map(vfv,gxyz)    
+    X = 0:0.1:1
+    fx(x) = x
+    fxy(x, y) = x + y
+    fxyz(x, y, z) = x + y + z
+    fv(v) = sum(v)
+    gx = simplexgrid(X)
+    gxy = simplexgrid(X, X)
+    gxyz = simplexgrid(X, X, X)
+    @test map(fx, gx) == map(fv, gx)
+    @test map(fxy, gxy) == map(fv, gxy)
+    @test map(fxyz, gxyz) == map(fv, gxyz)
+
+    vfx(x) = [x]
+    vfxy(x, y) = [x, y]
+    vfxyz(x, y, z) = [x, y, z]
+    vfv(v) = v
+    @test map(vfx, gx) == map(x -> [vfv(x)], gx)
+    @test map(vfxy, gxy) == map(vfv, gxy)
+    @test map(vfxyz, gxyz) == map(vfv, gxyz)
 end
 
 function testrw(grid, format; confidence = :full, kwargs...)
@@ -207,14 +227,14 @@ function testrw(grid, format; confidence = :full, kwargs...)
     ftmp = tempname() * "." * format
     write(ftmp, grid; kwargs...)
     grid1 = simplexgrid(ftmp)
-    seemingly_equal(grid1, grid; confidence = confidence)
+    return seemingly_equal(grid1, grid; confidence = confidence)
 end
 
 @testset "Read/Write sg" begin
     X = collect(0:0.05:1)
     for version in [v"2.1", v"2.2"]
         @test testrw(simplexgrid(X), "sg"; version)
-        @test testrw(simplexgrid(X, X), "sg";version)
+        @test testrw(simplexgrid(X, X), "sg"; version)
         @test testrw(simplexgrid(X, X, X), "sg"; version)
     end
 end
@@ -258,7 +278,7 @@ end
         cellmask!(g, [-1, 0, 0], [0, 1, 1], 2)
         cellmask!(g, [1, 0, 0], [2, 1, 1], 2)
         # Mark interior region 3 with region 2
-        cellmask!(g, [-0.75,0.25,0.25], [-0.25,0.75,0.75], 3)
+        cellmask!(g, [-0.75, 0.25, 0.25], [-0.25, 0.75, 0.75], 3)
 
         # add new interface elements
         bfacemask!(g, [-1, 0, 1], [2, 1, 1], 3; allow_new = true)
@@ -269,7 +289,7 @@ end
         subgrid(g, [region])
     end
     sub2 = subgen(; region = 3)
-    
+
     @test numbers_match(subgen(), 756, 3000, 950)
 
     X = collect(0:0.25:1)
@@ -284,12 +304,12 @@ end
 @testset "ParentGridRelation-SubGrid" begin
     ## generate a subgrid
     grid = grid_unitsquare(Triangle2D)
-    grid[CellRegions] = Int32[1,2,2,1]
+    grid[CellRegions] = Int32[1, 2, 2, 1]
     sgrid = subgrid(grid, [1])
     @test sgrid[ParentGridRelation] == SubGrid{ON_CELLS}
 
     ## check if CellParents are assigned correctly
-    @test sgrid[CellParents] == [1,4]
+    @test sgrid[CellParents] == [1, 4]
 
     ## check if FaceNodes couple correctly with FaceNodes in parent grid
     facenodes = sgrid[FaceNodes]
@@ -298,27 +318,27 @@ end
     parentfaces = sgrid[FaceParents]
     parentbfaces = sgrid[BFaceParents]
     @test all(parentnodes[facenodes] .== grid[FaceNodes][:, parentfaces])
-    @test all(parentnodes[bfacenodes] .== grid[BFaceNodes][:,parentbfaces])
+    @test all(parentnodes[bfacenodes] .== grid[BFaceNodes][:, parentbfaces])
 end
 
 @testset "ParentGridRelation-RefinedGrid" begin
-    ## generate a refined 
+    ## generate a refined
     grid = grid_unitsquare(Triangle2D)
-    
+
     ## check uniform refinement
     rgrid = uniform_refine(grid)
     @test rgrid[ParentGridRelation] == RefinedGrid
 
     ## check if CellParents and BFaceParents are set
-    @test length(rgrid[CellParents]) == 4*num_cells(grid)
-    @test length(rgrid[BFaceParents]) == 2*num_bfaces(grid)
+    @test length(rgrid[CellParents]) == 4 * num_cells(grid)
+    @test length(rgrid[BFaceParents]) == 2 * num_bfaces(grid)
 
     ## check barycentric refinement
     rgrid = barycentric_refine(grid)
     @test rgrid[ParentGridRelation] == RefinedGrid
 
     ## check if CellParents and BFaceParents are set
-    @test length(rgrid[CellParents]) == 3*num_cells(grid)
+    @test length(rgrid[CellParents]) == 3 * num_cells(grid)
     @test length(rgrid[BFaceParents]) == num_bfaces(grid)
 
 
@@ -353,7 +373,7 @@ function tglue(; dim = 2, breg = 0)
         g2 = simplexgrid(X2, Y2, Z2)
     end
 
-    glue(g1, g2; interface = breg)
+    return glue(g1, g2; interface = breg)
 end
 
 @testset "Glue" begin
@@ -381,8 +401,10 @@ function voronoitest()
     g = simplexgrid(0:0.1:1)
     @test g[VoronoiFaceCenters] ≈ [0.05 0.15 0.25 0.35 0.45 0.55 0.65 0.75 0.85 0.95]
     g = simplexgrid(0:0.5:1, 0:0.5:1)
-    @test g[VoronoiFaceCenters] ≈ [0.25 0.5 0.25 0.25 0.0 0.75 1.0 0.75 0.75 0.5 0.25 0.25 0.0 1.0 0.75 0.75;
-           0.0 0.25 0.25 0.5 0.25 0.0 0.25 0.25 0.5 0.75 0.75 1.0 0.75 0.75 0.75 1.0]
+    return @test g[VoronoiFaceCenters] ≈ [
+        0.25 0.5 0.25 0.25 0.0 0.75 1.0 0.75 0.75 0.5 0.25 0.25 0.0 1.0 0.75 0.75;
+        0.0 0.25 0.25 0.5 0.25 0.0 0.25 0.25 0.5 0.75 0.75 1.0 0.75 0.75 0.75 1.0
+    ]
 end
 
 @testset "Voronoi" begin
@@ -448,10 +470,12 @@ end
     point_data = map((x, y, z) -> (x + y + z), g)
     field_data = [1.0, 2, 3, 4, 5, 6]
 
-    writeVTK("testfile_writevtk.vtu", g;
-             cellregions = g[CellRegions],
-             point_data = point_data,
-             field_data = field_data)
+    writeVTK(
+        "testfile_writevtk.vtu", g;
+        cellregions = g[CellRegions],
+        point_data = point_data,
+        field_data = field_data
+    )
 
     sha_code = open("testfile_writevtk.vtu") do f
         sha256(f)
@@ -461,9 +485,9 @@ end
 end
 
 
-if  VERSION < v"1.12.0-DEV.0"
-        notebooks = ["pluto-partitioning.jl"]
-        @testset "Notebooks" begin
-            @testscripts(joinpath(@__DIR__, "..", "examples"), notebooks)
-        end
+if VERSION < v"1.12.0-DEV.0"
+    notebooks = ["pluto-partitioning.jl"]
+    @testset "Notebooks" begin
+        @testscripts(joinpath(@__DIR__, "..", "examples"), notebooks)
+    end
 end

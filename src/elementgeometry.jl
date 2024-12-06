@@ -8,7 +8,7 @@ $(TYPEDSIGNATURES)
 
 List supported element geometries.
 """
-elementgeometries()=AbstractTrees.print_tree(AbstractElementGeometry)
+elementgeometries() = AbstractTrees.print_tree(AbstractElementGeometry)
 
 
 """
@@ -122,28 +122,30 @@ abstract type HyperCube4D <: AbstractElementGeometry4D end
 """
 $(TYPEDSIGNATURES)
 """
-dim_element(::Type{<:AbstractElementGeometry0D})=0
+dim_element(::Type{<:AbstractElementGeometry0D}) = 0
 """
 $(TYPEDSIGNATURES)
 """
-dim_element(::Type{<:AbstractElementGeometry1D})=1
+dim_element(::Type{<:AbstractElementGeometry1D}) = 1
 """
 $(TYPEDSIGNATURES)
 """
-dim_element(::Type{<:AbstractElementGeometry2D})=2
+dim_element(::Type{<:AbstractElementGeometry2D}) = 2
 """
 $(TYPEDSIGNATURES)
 """
-dim_element(::Type{<:AbstractElementGeometry3D})=3
+dim_element(::Type{<:AbstractElementGeometry3D}) = 3
 """
 $(TYPEDSIGNATURES)
 """
-dim_element(::Type{<:AbstractElementGeometry4D})=4
+dim_element(::Type{<:AbstractElementGeometry4D}) = 4
 
 
-const allgeometrytypes=vcat(allsubtypes(AbstractElementGeometry0D),
-                            allsubtypes(AbstractElementGeometry1D),
-                            allsubtypes(AbstractElementGeometry2D),
-                            allsubtypes(AbstractElementGeometry3D))
+const allgeometrytypes = vcat(
+    allsubtypes(AbstractElementGeometry0D),
+    allsubtypes(AbstractElementGeometry1D),
+    allsubtypes(AbstractElementGeometry2D),
+    allsubtypes(AbstractElementGeometry3D)
+)
 
-const ElementGeometries=Union{[Type{t} for t in allgeometrytypes]...}
+const ElementGeometries = Union{[Type{t} for t in allgeometrytypes]...}

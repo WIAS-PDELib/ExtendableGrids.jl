@@ -9,13 +9,13 @@ begin
     import Pkg as _Pkg
     haskey(ENV, "PLUTO_PROJECT") && _Pkg.activate(ENV["PLUTO_PROJECT"])
     using Revise, Test
-	import PlutoUI
+    import PlutoUI
     import Metis
     using ExtendableGrids: simplexgrid, partition, num_partitions, num_pcolors
-	using ExtendableGrids: partition_cells, pcolor_partitions, pcolors
-	using ExtendableGrids: PlainMetisPartitioning, RecursiveMetisPartitioning
-	using ExtendableGrids: PColorPartitions, PartitionNodes, PartitionCells
-	using ExtendableGrids: CellVolumes
+    using ExtendableGrids: partition_cells, pcolor_partitions, pcolors
+    using ExtendableGrids: PlainMetisPartitioning, RecursiveMetisPartitioning
+    using ExtendableGrids: PColorPartitions, PartitionNodes, PartitionCells
+    using ExtendableGrids: CellVolumes
     using GridVisualize: gridplot, default_plotter!
     import CairoMakie
     isdefined(Main, :PlutoRunner) && default_plotter!(CairoMakie)
@@ -188,7 +188,7 @@ Assembly loops can be run in parallel on for partitions of the same color.
 
 # ╔═╡ dea042ab-f115-4556-87d5-845ee2da0315
 begin
-	cvol = pgrid1[CellVolumes]
+    cvol = pgrid1[CellVolumes]
     pvol = zeros(num_partitions(pgrid1))
     for color in pcolors(pgrid1)
         Threads.@threads for part in pcolor_partitions(pgrid1, color)
@@ -201,7 +201,7 @@ begin
 end
 
 # ╔═╡ 622185fe-02ec-4e3d-b77b-95b881cca9ac
-@test sum(pvol)-sum(cvol) ≈ 0.0
+@test sum(pvol) - sum(cvol) ≈ 0.0
 
 # ╔═╡ 139872f0-5158-4f09-af6e-e8822048f41f
 md"""

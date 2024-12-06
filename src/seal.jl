@@ -11,9 +11,9 @@ Example:
 `` [x₁, x₂, x₃] → (x₁-1) + (x₂-1)*nn + (x₃-1)*nn²````
 """
 function encode(x::Vector, nn::Integer)
-    y = 0*nn
-    for i = 1:length(x)
-        y += (x[i]-1) * nn^(i - 1)
+    y = 0 * nn
+    for i in 1:length(x)
+        y += (x[i] - 1) * nn^(i - 1)
     end
     return y
 end
@@ -80,7 +80,7 @@ function faces_of_ndim_simplex_direct(x::Vector)
             sort([x[2], x[3]]),
         ]
     end
-    return y 
+    return y
 end
 
 """
@@ -115,10 +115,10 @@ In this function, the faces are encoded for performance reasons. If a large grid
 We can not guarantee, that the orientation of the BoundaryFaces is correct.  
 """
 function assemble_bfaces(simplices, dim, nn, Ti)
-	m = size(simplices, 2)
+    m = size(simplices, 2)
     poss_faces = zeros(Ti, (dim + 1) * m)
-    for i = 1:m
-        poss_faces[(dim+1)*i-dim:(dim+1)*i] =
+    for i in 1:m
+        poss_faces[((dim + 1) * i - dim):((dim + 1) * i)] =
             faces_of_ndim_simplex(simplices[:, i], dim, nn)
     end
     dict = countmap(poss_faces)
@@ -141,9 +141,9 @@ function assemble_bfaces(simplices, dim, nn, Ti)
             k += 1
         end
     end
-    
+
     if dim == 3
-    	@warn "bfaces may not be oriented correctly"
+        @warn "bfaces may not be oriented correctly"
     end
 
     return bfaces
@@ -162,10 +162,10 @@ For smaller grids it can lead to performance losses.
 We can not guarantee, that the orientation of the BoundaryFaces is correct.  
 """
 function assemble_bfaces_direct(simplices, dim, Ti)
-	m = size(simplices, 2)
-    poss_faces = fill(zeros(Ti, dim), (dim+1)*m)#zeros(Int64, (dim, (dim + 1)*m))
-    for i = 1:m
-        poss_faces[(dim+1)*i-dim:(dim+1)*i] = faces_of_ndim_simplex_direct(simplices[:, i])
+    m = size(simplices, 2)
+    poss_faces = fill(zeros(Ti, dim), (dim + 1) * m) #zeros(Int64, (dim, (dim + 1)*m))
+    for i in 1:m
+        poss_faces[((dim + 1) * i - dim):((dim + 1) * i)] = faces_of_ndim_simplex_direct(simplices[:, i])
     end
     dict = countmap(poss_faces)
 
@@ -187,14 +187,13 @@ function assemble_bfaces_direct(simplices, dim, Ti)
             k += 1
         end
     end
-    
+
     if dim == 3
-    	@warn "bfaces may not be oriented correctly"
+        @warn "bfaces may not be oriented correctly"
     end
 
     return bfaces
 end
-
 
 
 """
@@ -217,26 +216,26 @@ But for each `encoding_type` there is a limit on the number of nodes: \n
 If `encode=false` is passed, there is no limit (besides the MaxValue of the Integer type used).
 
 """
-function seal!(grid::ExtendableGrid; bfaceregions=[], encode=true, encoding_type=Int64)
-	dim = size(grid[Coordinates])[1]
-	Ti2 = typeof(grid[CellNodes][1,1])
-	if encode
-		grid[BFaceNodes] = convert(Matrix{Ti2}, assemble_bfaces(grid[CellNodes], dim, size(grid[Coordinates])[2], encoding_type))
-	else
-		grid[BFaceNodes] = convert(Matrix{Ti2}, assemble_bfaces_direct(grid[CellNodes], dim, encoding_type))
-	end
-	
-	if bfaceregions==[]
-		grid[BFaceRegions] = ones(Ti2, size(grid[BFaceNodes])[2])
-	else
-		grid[BFaceRegions] = bfaceregions #Int64.(collect(1:size(grid[BFaceNodes])[2]))
-	end
+function seal!(grid::ExtendableGrid; bfaceregions = [], encode = true, encoding_type = Int64)
+    dim = size(grid[Coordinates])[1]
+    Ti2 = typeof(grid[CellNodes][1, 1])
+    if encode
+        grid[BFaceNodes] = convert(Matrix{Ti2}, assemble_bfaces(grid[CellNodes], dim, size(grid[Coordinates])[2], encoding_type))
+    else
+        grid[BFaceNodes] = convert(Matrix{Ti2}, assemble_bfaces_direct(grid[CellNodes], dim, encoding_type))
+    end
 
-	if dim == 2
-		grid[BFaceGeometries] = VectorOfConstants{ElementGeometries,Ti2}(Edge1D, size(grid[BFaceNodes])[2])
-	else
-		grid[BFaceGeometries] = VectorOfConstants{ElementGeometries,Ti2}(Triangle2D, size(grid[BFaceNodes])[2])
-	end
-	
-	return grid
+    if bfaceregions == []
+        grid[BFaceRegions] = ones(Ti2, size(grid[BFaceNodes])[2])
+    else
+        grid[BFaceRegions] = bfaceregions #Int64.(collect(1:size(grid[BFaceNodes])[2]))
+    end
+
+    if dim == 2
+        grid[BFaceGeometries] = VectorOfConstants{ElementGeometries, Ti2}(Edge1D, size(grid[BFaceNodes])[2])
+    else
+        grid[BFaceGeometries] = VectorOfConstants{ElementGeometries, Ti2}(Triangle2D, size(grid[BFaceNodes])[2])
+    end
+
+    return grid
 end

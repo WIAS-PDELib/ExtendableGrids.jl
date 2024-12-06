@@ -50,7 +50,7 @@ $(TYPEDEF)
 abstract type AbstractGridFloatArray1D <: AbstractGridComponent end
 
 function Base.getindex(grid::ExtendableGrid{Tc, Ti}, T::Type{<:AbstractGridFloatArray1D})::Array{Tc, 1} where {Tc, Ti}
-    get!(grid, T)
+    return get!(grid, T)
 end
 
 """
@@ -60,7 +60,7 @@ $(TYPEDEF)
 abstract type AbstractGridFloatArray2D <: AbstractGridComponent end
 
 function Base.getindex(grid::ExtendableGrid{Tc, Ti}, T::Type{<:AbstractGridFloatArray2D})::Array{Tc, 2} where {Tc, Ti}
-    get!(grid, T)
+    return get!(grid, T)
 end
 
 """
@@ -70,7 +70,7 @@ $(TYPEDEF)
 abstract type AbstractGridIntegerArray1D <: AbstractGridComponent end
 
 function Base.getindex(grid::ExtendableGrid{Tc, Ti}, T::Type{<:AbstractGridIntegerArray1D})::Array{Ti, 1} where {Tc, Ti}
-    get!(grid, T)
+    return get!(grid, T)
 end
 
 """
@@ -80,7 +80,7 @@ $(TYPEDEF)
 abstract type AbstractGridIntegerArray2D <: AbstractGridComponent end
 
 function Base.getindex(grid::ExtendableGrid{Tc, Ti}, T::Type{<:AbstractGridIntegerArray2D})::Array{Ti, 1} where {Tc, Ti}
-    get!(grid, T)
+    return get!(grid, T)
 end
 
 """
@@ -90,7 +90,7 @@ Integer number
 abstract type AbstractGridIntegerConstant <: AbstractGridComponent end
 
 function Base.getindex(grid::ExtendableGrid{Tc, Ti}, T::Type{<:AbstractGridIntegerConstant})::Ti where {Tc, Ti}
-    get!(grid, T)
+    return get!(grid, T)
 end
 
 """
@@ -100,7 +100,7 @@ Floating point number
 abstract type AbstractGridFloatConstant <: AbstractGridComponent end
 
 function Base.getindex(grid::ExtendableGrid{Tc, Ti}, T::Type{<:AbstractGridFloatConstant})::Tc where {Tc, Ti}
-    get!(grid, T)
+    return get!(grid, T)
 end
 
 """
@@ -111,7 +111,7 @@ Any kind of adjacency between grid components
 abstract type AbstractGridAdjacency <: AbstractGridComponent end
 
 function Base.getindex(grid::ExtendableGrid{Tc, Ti}, T::Type{<:AbstractGridAdjacency})::Adjacency{Ti} where {Tc, Ti}
-    get!(grid, T)
+    return get!(grid, T)
 end
 
 """
@@ -121,9 +121,11 @@ Array of element geometry information.
 """
 abstract type AbstractElementGeometries <: AbstractGridComponent end
 
-function Base.getindex(grid::ExtendableGrid{Tc, Ti},
-                       T::Type{<:AbstractElementGeometries})::ElementInfo{ElementGeometries} where {Tc, Ti}
-    get!(grid, T)
+function Base.getindex(
+        grid::ExtendableGrid{Tc, Ti},
+        T::Type{<:AbstractElementGeometries}
+    )::ElementInfo{ElementGeometries} where {Tc, Ti}
+    return get!(grid, T)
 end
 
 """
@@ -134,7 +136,7 @@ Array of element region number information.
 abstract type AbstractElementRegions <: AbstractGridComponent end
 
 function Base.getindex(grid::ExtendableGrid{Tc, Ti}, T::Type{<:AbstractElementRegions})::ElementInfo{Ti} where {Tc, Ti}
-    get!(grid, T)
+    return get!(grid, T)
 end
 
 """
@@ -145,7 +147,7 @@ Coordinate system
 abstract type CoordinateSystem <: AbstractGridComponent end
 
 function Base.getindex(grid::ExtendableGrid{Tc, Ti}, T::Type{CoordinateSystem})::CoordinateSystems where {Tc, Ti}
-    get!(grid, T)
+    return get!(grid, T)
 end
 
 ##################################################################
@@ -269,8 +271,10 @@ $(TYPEDSIGNATURES)
 To be called by getindex. This triggers lazy creation of 
 non-existing gridcomponents
 """
-Base.get!(grid::ExtendableGrid, T::Type{<:AbstractGridComponent}) = get!(() -> veryform(grid, instantiate(grid, T), T),
-                                                                         grid.components, T)
+Base.get!(grid::ExtendableGrid, T::Type{<:AbstractGridComponent}) = get!(
+    () -> veryform(grid, instantiate(grid, T), T),
+    grid.components, T
+)
 
 """
 $(TYPEDSIGNATURES)
@@ -290,7 +294,7 @@ veryform(grid::ExtendableGrid{Tc,Ti},v,T::Type{<:AbstractGridAdjacency}) where{T
 Check proper type of adjacencies upon insertion
 """
 veryform(grid::ExtendableGrid{Tc, Ti}, v, T::Type{<:AbstractGridAdjacency}) where {Tc, Ti} = typeof(v) <: Adjacency{Ti} ? v :
-                                                                                             throw("Type mismatch")
+    throw("Type mismatch")
 
 ############################################################
 # Instantiation methods
@@ -307,7 +311,7 @@ $(TYPEDSIGNATURES)
 
 Instantiate number of bface regions
 """
-instantiate(grid, ::Type{NumBFaceRegions}) = length(grid[BFaceRegions])> 0  ? maximum(grid[BFaceRegions]) : 0
+instantiate(grid, ::Type{NumBFaceRegions}) = length(grid[BFaceRegions]) > 0 ? maximum(grid[BFaceRegions]) : 0
 
 """
 $(TYPEDSIGNATURES)
@@ -319,7 +323,7 @@ instantiate(grid, ::Type{NumBEdgeRegions}) = maximum(grid[BEdgeRegions])
 function prepare_bedgeregions!(grid::ExtendableGrid)
     bedges = grid[BEdgeNodes]
     bedgeregions = zeros(Int32, num_bedges(grid))
-    grid[BEdgeRegions] = bedgeregions
+    return grid[BEdgeRegions] = bedgeregions
 end
 
 instantiate(grid, ::Type{BEdgeRegions}) = prepare_bedgeregions!(grid)
@@ -367,7 +371,7 @@ $(SIGNATURES)
 
 Number of nodes in grid
 """
-num_nodes(grid::ExtendableGrid)::Int = haskey(grid,Coordinates) ? size(grid[Coordinates], 2) : 0
+num_nodes(grid::ExtendableGrid)::Int = haskey(grid, Coordinates) ? size(grid[Coordinates], 2) : 0
 
 """
 $(TYPEDSIGNATURES)
@@ -425,20 +429,20 @@ Type of indices
 index_type(grid::ExtendableGrid{Tc, Ti}) where {Tc, Ti} = Ti
 
 function dangling_nodes(grid)
-    coord=grid[Coordinates]
-    nnodes=size(coord,2)
-    nodemark=zeros(Bool,nnodes)
-    cn=grid[CellNodes]
-    ncells=num_cells(grid)
-    for icell = 1:ncells
-        for inode=1:num_targets(cn,icell)
-            nodemark[cn[inode,icell]] = true
+    coord = grid[Coordinates]
+    nnodes = size(coord, 2)
+    nodemark = zeros(Bool, nnodes)
+    cn = grid[CellNodes]
+    ncells = num_cells(grid)
+    for icell in 1:ncells
+        for inode in 1:num_targets(cn, icell)
+            nodemark[cn[inode, icell]] = true
         end
     end
     if all(nodemark)
         return nothing
     else
-        return coord[:,findall(!,nodemark)]
+        return coord[:, findall(!, nodemark)]
     end
 end
 
@@ -453,17 +457,17 @@ Check consistency of grid: a grid is consistent if
 If grid is consistent, return true, otherwise throw an error, 
 or, if `warnoly==true`, return false.
 """
-function isconsistent(grid; warnonly=false)
-    consistent= true
-    dnodes=dangling_nodes(grid)
+function isconsistent(grid; warnonly = false)
+    consistent = true
+    dnodes = dangling_nodes(grid)
     if !isnothing(dnodes)
         @warn "Found dangling nodes: $(dnodes)"
-        consistent=false
+        consistent = false
     end
     if !consistent && ! warnonly
         error("Consistency error(s) found in grid")
     end
-    consistent
+    return consistent
 end
 
 """
@@ -483,50 +487,50 @@ and
 
 are possible.
 """
-function Base.map(f::Function, grid::ExtendableGrid{Tc, Ti}) where {Tc,Ti}
+function Base.map(f::Function, grid::ExtendableGrid{Tc, Ti}) where {Tc, Ti}
     coord = grid[Coordinates]
-    c1=coord[:,1]
+    c1 = coord[:, 1]
     dim = dim_space(grid)
 
     ## Check if f can be called with number args like f(x,y)
-    function checknumargs(f,args...)
-	if !hasmethod(f,Tuple(typeof.(args)))
-	    return false
-	end
-	try 
-	    y=f(args...)
-	catch e
-	    if isa(e,MethodError) 
-		return false
-	    end
-	    if isa(e,BoundsError) 
-		return false
-	    end
-	    rethrow(e)
-	end
-	return true
+    function checknumargs(f, args...)
+        if !hasmethod(f, Tuple(typeof.(args)))
+            return false
+        end
+        try
+            y = f(args...)
+        catch e
+            if isa(e, MethodError)
+                return false
+            end
+            if isa(e, BoundsError)
+                return false
+            end
+            rethrow(e)
+        end
+        return true
     end
 
     ## Check if f can be called with vector args like f(X::Vector) and returns a number
-    function checkvecargs(f,v)
-	if !hasmethod(f,Tuple{Vector})
-	    return false
-	end
-	try 
-	    y=f(v)
-	catch e
-	    if isa(e,MethodError) 
-		return false
-	    end
-	    rethrow(e)
-	end
-	return true
+    function checkvecargs(f, v)
+        if !hasmethod(f, Tuple{Vector})
+            return false
+        end
+        try
+            y = f(v)
+        catch e
+            if isa(e, MethodError)
+                return false
+            end
+            rethrow(e)
+        end
+        return true
     end
-    
-    use_numargs=checknumargs(f,c1...)
-    use_vecargs=checkvecargs(f,c1)
 
-    if use_numargs
+    use_numargs = checknumargs(f, c1...)
+    use_vecargs = checkvecargs(f, c1)
+
+    return if use_numargs
         if dim == 1
             @views Base.map(f, coord[1, :])
         elseif dim == 2
@@ -535,7 +539,7 @@ function Base.map(f::Function, grid::ExtendableGrid{Tc, Ti}) where {Tc,Ti}
             @views Base.map(f, coord[1, :], coord[2, :], coord[3, :])
         end
     elseif use_vecargs
-        Base.map(f,reinterpret(reshape, SVector{dim, Tc}, coord))
+        Base.map(f, reinterpret(reshape, SVector{dim, Tc}, coord))
     else
         error("Cannot map function $f on grid. Check for consistency of function args and grid dimension.")
     end
@@ -547,32 +551,36 @@ end
 # See https://discourse.julialang.org/t/show-and-showcompact-on-custom-types/8493/6
 #
 function Base.show(io::IO, ::MIME"text/plain", grid::ExtendableGrid)
-    str = @sprintf("%s\n      dim = %7d\n   nnodes = %7d\n   ncells = %7d\n  nbfaces = %7d",
-                   typeof(grid),
-                   dim_space(grid), num_nodes(grid), num_cells(grid), num_bfaces(grid))
+    str = @sprintf(
+        "%s\n      dim = %7d\n   nnodes = %7d\n   ncells = %7d\n  nbfaces = %7d",
+        typeof(grid),
+        dim_space(grid), num_nodes(grid), num_cells(grid), num_bfaces(grid)
+    )
     if num_edges(grid) > 0
-        str*=@sprintf("\n   nedges = %7d", num_edges(grid))
+        str *= @sprintf("\n   nedges = %7d", num_edges(grid))
     end
-    if num_partitions(grid)>1
-        str*="\n  npartitions/color = $(num_partitions_per_color(grid))" 
+    if num_partitions(grid) > 1
+        str *= "\n  npartitions/color = $(num_partitions_per_color(grid))"
     end
     print(io, str)
-    nothing
+    return nothing
 end
 
 function Base.show(io::IO, grid::ExtendableGrid)
-    str = @sprintf("%s(dim=%d, nnodes=%d, ncells=%d, nbfaces=%d",
-                   typeof(grid),
-                   dim_space(grid), num_nodes(grid), num_cells(grid), num_bfaces(grid))
+    str = @sprintf(
+        "%s(dim=%d, nnodes=%d, ncells=%d, nbfaces=%d",
+        typeof(grid),
+        dim_space(grid), num_nodes(grid), num_cells(grid), num_bfaces(grid)
+    )
     if num_edges(grid) > 0
-        str*=@sprintf(", nedges=%d", num_edges(grid))
+        str *= @sprintf(", nedges=%d", num_edges(grid))
     end
-    if num_partitions(grid)>1
-        str*=", npart/color=$(num_partitions_per_color(grid))" 
+    if num_partitions(grid) > 1
+        str *= ", npart/color=$(num_partitions_per_color(grid))"
     end
-    str*=")"
+    str *= ")"
     print(io, str)
-    nothing
+    return nothing
 end
 
 ### Tests for the gmsh extension:
@@ -580,7 +588,7 @@ end
 function multidimsort(A)
     i1 = sortperm(A[1, :])
     A1 = A[:, i1]
-    for j = 2:size(A, 1)
+    for j in 2:size(A, 1)
         cm = countmap(A1[j - 1, :])
         for (key, val) in cm
             if val > 1 #if there only is one entry with this key, the reordering is not necessary
@@ -682,18 +690,18 @@ function seemingly_equal(array1::AbstractArray, array2::AbstractArray)
             return false
         end
     end
-    true
+    return true
 end
 
 function seemingly_equal(a1::VariableTargetAdjacency, a2::VariableTargetAdjacency)
-    seemingly_equal(a1.colentries, a2.colentries) && seemingly_equal(a1.colstart, a2.colstart)
+    return seemingly_equal(a1.colentries, a2.colentries) && seemingly_equal(a1.colstart, a2.colstart)
 end
 seemingly_equal(x1::Type, x2::Type) = (x1 == x2)
 seemingly_equal(x1::Number, x2::Number) = (x1 ≈ x2)
 seemingly_equal(x1::Any, x2::Any) = (x1 == x2)
 
 function numbers_match(grid, nn, nc, nb)
-    num_nodes(grid) == nn &&
+    return num_nodes(grid) == nn &&
         num_cells(grid) == nc &&
         num_bfaces(grid) == nb
 end
@@ -702,5 +710,5 @@ Base.extrema(grid::ExtendableGrid) = Base.extrema(grid[Coordinates]; dims = 2)
 
 function bbox(grid)
     e = extrema(grid)
-    map(a -> a[1], e), map(a -> a[2], e)
+    return map(a -> a[1], e), map(a -> a[2], e)
 end

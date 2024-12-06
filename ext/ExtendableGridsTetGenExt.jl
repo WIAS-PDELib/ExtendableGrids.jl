@@ -3,15 +3,15 @@ module ExtendableGridsTetGenExt
 using TetGen
 import ExtendableGrids: simplexgrid
 
-function simplexgrid(tio::RawTetGenIO; flags=nothing)
+function simplexgrid(tio::RawTetGenIO; flags = nothing)
     if !isnothing(flags)
         tetout = TetGen.tetrahedralize(tio, flags)
     else
         tetout = tio
     end
-    
+
     pointlist = tetout.pointlist
-    
+
     tetrahedronlist = tetout.tetrahedronlist
 
     if size(tetout.tetrahedronattributelist, 2) == 0
@@ -24,7 +24,7 @@ function simplexgrid(tio::RawTetGenIO; flags=nothing)
 
     segmentmarkerlist = tetout.trifacemarkerlist
 
-    simplexgrid(pointlist, tetrahedronlist, cellregions, segmentlist, segmentmarkerlist)
+    return simplexgrid(pointlist, tetrahedronlist, cellregions, segmentlist, segmentmarkerlist)
 end
 
 end

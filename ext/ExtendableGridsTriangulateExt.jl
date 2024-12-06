@@ -4,7 +4,7 @@ using Triangulate
 
 import ExtendableGrids: simplexgrid
 
-function simplexgrid(tio::TriangulateIO; flags=nothing)
+function simplexgrid(tio::TriangulateIO; flags = nothing)
     if !isnothing(flags)
         triout, vorout = Triangulate.triangulate(tio, flags)
     else
@@ -34,7 +34,7 @@ function simplexgrid(tio::TriangulateIO; flags=nothing)
         error("Empty list of generated triangles. May be the geometry description is not watertight ?") |> throw
     end
 
-    simplexgrid(pointlist, trianglelist, cellregions, segmentlist, segmentmarkerlist)
+    return simplexgrid(pointlist, trianglelist, cellregions, segmentlist, segmentmarkerlist)
 end
 
 end

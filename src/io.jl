@@ -21,7 +21,7 @@ For the arguments 'append' and 'compress', see documentation of vtk_grid of Writ
 """
 function writeVTK(filename::String, grid::ExtendableGrid{Tc, Ti}; append = false, compress = false, kwargs...) where {Tc, Ti}
     ncells = num_cells(grid)   # get number of cells in grid
-    coords = grid[Coordinates] # get coordinates 
+    coords = grid[Coordinates] # get coordinates
     cells = grid[CellNodes]   # get cell-node list
     geo_dim = size(coords, 1)
 
@@ -29,11 +29,11 @@ function writeVTK(filename::String, grid::ExtendableGrid{Tc, Ti}; append = false
 
     vtk_cells = Array{MeshCell, 1}(undef, ncells)
 
-    for icell = 1:ncells
+    for icell in 1:ncells
         vtk_cells[icell] = MeshCell(VTKCellType(cell_geo[icell]), view(cells, :, icell))
     end
 
-    vtk_grid(filename, coords, vtk_cells, append = append, compress = compress) do vtk
+    return vtk_grid(filename, coords, vtk_cells, append = append, compress = compress) do vtk
         for (key, value) in kwargs
             vtk[String(key)] = value
         end
@@ -53,22 +53,22 @@ function Base.write(fname::String, g::ExtendableGrid; format = "", kwargs...)
     if format == ""
         format = fext[2:end]
     end
-    try
-        writegrid(fname,g, Val{Symbol(format)}; kwargs...)
+    return try
+        writegrid(fname, g, Val{Symbol(format)}; kwargs...)
     catch e
         throw(ErrorException("Writing $(fext) files not supported"))
     end
 end
 
-function writegrid(filename::String, g::ExtendableGrid, ::Type{Val{:msh}};kwargs...)
-    try
+function writegrid(filename::String, g::ExtendableGrid, ::Type{Val{:msh}}; kwargs...)
+    return try
         simplexgrid_to_gmsh(g; filename)
     catch e
         throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to write msh files."))
     end
 end
 
-function writegrid(fname::String, g::ExtendableGrid, ::Type{Val{:sg}}; version=v"2.2",  kwargs...)
+function writegrid(fname::String, g::ExtendableGrid, ::Type{Val{:sg}}; version = v"2.2", kwargs...)
     dim_g = dim_grid(g)
     dim_s = dim_space(g)
     nn = num_nodes(g)
@@ -84,54 +84,55 @@ function writegrid(fname::String, g::ExtendableGrid, ::Type{Val{:sg}}; version=v
     open(fname, "w") do file
         write(file, @sprintf("SimplexGrid"))
         write(file, @sprintf(" "))
-        write(file, @sprintf("%s\n","$version"[1:end-2]))
+        write(file, @sprintf("%s\n", "$version"[1:(end - 2)]))
         write(file, @sprintf("#created by ExtendableGrids.jl (c) J.Fuhrmann et al\n"))
         write(file, @sprintf("#%s\n", Dates.format(Dates.now(), "yyyy-mm-ddTHH-mm-SS")))
 
         write(file, @sprintf("DIMENSION %d\n", dim_g))
         write(file, @sprintf("NODES %d %d\n", nn, dim_s))
 
-        for inode = 1:nn
-            for idim = 1:dim_s
+        for inode in 1:nn
+            for idim in 1:dim_s
                 write(file, @sprintf("%.20e ", coord[idim, inode]))
                 write(file, @sprintf("\n"))
             end
         end
 
         write(file, @sprintf("CELLS %d\n", nc))
-        for icell = 1:nc
-            for inode = 1:(dim_g + 1)
+        for icell in 1:nc
+            for inode in 1:(dim_g + 1)
                 write(file, @sprintf("%d ", cellnodes[inode, icell]))
             end
             write(file, @sprintf("%d\n", cellregions[icell]))
         end
 
         write(file, @sprintf("FACES %d\n", nbf))
-        for ibface = 1:nbf
-            for inode = 1:dim_g
+        for ibface in 1:nbf
+            for inode in 1:dim_g
                 write(file, @sprintf("%d ", bfacenodes[inode, ibface]))
             end
             write(file, @sprintf("%d\n", bfaceregions[ibface]))
         end
 
-        if version>v"2.1"
-            function writeitems(key,label)
-                data=g[key]
+        if version > v"2.1"
+            function writeitems(key, label)
+                data = g[key]
                 write(file, "$(label) $(length(data))\n")
                 for d in data
                     write(file, "$d\n")
                 end
+                return
             end
-            writeitems(PColorPartitions,"PCOLORPARTITIONS")
-            writeitems(PartitionCells,"PARTITIONCELLS")
-            writeitems(PartitionBFaces,"PARTITIONBFACES")
-            writeitems(PartitionNodes,"PARTITIONNODES")
+            writeitems(PColorPartitions, "PCOLORPARTITIONS")
+            writeitems(PartitionCells, "PARTITIONCELLS")
+            writeitems(PartitionBFaces, "PARTITIONBFACES")
+            writeitems(PartitionNodes, "PARTITIONNODES")
         end
         write(file, @sprintf("END\n"))
         flush(file)
         flush(file)
     end
-    nothing
+    return nothing
 end
 
 ######################################################
@@ -153,15 +154,15 @@ function simplexgrid(file::String; format = "", kwargs...)
     if format == ""
         format = fext[2:end]
     end
-    try
-        simplexgrid(file,Val{Symbol(format)}; kwargs...)
+    return try
+        simplexgrid(file, Val{Symbol(format)}; kwargs...)
     catch e
         throw(ErrorException("Reading $(fext) files not supported"))
     end
 end
 
 function simplexgrid(file::String, ::Type{Val{:msh}}; kwargs...)
-    try
+    return try
         simplexgrid_from_gmsh(file)
     catch e
         throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to read msh files."))
@@ -169,7 +170,7 @@ function simplexgrid(file::String, ::Type{Val{:msh}}; kwargs...)
 end
 
 function simplexgrid(file::String, ::Type{Val{:geo}}; kwargs...)
-    try
+    return try
         simplexgrid_from_gmsh(file)
     catch e
         throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to read geo files."))
@@ -182,7 +183,7 @@ function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
     expecttoken(tks, "SimplexGrid")
     version = VersionNumber(gettoken(tks))
 
-    if version<v"2.0" || version>=v"2.3"
+    if version < v"2.0" || version >= v"2.3"
         error("Read grid: wrong format version: $(version)")
     end
 
@@ -193,12 +194,12 @@ function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
     faces = Array{Ti, 2}(undef, 0, 0)
     bregions = Array{Ti, 1}(undef, 0)
 
-    pcolorpartitions=Array{Ti, 1}(undef, 0)
-    partitioncells=Array{Ti, 1}(undef, 0)
-    partitionbfaces=Array{Ti, 1}(undef, 0)
-    partitionnodes=Array{Ti, 1}(undef, 0)
-    
-    
+    pcolorpartitions = Array{Ti, 1}(undef, 0)
+    partitioncells = Array{Ti, 1}(undef, 0)
+    partitionbfaces = Array{Ti, 1}(undef, 0)
+    partitionnodes = Array{Ti, 1}(undef, 0)
+
+
     while (true)
         if (trytoken(tks, "DIMENSION"))
             dim = parse(Ti, gettoken(tks))
@@ -209,8 +210,8 @@ function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
                 error("Dimension error (DIMENSION $(dim)) in section NODES")
             end
             coord = Array{Float64, 2}(undef, dim, nnodes)
-            for inode = 1:nnodes
-                for idim = 1:embdim
+            for inode in 1:nnodes
+                for idim in 1:embdim
                     coord[idim, inode] = parse(Float64, gettoken(tks))
                 end
             end
@@ -218,13 +219,13 @@ function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
             ncells = parse(Ti, gettoken(tks))
             cells = Array{Ti, 2}(undef, dim + 1, ncells)
             regions = Array{Ti, 1}(undef, ncells)
-            for icell = 1:ncells
-                for inode = 1:(dim + 1)
+            for icell in 1:ncells
+                for inode in 1:(dim + 1)
                     cells[inode, icell] = parse(Ti, gettoken(tks))
                 end
                 regions[icell] = parse(Ti, gettoken(tks))
-                if version==v"2.0"
-                    for j = 1:(dim + 1)
+                if version == v"2.0"
+                    for j in 1:(dim + 1)
                         gettoken(tks)  # skip file format garbage
                     end
                 end
@@ -233,42 +234,42 @@ function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
             nfaces = parse(Ti, gettoken(tks))
             faces = Array{Ti, 2}(undef, dim, nfaces)
             bregions = Array{Ti, 1}(undef, nfaces)
-            for iface = 1:nfaces
-                for inode = 1:dim
+            for iface in 1:nfaces
+                for inode in 1:dim
                     faces[inode, iface] = parse(Ti, gettoken(tks))
                 end
                 bregions[iface] = parse(Ti, gettoken(tks))
                 if version == v"2.0"
-                    for j = 1:(dim + 2)
+                    for j in 1:(dim + 2)
                         gettoken(tks) #skip file format garbage
                     end
                 end
             end
-        elseif trytoken(tks, "PCOLORPARTITIONS") && version>v"2.1"
-            n=parse(Ti, gettoken(tks))
-            pcolorpartitions=[parse(Ti, gettoken(tks)) for i=1:n]
-        elseif trytoken(tks, "PARTITIONCELLS") && version>v"2.1"
-            n=parse(Ti, gettoken(tks))
-            partitioncells=[parse(Ti, gettoken(tks)) for i=1:n]
-        elseif trytoken(tks, "PARTITIONBFACES") && version>v"2.1"
-            n=parse(Ti, gettoken(tks))
-            partitionbfaces=[parse(Ti, gettoken(tks)) for i=1:n]
-        elseif trytoken(tks, "PARTITIONNODES") && version>v"2.1"
-            n=parse(Ti, gettoken(tks))
-            partitionnodes=[parse(Ti, gettoken(tks)) for i=1:n]
+        elseif trytoken(tks, "PCOLORPARTITIONS") && version > v"2.1"
+            n = parse(Ti, gettoken(tks))
+            pcolorpartitions = [parse(Ti, gettoken(tks)) for i in 1:n]
+        elseif trytoken(tks, "PARTITIONCELLS") && version > v"2.1"
+            n = parse(Ti, gettoken(tks))
+            partitioncells = [parse(Ti, gettoken(tks)) for i in 1:n]
+        elseif trytoken(tks, "PARTITIONBFACES") && version > v"2.1"
+            n = parse(Ti, gettoken(tks))
+            partitionbfaces = [parse(Ti, gettoken(tks)) for i in 1:n]
+        elseif trytoken(tks, "PARTITIONNODES") && version > v"2.1"
+            n = parse(Ti, gettoken(tks))
+            partitionnodes = [parse(Ti, gettoken(tks)) for i in 1:n]
         else
             expecttoken(tks, "END")
             break
         end
     end
-    g=simplexgrid(coord, cells, regions, faces, bregions)
-    if version>v"2.1"
-        g[PColorPartitions]=pcolorpartitions
-        g[PartitionCells]=partitioncells
-        g[PartitionBFaces]=partitionbfaces
-        g[PartitionNodes]=partitionnodes
+    g = simplexgrid(coord, cells, regions, faces, bregions)
+    if version > v"2.1"
+        g[PColorPartitions] = pcolorpartitions
+        g[PartitionCells] = partitioncells
+        g[PartitionBFaces] = partitionbfaces
+        g[PartitionNodes] = partitionnodes
     end
-    g
+    return g
 end
 
 function simplexgrid_from_gmsh end

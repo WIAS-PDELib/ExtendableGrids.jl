@@ -5,14 +5,14 @@ $(SIGNATURES)
 
 Number of edges in grid.
 """
-num_edges(grid::ExtendableGrid)=haskey(grid,EdgeNodes) ?  num_sources(grid[EdgeNodes]) : 0
+num_edges(grid::ExtendableGrid) = haskey(grid, EdgeNodes) ? num_sources(grid[EdgeNodes]) : 0
 
 #########################################
 # VERTEX0D <: AbstractElementGeometry0D #       [1]
 #########################################
 
-const _refcoords_for_geometry_Vertex0D = reshape([0],1,1) |> Matrix
-const _local_celledgenodes_Vertex0D = reshape([1],1,1) |> Matrix
+const _refcoords_for_geometry_Vertex0D = reshape([0], 1, 1) |> Matrix
+const _local_celledgenodes_Vertex0D = reshape([1], 1, 1) |> Matrix
 
 """
 $(SIGNATURES)
@@ -47,17 +47,16 @@ $(SIGNATURES)
 
 Cell-edge node numbering for 1D edge
 """
-local_celledgenodes(::Type{Vertex0D}) = _local_celledgenodes_Vertex0D 
+local_celledgenodes(::Type{Vertex0D}) = _local_celledgenodes_Vertex0D
 
 
-
-#######################################      
+#######################################
 # EDGE1D <: AbstractElementGeometry1D #     [1]-----[2]        [1] = 0, [2] = 1
-#######################################      
+#######################################
 
-const _refcoords_for_geometry_Edge1D = reshape([0; 1]',1,2) |> Matrix
-const _local_cellfacenodes_Edge1D = reshape([1; 2],1,2) |> Matrix
-const _local_celledgenodes_Edge1D = reshape([1; 2],2,1) |> Matrix
+const _refcoords_for_geometry_Edge1D = reshape([0; 1]', 1, 2) |> Matrix
+const _local_cellfacenodes_Edge1D = reshape([1; 2], 1, 2) |> Matrix
+const _local_celledgenodes_Edge1D = reshape([1; 2], 2, 1) |> Matrix
 
 """
 $(SIGNATURES)
@@ -106,7 +105,7 @@ $(SIGNATURES)
 
 Number of edges of 1D edge
 """
-num_edges(::Type{Edge1D})=1
+num_edges(::Type{Edge1D}) = 1
 
 """
 $(SIGNATURES)
@@ -116,18 +115,20 @@ Geometries of faces of 1D edge
 facetype_of_cellface(::Type{<:AbstractElementGeometry1D}, k) = Vertex0D
 
 
-xrefFACE2xrefCELL(::Type{<:AbstractElementGeometry1D}) = [ [(xref4FACE) -> [1]],
-                                                           [(xref4FACE) -> [1]] ]
+xrefFACE2xrefCELL(::Type{<:AbstractElementGeometry1D}) = [
+    [(xref4FACE) -> [1]],
+    [(xref4FACE) -> [1]],
+]
 
 xrefFACE2xrefOFACE(::Type{<:AbstractElementGeometry1D}) = [(xref4FACE) -> xref4FACE, (xref4FACE) -> 1 .- xref4FACE]
 
 
-#                   [3]                 
-#                    | \   
+#                   [3]
+#                    | \
 ##############       |   \                    [1] = (0,0)
 # Triangle2D #       |     \                  [2] = (1,0)
 ##############       |       \                [3] = (0,1)
-#                    |         \ 
+#                    |         \
 #                   [1]--------[2]
 
 
@@ -184,20 +185,22 @@ Geometries of faces of 2D triangle
 facetype_of_cellface(::Type{<:Triangle2D}, k) = Edge1D
 
 # maps of reference coords on cell face to reference coords in cell
-xrefFACE2xrefCELL(::Type{<:Triangle2D}) = [ (xref4FACE) -> [xref4FACE[1],0],
-                                            (xref4FACE) -> [1-xref4FACE[1],xref4FACE[1]],
-                                            (xref4FACE) -> [0,1-xref4FACE[1]]
-                                            ]
+xrefFACE2xrefCELL(::Type{<:Triangle2D}) = [
+    (xref4FACE) -> [xref4FACE[1], 0],
+    (xref4FACE) -> [1 - xref4FACE[1], xref4FACE[1]],
+    (xref4FACE) -> [0, 1 - xref4FACE[1]],
+]
 
 # maps of reference coords on face to reference coords in face with other orientation
-xrefFACE2xrefOFACE(::Type{<:Triangle2D}) = [(xref4FACE) -> xref4FACE,                                    # orientation 1 = [1,2,3]
-                                            (xref4FACE) -> [xref4FACE[1],1-xref4FACE[1]-xref4FACE[2]],   # orientation 2 = [1,3,2]
-                                            (xref4FACE) -> [1-xref4FACE[1]-xref4FACE[2],xref4FACE[2]],   # orientation 3 = [3,2,1]
-                                            (xref4FACE) -> [xref4FACE[2],xref4FACE[1]]                   # orientation 4 = [2,1,3]
-                                            ]   
+xrefFACE2xrefOFACE(::Type{<:Triangle2D}) = [
+    (xref4FACE) -> xref4FACE,                                    # orientation 1 = [1,2,3]
+    (xref4FACE) -> [xref4FACE[1], 1 - xref4FACE[1] - xref4FACE[2]],   # orientation 2 = [1,3,2]
+    (xref4FACE) -> [1 - xref4FACE[1] - xref4FACE[2], xref4FACE[2]],   # orientation 3 = [3,2,1]
+    (xref4FACE) -> [xref4FACE[2], xref4FACE[1]],                   # orientation 4 = [2,1,3]
+]
 
 
-#                        [4]--------[3]               
+#                        [4]--------[3]
 #                         |          |             [1] = (0,0)
 ###################       |          |             [2] = (1,0)
 # Quadrilateral2D #       |          |             [3] = (1,1)
@@ -213,7 +216,7 @@ $(SIGNATURES)
 
 Coordinates of reference geometry of 2D quadrilateral
 """
-refcoords_for_geometry(::Type{<:Quadrilateral2D}) = _refcoords_for_geometry_Quadrilateral2D 
+refcoords_for_geometry(::Type{<:Quadrilateral2D}) = _refcoords_for_geometry_Quadrilateral2D
 
 """
 $(SIGNATURES)
@@ -258,15 +261,16 @@ Geometries of faces of 2D quadrilateral
 facetype_of_cellface(::Type{<:Quadrilateral2D}, k) = Edge1D
 
 # maps of reference coords on cell face to reference coords in cell
-xrefFACE2xrefCELL(::Type{<:Quadrilateral2D}) = [ (xref4FACE) -> [xref4FACE[1],0],
-                                                 (xref4FACE) -> [1,xref4FACE[1]],
-                                                 (xref4FACE) -> [1-xref4FACE[1],1],
-                                                 (xref4FACE) -> [0,1-xref4FACE[1]]
-                                                 ]
+xrefFACE2xrefCELL(::Type{<:Quadrilateral2D}) = [
+    (xref4FACE) -> [xref4FACE[1], 0],
+    (xref4FACE) -> [1, xref4FACE[1]],
+    (xref4FACE) -> [1 - xref4FACE[1], 1],
+    (xref4FACE) -> [0, 1 - xref4FACE[1]],
+]
 
 
-#                      [4]                 
-#                       |\\   
+#                      [4]
+#                       |\\
 #################       | \ \                    [1] = (0,0,0)
 # Tetrahedron3D #       |  \  \                  [2] = (1,0,0)
 #################       |   \   \                [3] = (0,1,0)
@@ -329,14 +333,15 @@ Cell-edge node numbering for 3D tetrahedron
 local_celledgenodes(::Type{<:Tetrahedron3D}) = _local_celledgenodes_Tetrahedron3D
 
 # maps of reference coords on cell face to reference coords in cell
-xrefFACE2xrefCELL(::Type{<:Tetrahedron3D}) = [ (xref4FACE) -> [xref4FACE[2],xref4FACE[1],0],
-                                               (xref4FACE) -> [xref4FACE[1],0,xref4FACE[2]],
-                                               (xref4FACE) -> [1-xref4FACE[1]-xref4FACE[2],xref4FACE[1],xref4FACE[2]],
-                                               (xref4FACE) -> [0,xref4FACE[2],xref4FACE[1]]                 
-                                                ]
+xrefFACE2xrefCELL(::Type{<:Tetrahedron3D}) = [
+    (xref4FACE) -> [xref4FACE[2], xref4FACE[1], 0],
+    (xref4FACE) -> [xref4FACE[1], 0, xref4FACE[2]],
+    (xref4FACE) -> [1 - xref4FACE[1] - xref4FACE[2], xref4FACE[1], xref4FACE[2]],
+    (xref4FACE) -> [0, xref4FACE[2], xref4FACE[1]],
+]
 
 
-#                         
+#
 #                         [8]--------[7]
 #                        / |        / |          [1] = (0,0,0)
 #                     [5]--------[6]  |          [2] = (1,0,0)
@@ -398,7 +403,6 @@ Cell-edge node numbering for 3D hexahedron
 local_celledgenodes(::Type{<:Hexahedron3D}) = _local_celledgenodes_Hexahedron3D
 
 
-
 ###############
 ### VOLUMES ###
 ###############
@@ -408,59 +412,66 @@ function volume(Coords, Nodes, item, ::Type{<:Vertex0D}, ::Type{<:ExtendableGrid
 end
 
 function volume(Coords, Nodes, item, ::Type{<:Edge1D}, ::Type{Cartesian1D})
-    return abs(Coords[1, Nodes[2,item]] - Coords[1, Nodes[1,item]])
+    return abs(Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]])
 end
 
 
 function volume(Coords, Nodes, item, ::Type{<:Edge1D}, ::Type{Cartesian2D})
-    return sqrt((Coords[1, Nodes[2,item]] - Coords[1, Nodes[1,item]]).^2 + (Coords[2, Nodes[2,item]] - Coords[2, Nodes[1,item]]).^2)
+    return sqrt((Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]) .^ 2 + (Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]) .^ 2)
 end
 
 function volume(Coords, Nodes, item, ::Type{<:Edge1D}, ::Type{Cartesian3D})
-    return sqrt((Coords[1, Nodes[2,item]] - Coords[1, Nodes[1,item]]).^2 + (Coords[2, Nodes[2,item]] - Coords[2, Nodes[1,item]]).^2  + (Coords[3, Nodes[2,item]] - Coords[3, Nodes[1,item]]).^2)
+    return sqrt((Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]) .^ 2 + (Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]) .^ 2 + (Coords[3, Nodes[2, item]] - Coords[3, Nodes[1, item]]) .^ 2)
 end
 
 
 function volume(Coords, Nodes, item, ::Type{Triangle2D}, ::Type{Cartesian2D})
-    return 1 // 2 * ( Coords[1, Nodes[1, item]] * (Coords[2, Nodes[2,item]] -  Coords[2, Nodes[3, item]])
-                  +   Coords[1, Nodes[2, item]] * (Coords[2, Nodes[3,item]] -  Coords[2, Nodes[1, item]])
-                  +   Coords[1, Nodes[3, item]] * (Coords[2, Nodes[1,item]] -  Coords[2, Nodes[2, item]]) )
+    return 1 // 2 * (
+        Coords[1, Nodes[1, item]] * (Coords[2, Nodes[2, item]] - Coords[2, Nodes[3, item]])
+            + Coords[1, Nodes[2, item]] * (Coords[2, Nodes[3, item]] - Coords[2, Nodes[1, item]])
+            + Coords[1, Nodes[3, item]] * (Coords[2, Nodes[1, item]] - Coords[2, Nodes[2, item]])
+    )
 end
 
 
 function volume(Coords, Nodes, item, ::Type{<:Quadrilateral2D}, ::Type{Cartesian2D})
-    return 1//2 * (   (Coords[1, Nodes[1, item]] - Coords[1, Nodes[3, item]]) * (Coords[2, Nodes[2, item]] - Coords[2, Nodes[4, item]])
-                + (Coords[1, Nodes[4, item]] - Coords[1, Nodes[2, item]]) * (Coords[2, Nodes[1, item]] - Coords[2, Nodes[3, item]]) )
+    return 1 // 2 * (
+        (Coords[1, Nodes[1, item]] - Coords[1, Nodes[3, item]]) * (Coords[2, Nodes[2, item]] - Coords[2, Nodes[4, item]])
+            + (Coords[1, Nodes[4, item]] - Coords[1, Nodes[2, item]]) * (Coords[2, Nodes[1, item]] - Coords[2, Nodes[3, item]])
+    )
 end
 
 function volume(Coords, Nodes, item, ::Type{<:Triangle2D}, ::Type{Cartesian3D})
-    @views d12 = SVector{3}(Coords[:, Nodes[1,item]]) - SVector{3}(Coords[:,Nodes[2,item]])
-    @views d14 = SVector{3}(Coords[:, Nodes[1,item]]) - SVector{3}(Coords[:,Nodes[3,item]])
-    return sqrt((d12[2]*d14[3]-d12[3]*d14[2])^2 + (d12[3]*d14[1]-d12[1]*d14[3])^2 + (d12[1]*d14[2]-d12[2]*d14[1])^2) / 2
+    @views d12 = SVector{3}(Coords[:, Nodes[1, item]]) - SVector{3}(Coords[:, Nodes[2, item]])
+    @views d14 = SVector{3}(Coords[:, Nodes[1, item]]) - SVector{3}(Coords[:, Nodes[3, item]])
+    return sqrt((d12[2] * d14[3] - d12[3] * d14[2])^2 + (d12[3] * d14[1] - d12[1] * d14[3])^2 + (d12[1] * d14[2] - d12[2] * d14[1])^2) / 2
 end
 
 
-
-function volume(Coords::Array{Tc,2}, Nodes, item, ::Type{<:Parallelogram2D}, ::Type{Cartesian3D}) where {Tc}
-    @views d12 = SVector{3}(Coords[:, Nodes[1,item]]) - SVector{3}(Coords[:,Nodes[2,item]])
-    @views d14 = SVector{3}(Coords[:, Nodes[1,item]]) - SVector{3}(Coords[:,Nodes[3,item]])
-    return sqrt((d12[2]*d14[3]-d12[3]*d14[2])^2 + (d12[3]*d14[1]-d12[1]*d14[3])^2 + (d12[1]*d14[2]-d12[2]*d14[1])^2)
+function volume(Coords::Array{Tc, 2}, Nodes, item, ::Type{<:Parallelogram2D}, ::Type{Cartesian3D}) where {Tc}
+    @views d12 = SVector{3}(Coords[:, Nodes[1, item]]) - SVector{3}(Coords[:, Nodes[2, item]])
+    @views d14 = SVector{3}(Coords[:, Nodes[1, item]]) - SVector{3}(Coords[:, Nodes[3, item]])
+    return sqrt((d12[2] * d14[3] - d12[3] * d14[2])^2 + (d12[3] * d14[1] - d12[1] * d14[3])^2 + (d12[1] * d14[2] - d12[2] * d14[1])^2)
 end
 
 
 function volume(Coords, Nodes, item, ::Type{<:Parallelepiped3D}, ::Type{Cartesian3D})
-    return    ((Coords[1, Nodes[5, item]] - Coords[1, Nodes[1, item]]) * ( (Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]) * (Coords[3, Nodes[4, item]] - Coords[3, Nodes[1, item]]) - (Coords[2, Nodes[4, item]] - Coords[2, Nodes[1, item]]) * (Coords[3, Nodes[2, item]] - Coords[3, Nodes[1, item]])) 
-        + (Coords[2, Nodes[5, item]] - Coords[2, Nodes[1, item]]) * ( (Coords[3, Nodes[2, item]] - Coords[3, Nodes[1, item]]) * (Coords[1, Nodes[4, item]] - Coords[1, Nodes[1, item]]) - (Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]) * (Coords[3, Nodes[4, item]] - Coords[3, Nodes[1, item]])) 
-        + (Coords[3, Nodes[5, item]] - Coords[3, Nodes[1, item]]) * ( (Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]) * (Coords[2, Nodes[4, item]] - Coords[2, Nodes[1, item]]) - (Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]) * (Coords[1, Nodes[4, item]] - Coords[1, Nodes[1, item]])))
+    return (
+        (Coords[1, Nodes[5, item]] - Coords[1, Nodes[1, item]]) * ((Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]) * (Coords[3, Nodes[4, item]] - Coords[3, Nodes[1, item]]) - (Coords[2, Nodes[4, item]] - Coords[2, Nodes[1, item]]) * (Coords[3, Nodes[2, item]] - Coords[3, Nodes[1, item]]))
+            + (Coords[2, Nodes[5, item]] - Coords[2, Nodes[1, item]]) * ((Coords[3, Nodes[2, item]] - Coords[3, Nodes[1, item]]) * (Coords[1, Nodes[4, item]] - Coords[1, Nodes[1, item]]) - (Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]) * (Coords[3, Nodes[4, item]] - Coords[3, Nodes[1, item]]))
+            + (Coords[3, Nodes[5, item]] - Coords[3, Nodes[1, item]]) * ((Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]) * (Coords[2, Nodes[4, item]] - Coords[2, Nodes[1, item]]) - (Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]) * (Coords[1, Nodes[4, item]] - Coords[1, Nodes[1, item]]))
+    )
 end
 
 
 function volume(Coords, Nodes, item, ::Type{<:Tetrahedron3D}, ::Type{Cartesian3D})
-    return    1 // 6 * ((Coords[1, Nodes[4, item]] - Coords[1, Nodes[1, item]]) * ( (Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]) * (Coords[3, Nodes[3, item]] - Coords[3, Nodes[1, item]]) - (Coords[2, Nodes[3, item]] - Coords[2, Nodes[1, item]]) * (Coords[3, Nodes[2, item]] - Coords[3, Nodes[1, item]])) 
-        + (Coords[2, Nodes[4, item]] - Coords[2, Nodes[1, item]]) * ( (Coords[3, Nodes[2, item]] - Coords[3, Nodes[1, item]]) * (Coords[1, Nodes[3, item]] - Coords[1, Nodes[1, item]]) - (Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]) * (Coords[3, Nodes[3, item]] - Coords[3, Nodes[1, item]])) 
-        + (Coords[3, Nodes[4, item]] - Coords[3, Nodes[1, item]]) * ( (Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]) * (Coords[2, Nodes[3, item]] - Coords[2, Nodes[1, item]]) - (Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]) * (Coords[1, Nodes[3, item]] - Coords[1, Nodes[1, item]])))
+    return 1 // 6 * (
+        (Coords[1, Nodes[4, item]] - Coords[1, Nodes[1, item]]) * ((Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]) * (Coords[3, Nodes[3, item]] - Coords[3, Nodes[1, item]]) - (Coords[2, Nodes[3, item]] - Coords[2, Nodes[1, item]]) * (Coords[3, Nodes[2, item]] - Coords[3, Nodes[1, item]]))
+            + (Coords[2, Nodes[4, item]] - Coords[2, Nodes[1, item]]) * ((Coords[3, Nodes[2, item]] - Coords[3, Nodes[1, item]]) * (Coords[1, Nodes[3, item]] - Coords[1, Nodes[1, item]]) - (Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]) * (Coords[3, Nodes[3, item]] - Coords[3, Nodes[1, item]]))
+            + (Coords[3, Nodes[4, item]] - Coords[3, Nodes[1, item]]) * ((Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]) * (Coords[2, Nodes[3, item]] - Coords[2, Nodes[1, item]]) - (Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]) * (Coords[1, Nodes[3, item]] - Coords[1, Nodes[1, item]]))
+    )
 end
-  
+
 
 ###############
 ### NORMALS ###
@@ -468,31 +479,31 @@ end
 
 function Normal4ElemType!(normal, Coords, Nodes, item, ::Type{<:Vertex0D}, ::Type{Cartesian2D})
     normal[1] = 0.0
-    normal[2] = 0.0
+    return normal[2] = 0.0
 end
 
 function Normal4ElemType!(normal, Coords, Nodes, item, ::Type{<:Vertex0D}, ::Type{Cartesian1D})
-    normal[1] = 1.0
+    return normal[1] = 1.0
 end
 
 function Normal4ElemType!(normal, Coords, Nodes, item, ::Type{<:Edge1D}, ::Type{Cartesian2D})
     # rotate tangent
-    normal[1] = Coords[2, Nodes[2,item]] - Coords[2, Nodes[1,item]]
-    normal[2] = Coords[1, Nodes[1,item]] - Coords[1, Nodes[2,item]]
+    normal[1] = Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]
+    normal[2] = Coords[1, Nodes[1, item]] - Coords[1, Nodes[2, item]]
     # divide by length
-    normal ./= sqrt(normal[1]^2+normal[2]^2)
+    return normal ./= sqrt(normal[1]^2 + normal[2]^2)
 end
 
 function Normal4ElemType!(normal, Coords, Nodes, item, ::Type{<:Quadrilateral2D}, ::Type{Cartesian3D})
     # cross(p(1)-p(2), p(1)-p(4)) / length
-    normal[1]  = (Coords[2, Nodes[1, item]] - Coords[2, Nodes[2, item]]) * (Coords[3, Nodes[1, item]] - Coords[3, Nodes[4, item]])
+    normal[1] = (Coords[2, Nodes[1, item]] - Coords[2, Nodes[2, item]]) * (Coords[3, Nodes[1, item]] - Coords[3, Nodes[4, item]])
     normal[1] -= (Coords[3, Nodes[1, item]] - Coords[3, Nodes[2, item]]) * (Coords[2, Nodes[1, item]] - Coords[2, Nodes[4, item]])
-    normal[2]  = (Coords[3, Nodes[1, item]] - Coords[3, Nodes[2, item]]) * (Coords[1, Nodes[1, item]] - Coords[1, Nodes[4, item]])
+    normal[2] = (Coords[3, Nodes[1, item]] - Coords[3, Nodes[2, item]]) * (Coords[1, Nodes[1, item]] - Coords[1, Nodes[4, item]])
     normal[2] -= (Coords[1, Nodes[1, item]] - Coords[1, Nodes[2, item]]) * (Coords[3, Nodes[1, item]] - Coords[3, Nodes[4, item]])
-    normal[3]  = (Coords[1, Nodes[1, item]] - Coords[1, Nodes[2, item]]) * (Coords[2, Nodes[1, item]] - Coords[2, Nodes[4, item]])
+    normal[3] = (Coords[1, Nodes[1, item]] - Coords[1, Nodes[2, item]]) * (Coords[2, Nodes[1, item]] - Coords[2, Nodes[4, item]])
     normal[3] -= (Coords[2, Nodes[1, item]] - Coords[2, Nodes[2, item]]) * (Coords[1, Nodes[1, item]] - Coords[1, Nodes[4, item]])
     # divide by length
-    normal ./= sqrt(normal[1]^2+normal[2]^2+normal[3]^2)
+    return normal ./= sqrt(normal[1]^2 + normal[2]^2 + normal[3]^2)
 
     ## old version
     #d12 = @views Coords[:, Nodes[1, item]] - Coords[:, Nodes[2, item]]
@@ -504,14 +515,14 @@ end
 
 function Normal4ElemType!(normal, Coords, Nodes, item, ::Type{<:Triangle2D}, ::Type{Cartesian3D})
     # cross(p(1)-p(2), p(1)-p(3)) / length
-    normal[1]  = (Coords[2, Nodes[1, item]] - Coords[2, Nodes[2, item]]) * (Coords[3, Nodes[1, item]] - Coords[3, Nodes[3, item]])
+    normal[1] = (Coords[2, Nodes[1, item]] - Coords[2, Nodes[2, item]]) * (Coords[3, Nodes[1, item]] - Coords[3, Nodes[3, item]])
     normal[1] -= (Coords[3, Nodes[1, item]] - Coords[3, Nodes[2, item]]) * (Coords[2, Nodes[1, item]] - Coords[2, Nodes[3, item]])
-    normal[2]  = (Coords[3, Nodes[1, item]] - Coords[3, Nodes[2, item]]) * (Coords[1, Nodes[1, item]] - Coords[1, Nodes[3, item]])
+    normal[2] = (Coords[3, Nodes[1, item]] - Coords[3, Nodes[2, item]]) * (Coords[1, Nodes[1, item]] - Coords[1, Nodes[3, item]])
     normal[2] -= (Coords[1, Nodes[1, item]] - Coords[1, Nodes[2, item]]) * (Coords[3, Nodes[1, item]] - Coords[3, Nodes[3, item]])
-    normal[3]  = (Coords[1, Nodes[1, item]] - Coords[1, Nodes[2, item]]) * (Coords[2, Nodes[1, item]] - Coords[2, Nodes[3, item]])
+    normal[3] = (Coords[1, Nodes[1, item]] - Coords[1, Nodes[2, item]]) * (Coords[2, Nodes[1, item]] - Coords[2, Nodes[3, item]])
     normal[3] -= (Coords[2, Nodes[1, item]] - Coords[2, Nodes[2, item]]) * (Coords[1, Nodes[1, item]] - Coords[1, Nodes[3, item]])
     # divide by length
-    normal ./= sqrt(normal[1]^2+normal[2]^2+normal[3]^2)
+    return normal ./= sqrt(normal[1]^2 + normal[2]^2 + normal[3]^2)
 end
 
 
@@ -520,16 +531,16 @@ end
 ################
 
 function Tangent4ElemType!(tangent, Coords, Nodes, item, ::Type{<:Edge1D}, ::Type{Cartesian2D})
-    tangent[1] = Coords[1,Nodes[2,item]] - Coords[1, Nodes[1,item]]
-    tangent[2] = Coords[2,Nodes[2,item]] - Coords[2, Nodes[1,item]]
+    tangent[1] = Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]
+    tangent[2] = Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]
     # divide by length
-    tangent ./= sqrt(tangent[1]^2+tangent[2]^2)
+    return tangent ./= sqrt(tangent[1]^2 + tangent[2]^2)
 end
 
 function Tangent4ElemType!(tangent, Coords, Nodes, item, ::Type{<:Edge1D}, ::Type{Cartesian3D})
-    tangent[1] = Coords[1,Nodes[2,item]] - Coords[1, Nodes[1,item]]
-    tangent[2] = Coords[2,Nodes[2,item]] - Coords[2, Nodes[1,item]]
-    tangent[3] = Coords[3,Nodes[2,item]] - Coords[3, Nodes[1,item]]
+    tangent[1] = Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]
+    tangent[2] = Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]
+    tangent[3] = Coords[3, Nodes[2, item]] - Coords[3, Nodes[1, item]]
     # divide by length
-    tangent ./= sqrt(tangent[1]^2+tangent[2]^2+tangent[3]^2)
+    return tangent ./= sqrt(tangent[1]^2 + tangent[2]^2 + tangent[3]^2)
 end
