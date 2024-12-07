@@ -3,7 +3,7 @@
     X = collect(0:hx:1)
     Y = collect(0:hy:1)
     Z = collect(0:hz:1)
-    simplexgrid(X, Y, Z)
+    return simplexgrid(X, Y, Z)
 end</code></pre><p><img src="../quadrilateral.png" alt/></p><h2 id="Cross3d"><a class="docs-heading-anchor" href="#Cross3d">Cross3d</a><a id="Cross3d-1"></a><a class="docs-heading-anchor-permalink" href="#Cross3d" title="Permalink"></a></h2><pre><code class="language-julia hljs">function cross3d()
     X = collect(0:0.1:1)
     Y = collect(0:0.1:1)
@@ -14,7 +14,7 @@ end</code></pre><p><img src="../quadrilateral.png" alt/></p><h2 id="Cross3d"><a 
 
     rect!(grid, (0.4, 0, 0.2), (0.6, 1, 0.4); region = 2, bregions = [4, 4, 4, 4, (cur) -&gt; cur == 3 ? 0 : 5, 6])
 
-    subgrid(grid, [2])
+    return subgrid(grid, [2])
 end</code></pre><p><img src="../cross3d.png" alt/></p><h2 id="CI-callbacks-for-[ExampleJuggler.jl](https://github.com/j-fu/ExampleJuggler.jl)"><a class="docs-heading-anchor" href="#CI-callbacks-for-[ExampleJuggler.jl](https://github.com/j-fu/ExampleJuggler.jl)">CI callbacks  for <a href="https://github.com/j-fu/ExampleJuggler.jl">ExampleJuggler.jl</a></a><a id="CI-callbacks-for-[ExampleJuggler.jl](https://github.com/j-fu/ExampleJuggler.jl)-1"></a><a class="docs-heading-anchor-permalink" href="#CI-callbacks-for-[ExampleJuggler.jl](https://github.com/j-fu/ExampleJuggler.jl)" title="Permalink"></a></h2><p>Unit tests</p><pre><code class="language-julia hljs">function mask_bedges()
     grid = quadrilateral(; hx = 0.25, hy = 0.25, hz = 0.25)
 
@@ -24,7 +24,7 @@ end</code></pre><p><img src="../cross3d.png" alt/></p><h2 id="CI-callbacks-for-[
     bedgemask!(grid, [0.0, 0.0, 1.0], [0.0, 1.0, 1.0], 4)
     bedgemask!(grid, [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], 5)
 
-    true
+    return true
 end
 
 using Test
@@ -33,6 +33,7 @@ function runtests()
     @test numbers_match(quadrilateral(), 330, 1200, 440)
     @test mask_bedges()
     @test numbers_match(cross3d(), 189, 480, 344)
+    return nothing
 end</code></pre><p>Plot generation</p><pre><code class="language-julia hljs">using GridVisualize
 function generateplots(picdir; Plotter = nothing)
     if isdefined(Plotter, :Makie)
@@ -40,4 +41,5 @@ function generateplots(picdir; Plotter = nothing)
         Plotter.save(joinpath(picdir, &quot;quadrilateral.png&quot;), gridplot(quadrilateral(); Plotter, size))
         Plotter.save(joinpath(picdir, &quot;cross3d.png&quot;), gridplot(cross3d(); Plotter, size))
     end
-end</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../examples2d/">« examples2d</a><a class="docs-footer-nextpage" href="../gmsh/">gmsh »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.8.0 on <span class="colophon-date" title="Saturday 7 December 2024 15:44">Saturday 7 December 2024</span>. Using Julia version 1.11.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+    return nothing
+end</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../examples2d/">« examples2d</a><a class="docs-footer-nextpage" href="../gmsh/">gmsh »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.8.0 on <span class="colophon-date" title="Saturday 7 December 2024 17:04">Saturday 7 December 2024</span>. Using Julia version 1.11.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
