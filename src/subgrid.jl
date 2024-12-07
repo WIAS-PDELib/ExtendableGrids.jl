@@ -80,7 +80,7 @@ Base.isless(x::XIPair, y::XIPair) = (x.x < y.x)
 """
     subgrid(parent,                                                             
             subregions::AbstractArray;                                          
-            transform::T=function(a,b) @views a.=b[1:length(a)] end,                                      
+            transform::T = (a, b) -> a .= b[1:length(a)],
             boundary=false,                                                     
             coordinatesystem=codim1_coordinatesystem(parent[CoordinateSystem]), 
             project=true) where T                                               
@@ -105,9 +105,7 @@ A subgrid is of type `ExtendableGrid` and stores two additional components:
 function subgrid(
         parent,
         subregions::AbstractArray;
-        transform::T = function(a, b)
-            return @views a .= b[1:length(a)]
-        end,
+        transform::T = (a, b) -> a .= b[1:length(a)],
         boundary = false,
         support = ON_CELLS,
         project = true,

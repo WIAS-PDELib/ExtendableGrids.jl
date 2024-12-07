@@ -154,9 +154,9 @@ function run_grid_tests()
     grid = simplexgrid(X, X)
     @test all(grid[CellVolumes] .> 0)
     sub = subgrid(
-        grid, [2], transform = function(a, b)
-            return a[1] = b[2]
-        end, boundary = true
+        grid, [2],
+        transform = (a, b) -> a[1] = b[2],
+        boundary = true
     )
     @test check_cellfinder(sub)
 
