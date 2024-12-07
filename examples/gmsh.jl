@@ -314,7 +314,7 @@ function runtests()
     @test ok(gmsh_t1())
     @test ok(gmsh_t4())
     @test ok(gmsh_t5())
-nothing
+    return nothing
 end
 
 # Plot generation
@@ -326,5 +326,5 @@ function generateplots(picdir; Plotter = nothing)
         Plotter.save(joinpath(picdir, "gmsh_t4.png"), gridplot(gmsh_t4(); Plotter, size))
         Plotter.save(joinpath(picdir, "gmsh_t5.png"), gridplot(gmsh_t5(); Plotter, size))
     end
-nothing
+    return nothing
 end

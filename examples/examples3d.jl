@@ -47,16 +47,16 @@ function runtests()
     @test numbers_match(quadrilateral(), 330, 1200, 440)
     @test mask_bedges()
     @test numbers_match(cross3d(), 189, 480, 344)
-nothing
+    return nothing
 end
 
 # Plot generation
 using GridVisualize
 function generateplots(picdir; Plotter = nothing)
-     if isdefined(Plotter, :Makie)
+    if isdefined(Plotter, :Makie)
         size = (400, 400)
         Plotter.save(joinpath(picdir, "quadrilateral.png"), gridplot(quadrilateral(); Plotter, size))
         Plotter.save(joinpath(picdir, "cross3d.png"), gridplot(cross3d(); Plotter, size))
     end
-nothing
+    return nothing
 end

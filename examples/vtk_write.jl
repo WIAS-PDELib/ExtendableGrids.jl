@@ -16,7 +16,7 @@ function grid3D_test(filename::String)
         cell_data = cell_data,
         field_data = field_data
     )
-nothing
+    return nothing
 
 end
 
@@ -35,7 +35,7 @@ function grid2D_test(filename::String)
         cell_data = cell_data,
         field_data = field_data
     )
-nothing
+    return nothing
 end
 
 function grid1D_test(filename::String)
@@ -53,5 +53,5 @@ function grid1D_test(filename::String)
         cell_data = cell_data,
         field_data = field_data
     )
-nothing
+    return nothing
 end

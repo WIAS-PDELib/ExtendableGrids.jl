@@ -34,7 +34,7 @@ function rectangle_multiregion()
     bfacemask!(grid, [0.0, 0.0], [0.0, 0.5], 5)
     bfacemask!(grid, [1.0, 0.0], [1.0, 0.5], 6)
     bfacemask!(grid, [0.0, 0.5], [1.0, 0.5], 7)
-grid
+    return grid
 end
 # ![](rectangle_multiregion.png)
 
@@ -108,7 +108,7 @@ function runtests()
     @test numbers_match(g, 187, 306, 66)
     @test numbers_match(sg, 17, 16, 0)
     @test issorted(view(sg[Coordinates], 1, :))
-nothing
+    return nothing
 end
 
 # Plot generation
@@ -130,5 +130,5 @@ function generateplots(picdir; Plotter = nothing)
         fname = joinpath(picdir, "sorted_subgrid.png")
         Plotter.save(fname, reveal(p))
     end
-    nothing
+    return nothing
 end

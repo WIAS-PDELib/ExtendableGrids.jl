@@ -53,7 +53,7 @@ function runtests()
     @test numbers_match(interval_localref(), 27, 26, 2)
     @test numbers_match(interval_multiregion(), 21, 20, 3)
     @test numbers_match(interval_subgrid(), 51, 50, 2)
-    nothing
+    return nothing
 end
 
 # Plot generation
@@ -67,5 +67,5 @@ function generateplots(picdir; Plotter = nothing)
         Plotter.save(joinpath(picdir, "interval_multiregion.png"), gridplot(interval_multiregion(); Plotter, size, legend))
         Plotter.save(joinpath(picdir, "interval_subgrid.png"), gridplot(interval_subgrid(); Plotter, size, legend))
     end
-    nothing    
+    return nothing
 end
