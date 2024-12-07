@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.12] - 2024-11-29
+- Allow TetGen v1 and v2
+- Code sustainability improvements: pre-commit, codespell
+
+## [1.11] - 2024-11-16
+-  Update show method. Have different methods for REPL and interpolation
+- make it compatible with planned improvement of show method for VoronoiFVM.System
+
 ## [1.10.5] - 2024-11-14
 
 ### Changed
