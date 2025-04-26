@@ -109,7 +109,7 @@ max_num_targets_per_source(adj::VariableTargetAdjacency) = maximum(adj.colstart[
 Base.size(adj::VariableTargetAdjacency) = (max_num_targets_per_source(adj), num_sources(adj))
 
 
-function Matrix(adj::VariableTargetAdjacency{T}) where {T}
+function Base.Matrix(adj::VariableTargetAdjacency{T}) where {T}
     m = zeros(T, size(adj)...)
     for isrc in 1:num_sources(adj)
         for itgt in 1:num_targets(adj, isrc)
