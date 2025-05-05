@@ -427,7 +427,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceN
 
     if haskey(xgrid, ParentGrid) && haskey(xgrid, ParentGridRelation)
         if xgrid[ParentGridRelation] <: SubGrid{ON_CELLS}
-                
+
             ## get FaceNodes from ParentGrid to keep ordering and orientation
             pgrid = xgrid[ParentGrid]
             pnodes = xgrid[NodeParents]
@@ -444,7 +444,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceN
                 singleEG = false
             end
             SFaceNodes::Union{VariableTargetAdjacency{Ti}, Matrix{Ti}} = singleEG ? zeros(Ti, size(PFaceNodes, 1), 0) : VariableTargetAdjacency(Ti)
-        
+
             pnode2snode = zeros(Ti, num_nodes(pgrid))
             pnode2snode[pnodes] .= 1:length(pnodes)
             pfaces = Ti[]
