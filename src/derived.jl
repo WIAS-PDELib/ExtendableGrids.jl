@@ -427,6 +427,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceN
 
     if haskey(xgrid, ParentGrid) && haskey(xgrid, ParentGridRelation)
         if xgrid[ParentGridRelation] <: SubGrid{ON_CELLS}
+                
             ## get FaceNodes from ParentGrid to keep ordering and orientation
             pgrid = xgrid[ParentGrid]
             pnodes = xgrid[NodeParents]
@@ -443,14 +444,14 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceN
                 singleEG = false
             end
             SFaceNodes::Union{VariableTargetAdjacency{Ti}, Matrix{Ti}} = singleEG ? zeros(Ti, size(PFaceNodes, 1), 0) : VariableTargetAdjacency(Ti)
-
+        
             pnode2snode = zeros(Ti, num_nodes(pgrid))
             pnode2snode[pnodes] .= 1:length(pnodes)
             pfaces = Ti[]
             for face in 1:nfaces
                 is_subface = true
                 for k in 1:num_targets(PFaceNodes, face)
-                    if !(PFaceNodes[k, face] in pnodes)
+                    if pnode2snode[PFaceNodes[k, face]] == 0
                         is_subface = false
                         break
                     end
@@ -513,6 +514,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceN
     xCellGeometries = xgrid[CellGeometries]
 
     # transpose CellNodes to get NodeCells
+    # note: we could use xgrid[NodeCells] here (but causes storage)
     xNodeCells = atranspose(xCellNodes)
     max_ncell4node::Ti = max_num_targets_per_source(xNodeCells)
 
@@ -742,6 +744,7 @@ end
 
 function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{NodePatchGroups}) where {Tc, Ti}
     xCellNodes::Adjacency = xgrid[CellNodes]
+    # note: we could use xgrid[NodeCells] here (but causes storage)
     xNodeCells = atranspose(xCellNodes)
     nnodes = size(xgrid[Coordinates], 2)
     ncells = num_sources(xCellNodes)
@@ -804,7 +807,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeN
             for Edge in 1:nEdges
                 is_subEdge = true
                 for k in 1:num_targets(PEdgeNodes, Edge)
-                    if !(PEdgeNodes[k, Edge] in pnodes)
+                    if pnode2snode[PEdgeNodes[k, Edge]] == 0
                         is_subEdge = false
                         break
                     end
@@ -881,6 +884,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeN
 
 
     # transpose CellNodes to get NodeCells
+    # note: we could use xgrid[NodeCells] here (but causes storage)
     xNodeCells = atranspose(xCellNodes)
     max_ncell4node::Ti = max_num_targets_per_source(xNodeCells)
 
@@ -1378,6 +1382,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFace
     #end
 
     # transpose FaceNodes to get NodeFaces
+    # note: we could use xgrid[NodeFaces] here (but causes storage)
     xNodeFaces = atranspose(xFaceNodes)
 
     flag4item::Array{Bool, 1} = zeros(Bool, nnodes)
