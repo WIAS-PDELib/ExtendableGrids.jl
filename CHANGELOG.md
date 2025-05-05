@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.13] - 2025-5-5
+- better documentation of adjacencies
+- transposed adjacencies NodeCells, NodeFaces, NodeEdges can be stored in the grid
+- EdgeNodes now also instantiates adjacencies in relation to its ParentGrid
+  
 ## [1.12] - 2024-11-29
 - Allow TetGen v1 and v2
 - Code sustainability improvements: pre-commit, codespell
