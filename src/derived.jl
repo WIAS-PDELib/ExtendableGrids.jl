@@ -271,13 +271,6 @@ abstract type BEdgeVolumes <: AbstractGridFloatArray1D end
 """
 $(TYPEDEF)
 
-Vector with boundary edge regions
-"""
-abstract type BEdgeRegions <: AbstractElementRegions end
-
-"""
-$(TYPEDEF)
-
 Vector with boundary edge geometries
 """
 abstract type BEdgeGeometries <: AbstractElementGeometries end
