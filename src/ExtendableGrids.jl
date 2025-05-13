@@ -100,7 +100,7 @@ export GridComponentAssemblyGroups4AssemblyType
 include("subgrid.jl")
 export subgrid
 export ParentGrid
-export NodeParents, CellParents, FaceParents, BFaceParents
+export NodeParents, CellParents, FaceParents, BFaceParents, EdgeParents, BEdgeParents
 export ParentGridRelation, SubGrid, RefinedGrid
 
 include("shape_specs.jl")
@@ -122,6 +122,7 @@ export Coordinates
 export CellVolumes, CellFaces, CellEdges, CellFaceSigns, CellFaceOrientations, CellEdgeSigns
 export FaceNodes, FaceGeometries, FaceVolumes, FaceRegions, FaceCells, FaceEdges, FaceEdgeSigns, FaceNormals
 export EdgeNodes, EdgeGeometries, EdgeVolumes, EdgeRegions, EdgeCells, EdgeTangents
+export NodeCells, NodeFaces, NodeEdges
 export BFaceFaces, BFaceCellPos, BFaceVolumes
 export BEdgeNodes, BEdgeEdges, BEdgeVolumes, BEdgeGeometries
 export NodePatchGroups
