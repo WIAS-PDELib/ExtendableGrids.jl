@@ -1,11 +1,11 @@
 using WriteVTK
 
 # conversion from AbstractElementGeometry to WriteVTK.VTKCellTypes
-VTKCellType(::Type{<:AbstractElementGeometry1D}) = VTKCellTypes.VTK_LINE
-VTKCellType(::Type{<:Triangle2D}) = VTKCellTypes.VTK_TRIANGLE
-VTKCellType(::Type{<:Quadrilateral2D}) = VTKCellTypes.VTK_QUAD
-VTKCellType(::Type{<:Tetrahedron3D}) = VTKCellTypes.VTK_TETRA
-VTKCellType(::Type{<:Hexahedron3D}) = VTKCellTypes.VTK_HEXAHEDRON
+WriteVTK.VTKCellType(::Type{<:AbstractElementGeometry1D}) = VTKCellTypes.VTK_LINE
+WriteVTK.VTKCellType(::Type{<:Triangle2D}) = VTKCellTypes.VTK_TRIANGLE
+WriteVTK.VTKCellType(::Type{<:Quadrilateral2D}) = VTKCellTypes.VTK_QUAD
+WriteVTK.VTKCellType(::Type{<:Tetrahedron3D}) = VTKCellTypes.VTK_TETRA
+WriteVTK.VTKCellType(::Type{<:Hexahedron3D}) = VTKCellTypes.VTK_HEXAHEDRON
 
 """
 $(TYPEDSIGNATURES)
