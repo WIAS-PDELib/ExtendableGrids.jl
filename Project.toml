@@ -1,7 +1,7 @@
 name = "ExtendableGrids"
 uuid = "cfc395e8-590f-11e8-1f13-43a2532b2fa8"
 authors = ["Juergen Fuhrmann <juergen.fuhrmann@wias-berlin.de>", "Christian Merdon  <christian.merdon@wias-berlin.de>", "Johannes Taraz  <johannes.taraz@gmail.com>", "Patrick Jaap <patrick.jaap@wias-berlin.de>"]
-version = "1.12.1"
+version = "1.13.1"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"

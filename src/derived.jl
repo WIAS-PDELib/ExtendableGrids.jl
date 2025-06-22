@@ -27,51 +27,296 @@ const GridRegionTypes{Ti} = Union{VectorOfConstants{Ti}, Array{Ti, 1}}
 
 
 # additional ExtendableGrids adjacency types
+
+
+"""
+$(TYPEDEF)
+
+Adjacency describing edges for cells
+"""
 abstract type CellEdges <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing faces for cells
+"""
 abstract type CellFaces <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing face signs for cells
+"""
 abstract type CellFaceSigns <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing face orientations for cells
+"""
 abstract type CellFaceOrientations <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing edge signs for cells
+"""
 abstract type CellEdgeSigns <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
+Vector of cell volumes
+"""
 abstract type CellVolumes <: AbstractGridFloatArray1D end
+
+"""
+$(TYPEDEF)
+
+Vector of unique cell geometries
+"""
 abstract type UniqueCellGeometries <: AbstractElementGeometries end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing assembly groups for cells
+"""
 abstract type CellAssemblyGroups <: AbstractGridAdjacency end
 
+"""
+$(TYPEDEF)
+
+Adjacency describing nodes for faces
+"""
 abstract type FaceNodes <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
+Vector of face volumes
+"""
 abstract type FaceVolumes <: AbstractGridFloatArray1D end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing cells for faces
+"""
 abstract type FaceCells <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing edges for faces
+"""
 abstract type FaceEdges <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing edges signs for faces
+"""
 abstract type FaceEdgeSigns <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
+Matrix of face normals
+"""
 abstract type FaceNormals <: AbstractGridFloatArray2D end
+
+"""
+$(TYPEDEF)
+
+Vector of face geometries
+"""
 abstract type FaceGeometries <: AbstractElementGeometries end
+
+"""
+$(TYPEDEF)
+
+Vector of face regions
+"""
 abstract type FaceRegions <: AbstractElementRegions end
+
+"""
+$(TYPEDEF)
+
+Vector of unique face geometries
+"""
 abstract type UniqueFaceGeometries <: AbstractElementGeometries end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing assembly groups for faces
+"""
 abstract type FaceAssemblyGroups <: AbstractGridAdjacency end
 
+"""
+$(TYPEDEF)
+
+Vector with face numbers of boundary faces
+"""
 abstract type BFaceFaces <: AbstractGridIntegerArray1D end
+
+"""
+$(TYPEDEF)
+
+Vector with local positions of bfaces in their adjacent cell
+"""
 abstract type BFaceCellPos <: AbstractGridIntegerArray1D end # position of bface in adjacent cell
+
+"""
+$(TYPEDEF)
+
+Vector with boundary face volumes
+"""
 abstract type BFaceVolumes <: AbstractGridFloatArray1D end
+
+"""
+$(TYPEDEF)
+
+Vector with unique bface geometries
+"""
 abstract type UniqueBFaceGeometries <: AbstractElementGeometries end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing assembly groups for bfaces
+"""
 abstract type BFaceAssemblyGroups <: AbstractGridAdjacency end
 
+"""
+$(TYPEDEF)
+
+Adjacency describing nodes for edges
+"""
 abstract type EdgeNodes <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
+Vector with edge volumes
+"""
 abstract type EdgeVolumes <: AbstractGridFloatArray1D end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing cells for edges
+"""
 abstract type EdgeCells <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
+Matrix with edge tangents
+"""
 abstract type EdgeTangents <: AbstractGridFloatArray2D end
+
+"""
+$(TYPEDEF)
+
+Vector with edge regions
+"""
 abstract type EdgeRegions <: AbstractElementRegions end
+
+"""
+$(TYPEDEF)
+
+Vector with edge geometries
+"""
 abstract type EdgeGeometries <: AbstractElementGeometries end
+
+"""
+$(TYPEDEF)
+
+Vector with unique edge geometries
+"""
 abstract type UniqueEdgeGeometries <: AbstractElementGeometries end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing assembly groups for edges
+"""
 abstract type EdgeAssemblyGroups <: AbstractGridAdjacency end
 
+"""
+$(TYPEDEF)
+
+Adjacency describing nodes for boundary edges
+"""
 abstract type BEdgeNodes <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
+Vector with edge numbers of boundary edges
+"""
 abstract type BEdgeEdges <: AbstractGridIntegerArray1D end
 #abstract type BEdgeCellPos <: AbstractGridIntegerArray1D end # position of bface in adjacent cell
+
+"""
+$(TYPEDEF)
+
+Vector with boundary edge volumes
+"""
 abstract type BEdgeVolumes <: AbstractGridFloatArray1D end
-abstract type BEdgeRegions <: AbstractElementRegions end
+
+"""
+$(TYPEDEF)
+
+Vector with boundary edge geometries
+"""
 abstract type BEdgeGeometries <: AbstractElementGeometries end
+
+"""
+$(TYPEDEF)
+
+Vector with unique boundary edge geometries
+"""
 abstract type UniqueBEdgeGeometries <: AbstractElementGeometries end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing assembly groups for boundary edges
+"""
 abstract type BEdgeAssemblyGroups <: AbstractGridAdjacency end
 
+"""
+$(TYPEDEF)
+
+Vector with patch groups for nodes (ensuring that node patches
+of nodes in same group do not overlap)
+"""
 abstract type NodePatchGroups <: AbstractGridIntegerArray1D end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing cells for nodes (transposed of CellNodes)
+"""
+abstract type NodeCells <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing faces for nodes (transposed of FaceNodes)
+"""
+abstract type NodeFaces <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing edges for nodes (transposed of EdgeNodes)
+"""
+abstract type NodeEdges <: AbstractGridAdjacency end
 
 
 ## grid item types to dispatch certain things to the correct GridComponents
@@ -95,7 +340,6 @@ GridComponent4TypeProperty(::Type{ITEMTYPE_CELL}, ::Type{PROPERTY_REGION}) = Cel
 GridComponent4TypeProperty(::Type{ITEMTYPE_CELL}, ::Type{PROPERTY_GEOMETRY}) = CellGeometries
 GridComponent4TypeProperty(::Type{ITEMTYPE_CELL}, ::Type{PROPERTY_UNIQUEGEOMETRY}) = UniqueCellGeometries
 GridComponent4TypeProperty(::Type{ITEMTYPE_CELL}, ::Type{PROPERTY_ASSEMBLYGROUP}) = CellAssemblyGroups
-
 
 GridComponent4TypeProperty(::Type{ITEMTYPE_FACE}, ::Type{PROPERTY_NODES}) = FaceNodes
 GridComponent4TypeProperty(::Type{ITEMTYPE_FACE}, ::Type{PROPERTY_VOLUME}) = FaceVolumes
@@ -158,12 +402,25 @@ function showmore(io::IO, xgrid::ExtendableGrid{Tc, Ti}) where {Tc, Ti}
     return
 end
 
+function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{NodeCells}) where {Tc, Ti}
+    return atranspose(xgrid[CellNodes])
+end
+
+function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{NodeFaces}) where {Tc, Ti}
+    return atranspose(xgrid[FaceNodes])
+end
+
+function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{NodeEdges}) where {Tc, Ti}
+    return atranspose(xgrid[EdgeNodes])
+end
+
 
 # FaceNodes = nodes for each face (implicitly defines the enumerations of faces)
 function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceNodes}) where {Tc, Ti}
 
     if haskey(xgrid, ParentGrid) && haskey(xgrid, ParentGridRelation)
         if xgrid[ParentGridRelation] <: SubGrid{ON_CELLS}
+
             ## get FaceNodes from ParentGrid to keep ordering and orientation
             pgrid = xgrid[ParentGrid]
             pnodes = xgrid[NodeParents]
@@ -187,7 +444,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceN
             for face in 1:nfaces
                 is_subface = true
                 for k in 1:num_targets(PFaceNodes, face)
-                    if !(PFaceNodes[k, face] in pnodes)
+                    if pnode2snode[PFaceNodes[k, face]] == 0
                         is_subface = false
                         break
                     end
@@ -239,7 +496,6 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceN
             end
             xgrid[FaceCells] = SFaceCells
             xgrid[FaceParents] = pfaces
-            xgrid[CellParents] = pcells
 
             return SFaceNodes
         end
@@ -251,6 +507,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceN
     xCellGeometries = xgrid[CellGeometries]
 
     # transpose CellNodes to get NodeCells
+    # note: we could use xgrid[NodeCells] here (but causes storage)
     xNodeCells = atranspose(xCellNodes)
     max_ncell4node::Ti = max_num_targets_per_source(xNodeCells)
 
@@ -480,6 +737,7 @@ end
 
 function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{NodePatchGroups}) where {Tc, Ti}
     xCellNodes::Adjacency = xgrid[CellNodes]
+    # note: we could use xgrid[NodeCells] here (but causes storage)
     xNodeCells = atranspose(xCellNodes)
     nnodes = size(xgrid[Coordinates], 2)
     ncells = num_sources(xCellNodes)
@@ -514,9 +772,83 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{NodeP
     return group4node
 end
 
-
-# FaceNodes = nodes for each face (implicitly defines the enumerations of faces)
+# EdgeNodes = nodes for each edge (implicitly defines the enumerations of edges)
 function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeNodes}) where {Tc, Ti}
+
+    if haskey(xgrid, ParentGrid) && haskey(xgrid, ParentGridRelation)
+        if xgrid[ParentGridRelation] <: SubGrid{ON_CELLS}
+            ## get EdgeNodes from ParentGrid to keep ordering and orientation
+            pgrid = xgrid[ParentGrid]
+            pnodes = xgrid[NodeParents]
+            nscells = num_cells(xgrid)
+            PEdgeNodes = pgrid[EdgeNodes]
+            PCellEdges = deepcopy(pgrid[CellEdges])
+            pcells = xgrid[CellParents]
+            nEdges = size(PEdgeNodes, 2)
+            is_subEdge = false
+            FNT = typeof(PEdgeNodes)
+            if FNT <: Matrix
+                singleEG = true
+            else
+                singleEG = false
+            end
+            SEdgeNodes::Union{VariableTargetAdjacency{Ti}, Matrix{Ti}} = singleEG ? zeros(Ti, size(PEdgeNodes, 1), 0) : VariableTargetAdjacency(Ti)
+
+            pnode2snode = zeros(Ti, num_nodes(pgrid))
+            pnode2snode[pnodes] .= 1:length(pnodes)
+            pEdges = Ti[]
+            for Edge in 1:nEdges
+                is_subEdge = true
+                for k in 1:num_targets(PEdgeNodes, Edge)
+                    if pnode2snode[PEdgeNodes[k, Edge]] == 0
+                        is_subEdge = false
+                        break
+                    end
+                end
+                if is_subEdge
+                    push!(pEdges, Edge)
+                end
+            end
+            pEdge2sEdge = zeros(Ti, nEdges)
+            pEdge2sEdge[pEdges] = 1:length(pEdges)
+            SEdgeNodes = PEdgeNodes[:, pEdges]
+            for Edge in 1:length(pEdges)
+                for k in 1:num_targets(SEdgeNodes, Edge)
+                    SEdgeNodes[k, Edge] = pnode2snode[SEdgeNodes[k, Edge]]
+                end
+            end
+            xgrid[EdgeNodes] = SEdgeNodes
+            if typeof(pgrid[EdgeGeometries]) <: VectorOfConstants
+                xgrid[EdgeGeometries] = VectorOfConstants{ElementGeometries, Int}(pgrid[EdgeGeometries][1], length(pEdges))
+            else
+                xgrid[EdgeGeometries] = pgrid[EdgeGeometries][pEdges]
+            end
+            if typeof(pgrid[EdgeRegions]) <: VectorOfConstants
+                xgrid[EdgeRegions] = VectorOfConstants{Int, Int}(pgrid[EdgeRegions][1], length(pEdges))
+            else
+                xgrid[EdgeRegions] = pgrid[EdgeRegions][pEdges]
+            end
+
+            npcells = num_cells(pgrid)
+            for cell in 1:npcells
+                for k in 1:num_targets(PCellEdges, cell)
+                    PCellEdges[k, cell] = pEdge2sEdge[PCellEdges[k, cell]]
+                end
+            end
+            pcell2scell = zeros(Ti, npcells)
+            pcell2scell[pcells] = 1:length(pcells)
+            xgrid[CellEdges] = PCellEdges[:, pcells]
+            xgrid[CellEdgeSigns] = pgrid[CellEdgeSigns][:, pcells]
+            # we need pgrid[EdgeCells][:, pEdges]
+            # quick and dirty solution: go via SparseMatrixCSC
+            EdgeCells_CSC = asparse(pgrid[EdgeCells])[:, pEdges]
+            SEdgeCells = VariableTargetAdjacency(EdgeCells_CSC)
+            SEdgeCells.colentries .= pcell2scell[SEdgeCells.colentries]
+            xgrid[EdgeCells] = SEdgeCells
+            xgrid[EdgeParents] = pEdges
+            return SEdgeNodes
+        end
+    end
 
     xCellNodes = xgrid[CellNodes]
     ncells::Ti = num_sources(xCellNodes)
@@ -545,6 +877,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeN
 
 
     # transpose CellNodes to get NodeCells
+    # note: we could use xgrid[NodeCells] here (but causes storage)
     xNodeCells = atranspose(xCellNodes)
     max_ncell4node::Ti = max_num_targets_per_source(xNodeCells)
 
@@ -1042,6 +1375,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFace
     #end
 
     # transpose FaceNodes to get NodeFaces
+    # note: we could use xgrid[NodeFaces] here (but causes storage)
     xNodeFaces = atranspose(xFaceNodes)
 
     flag4item::Array{Bool, 1} = zeros(Bool, nnodes)

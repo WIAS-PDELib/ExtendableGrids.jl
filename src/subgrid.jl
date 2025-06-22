@@ -23,6 +23,22 @@ abstract type BFaceParents <: AbstractGridIntegerArray1D end
 """
 $(TYPEDEF)
 
+Grid component key type for storing parent edges
+(only for SubGrid relation when EdgeNodes is instantiated)
+"""
+abstract type EdgeParents <: AbstractGridIntegerArray1D end
+
+"""
+$(TYPEDEF)
+
+Grid component key type for storing parent bedges
+"""
+abstract type BEdgeParents <: AbstractGridIntegerArray1D end
+
+
+"""
+$(TYPEDEF)
+
 Grid component key type for storing parent cells
 """
 abstract type CellParents <: AbstractGridIntegerArray1D end
