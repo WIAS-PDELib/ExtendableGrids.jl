@@ -1,6 +1,8 @@
 # Changelog
+## [1.13.2] - 2025-06-22
+- Allow Triangulate v3
 
-## [1.13] - 2025-5-5
+## [1.13] - 2025-05-05
 - better documentation of adjacencies
 - transposed adjacencies NodeCells, NodeFaces, NodeEdges can be stored in the grid
 - EdgeNodes now also instantiates adjacencies in relation to its ParentGrid
