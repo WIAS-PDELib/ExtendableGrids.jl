@@ -35,7 +35,7 @@ ExtendableGridsTriangulateExt = "Triangulate"
 
 [compat]
 AbstractTrees = "0.3,0.4"
-Bijections = "0.1.4"
+Bijections = "0.1.4, 0.2"
 Compat = "4.10"
 Dates = "1.9"
 DocStringExtensions = "0.8,0.9"
