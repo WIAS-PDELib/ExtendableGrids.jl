@@ -783,3 +783,19 @@ function trim!(grid::ExtendableGrid; keep = [])
 
     return nothing
 end
+
+
+"""
+    $(SIGNATURES)
+
+Variant of [`trim!`](@ref) without modification of the original grid.
+
+Returns a trimmed copy of the grid.
+"""
+function trim(grid::ExtendableGrid; keep = [])
+
+    grid_copy = deepcopy(grid)
+    trim!(grid_copy; keep)
+
+    return grid_copy
+end
