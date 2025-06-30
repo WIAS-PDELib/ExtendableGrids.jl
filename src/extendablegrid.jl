@@ -712,3 +712,79 @@ function bbox(grid)
     e = extrema(grid)
     return map(a -> a[1], e), map(a -> a[2], e)
 end
+
+
+"""
+    $(SIGNATURES)
+
+Remove precomputed grid components for lightweight storage of the grid.
+
+Use the `keep` list to exclude grid components from trimming.
+"""
+function trim!(grid::ExtendableGrid; keep = [])
+
+    components_for_trimming = [
+        BEdgeAssemblyGroups,
+        BEdgeEdges,
+        BEdgeGeometries,
+        BEdgeNodes,
+        BEdgeRegions,
+        BEdgeVolumes,
+        BFaceAssemblyGroups,
+        BFaceCellPos,
+        BFaceCells,
+        BFaceEdges,
+        BFaceFaces,
+        BFaceNormals,
+        BFaceVolumes,
+        CellAssemblyGroups,
+        CellEdges,
+        CellEdgeSigns,
+        CellFaceOrientations,
+        CellFaces,
+        CellFaceSigns,
+        CellVolumes,
+        EdgeAssemblyGroups,
+        EdgeCells,
+        EdgeGeometries,
+        EdgeNodes,
+        EdgeRegions,
+        EdgeTangents,
+        EdgeVolumes,
+        FaceAssemblyGroups,
+        FaceCells,
+        FaceEdges,
+        FaceEdgeSigns,
+        FaceGeometries,
+        FaceNodes,
+        FaceNormals,
+        FaceRegions,
+        FaceVolumes,
+        NodeCells,
+        NodeEdges,
+        NodeFaces,
+        NodePatchGroups,
+        NumBEdgeRegions,
+        NumBFaceRegions,
+        NumCellRegions,
+        PartitionBFaces,
+        PartitionCells,
+        PartitionEdges,
+        PartitionNodes,
+        PColorPartitions,
+        UniqueBEdgeGeometries,
+        UniqueBFaceGeometries,
+        UniqueCellGeometries,
+        UniqueEdgeGeometries,
+        UniqueFaceGeometries,
+    ]
+
+    # filter out kept components
+    filter!(!in(keep), components_for_trimming)
+
+    for component in components_for_trimming
+        delete!(grid, component)
+    end
+
+    return nothing
+end

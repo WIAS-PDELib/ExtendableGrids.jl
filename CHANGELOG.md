@@ -1,4 +1,8 @@
 # Changelog
+## unreleased
+
+- add `trim!` function to remove precomputed grid components for lightweight storage
+
 ## [1.13.2] - 2025-06-22
 - Allow Triangulate v3
 
