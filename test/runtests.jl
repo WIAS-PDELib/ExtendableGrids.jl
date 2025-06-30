@@ -491,3 +491,76 @@ if VERSION < v"1.12.0-DEV.0"
         @testscripts(joinpath(@__DIR__, "..", "examples"), notebooks)
     end
 end
+
+
+@testset "trim!" begin
+
+    grid = grid_unitcube(Tetrahedron3D)
+
+    component_list = [
+        BEdgeAssemblyGroups,
+        BEdgeEdges,
+        BEdgeGeometries,
+        BEdgeNodes,
+        BEdgeRegions,
+        BEdgeVolumes,
+        BFaceAssemblyGroups,
+        BFaceCellPos,
+        BFaceCells,
+        BFaceEdges,
+        BFaceFaces,
+        BFaceNormals,
+        BFaceVolumes,
+        CellAssemblyGroups,
+        CellEdges,
+        CellEdgeSigns,
+        CellFaceOrientations,
+        CellFaces,
+        CellFaceSigns,
+        CellVolumes,
+        EdgeAssemblyGroups,
+        EdgeCells,
+        EdgeGeometries,
+        EdgeNodes,
+        EdgeRegions,
+        EdgeTangents,
+        EdgeVolumes,
+        FaceAssemblyGroups,
+        FaceCells,
+        FaceEdges,
+        FaceEdgeSigns,
+        FaceGeometries,
+        FaceNodes,
+        FaceNormals,
+        FaceRegions,
+        FaceVolumes,
+        NodeCells,
+        NodeEdges,
+        NodeFaces,
+        NodePatchGroups,
+        NumBEdgeRegions,
+        NumBFaceRegions,
+        NumCellRegions,
+        UniqueBEdgeGeometries,
+        UniqueBFaceGeometries,
+        UniqueCellGeometries,
+        UniqueEdgeGeometries,
+        UniqueFaceGeometries,
+    ]
+
+    # init components
+    for c in component_list
+        grid[c]
+    end
+
+    # trim all components, except a few
+    grid = ExtendableGrids.trim(grid, keep = [BFaceNormals, NodeCells])
+
+    @test haskey(grid, BFaceNormals)
+    @test haskey(grid, NodeCells)
+
+    # trim everything
+    grid = ExtendableGrids.trim(grid)
+
+    @test all([!haskey(grid, c) for c in component_list])
+end
