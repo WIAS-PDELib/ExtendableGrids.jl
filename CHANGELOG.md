@@ -1,5 +1,5 @@
 # Changelog
-## unreleased
+## [1.14.0] - 2025-07-01
 
 - add `trim!`/`trim` function to remove precomputed grid components for lightweight storage
 
