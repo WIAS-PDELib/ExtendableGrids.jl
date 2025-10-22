@@ -38,6 +38,7 @@ function mkdocs()
             "adjacency.md",
             "vectorofconstants.md",
             "typehierarchy.md",
+            "tdict.md",
             "elementgeometry.md",
             "shape_specs.md",
             "coordinatesystem.md",
