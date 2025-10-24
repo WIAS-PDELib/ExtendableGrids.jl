@@ -16,7 +16,6 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Triangulate = "f7e6ffb2-c36d-4f8f-a77e-16e897189344"
 
 [compat]
-CairoMakie = "0.12"
 Documenter = "1"
 ExampleJuggler = "2"
 julia = "1.9"
