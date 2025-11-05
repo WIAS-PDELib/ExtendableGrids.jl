@@ -110,7 +110,7 @@ function gFindLocal!(xref, CF::CellFinder{Tv, Ti}, x; icellstart = 1, trybrute =
     xreftest::Array{Tv, 1} = CF.xreftest
     L2G::L2GTransformer{Tv, Ti} = CF.L2G4EG[1]
     L2Gb::Vector{Tv} = L2G.b
-    
+
     invA::Matrix{Tv} = CF.invA
     imin::Int = 0
 
