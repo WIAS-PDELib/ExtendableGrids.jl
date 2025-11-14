@@ -131,6 +131,20 @@ function Base.append!(adj::VariableTargetAdjacency, column)
 end
 
 """
+$(TYPEDSIGNATURES)
+
+Maximum for VariableTargetAdjacency
+"""
+Base.maximum(adj::VariableTargetAdjacency) = Base.maximum(adj.colentries)
+
+"""
+$(TYPEDSIGNATURES)
+
+Minimum for VariableTargetAdjacency
+"""
+Base.minimum(adj::VariableTargetAdjacency) = Base.minimum(adj.colentries)
+
+"""
 $(TYPEDEF)
 
 Use Matrix to store fixed target adjacency
