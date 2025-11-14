@@ -174,12 +174,12 @@ end
 
 
 """
-    ringsector(rad,ang; eltype=Triangle2D)
+    ringsector(rad,ang)
 
 Sector of ring or full ring (if  `ang[begin]-ang[end]≈2π`)
 """
-function ringsector(rad, ang; eltype = Triangle2D)
-    Tv = Float64
+function ringsector(rad, ang)
+    Tv = promote_type(eltype(rad), eltype(ang))
     Ti = Int32
 
     coord = ElasticArray{Tv, 2}(undef, 2, 0)
