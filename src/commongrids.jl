@@ -179,7 +179,7 @@ end
 Sector of ring or full ring (if  `ang[begin]-ang[end]≈2π`)
 """
 function ringsector(rad, ang; eltype = Triangle2D)
-    Tv = Float32
+    Tv = Float64
     Ti = Int32
 
     coord = ElasticArray{Tv, 2}(undef, 2, 0)
@@ -201,7 +201,9 @@ function ringsector(rad, ang; eltype = Triangle2D)
         x = cos(ϕ)
         y = sin(ϕ)
         for irad in 1:nrad
-            append!(coord, (rad[irad] * x, rad[irad] * y))
+            if iarc < narc || !fullcircle
+                append!(coord, (rad[irad] * x, rad[irad] * y))
+            end
             icoord = size(coord, 2)
             if irad < nrad
                 if iarc < narc
