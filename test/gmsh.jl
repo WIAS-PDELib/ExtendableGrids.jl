@@ -51,41 +51,51 @@ end
     ExtendableGrids.simplexgrid_to_gmsh(grid1; filename = joinpath(path, "testfile.msh"))
 
     grid2 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "testfile.msh"); Tc = Float32, Ti = Int64)
+    @test isconsistent(grid2)
 
     @test seemingly_equal(grid2, grid1; sort = true, confidence = :low)
     @test seemingly_equal(grid2, grid1; sort = true, confidence = :full)
 
     grid1 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "sto_2d.msh"); Tc = Float64, Ti = Int64)
+    @test isconsistent(grid1)
 
     ExtendableGrids.simplexgrid_to_gmsh(grid1; filename = joinpath(path, "testfile.msh"))
     grid2 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "testfile.msh"); Tc = Float64, Ti = Int64)
+    @test isconsistent(grid2)
 
     @test seemingly_equal(grid1, grid2; sort = true, confidence = :low)
     @test seemingly_equal(grid1, grid2; sort = true, confidence = :full)
 
     grid1 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "sto_3d.msh"); Tc = Float32, Ti = Int64)
+    @test isconsistent(grid1)
 
     ExtendableGrids.simplexgrid_to_gmsh(grid1; filename = joinpath(path, "testfile.msh"))
     grid2 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "testfile.msh"); Tc = Float64, Ti = Int32)
+    @test isconsistent(grid2)
 
     @test seemingly_equal(grid1, grid2; sort = true, confidence = :low)
     @test seemingly_equal(grid1, grid2; sort = true, confidence = :full)
 
     grid1 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "sto_2d.msh"))
+    @test isconsistent(grid1)
 
     grid2 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "sto_3d.msh"); Tc = Float32, Ti = Int32)
+    @test isconsistent(grid2)
 
     @test !seemingly_equal(grid1, grid2; sort = true, confidence = :low)
     @test !seemingly_equal(grid1, grid2; sort = true, confidence = :full)
 
     grid1 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "testmesh.gmsh"); incomplete = true)
     ExtendableGrids.seal!(grid1; encode = false)
+    @test isconsistent(grid1)
 
     ExtendableGrids.simplexgrid_to_gmsh(grid1; filename = joinpath(path, "completed_testfile.msh"))
     grid2 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "completed_testfile.msh"))
+    @test isconsistent(grid2)
 
     grid3 = ExtendableGrids.simplexgrid_from_gmsh(joinpath(path, "testmesh.gmsh"); incomplete = true)
     ExtendableGrids.seal!(grid3; encode = true)
+    @test isconsistent(grid3)
 
     @test seemingly_equal(grid1, grid2; sort = true, confidence = :low)
     @test seemingly_equal(grid1, grid2; sort = true, confidence = :full)
@@ -98,7 +108,9 @@ end
     grid2 = simplexgrid(x, x)
     grid3 = simplexgrid(x, x)
     ExtendableGrids.seal!(grid2)
+    @test isconsistent(grid2)
     ExtendableGrids.seal!(grid3; encode = false)
+    @test isconsistent(grid3)
 
     @test seemingly_equal(grid2, grid1; sort = true, confidence = :low)
     @test seemingly_equal(grid2, grid1; sort = true, confidence = :full)
@@ -109,9 +121,11 @@ end
 @testset "Read/write mixed gmsh 2d" begin
     path = joinpath(pkgdir(ExtendableGrids), "test")
     grid1 = ExtendableGrids.mixedgrid_from_gmsh(joinpath(path, "mixedgrid_2d.msh"); Tc = Float64, Ti = Int64)
+    @test_broken isconsistent(grid1)
 
     ExtendableGrids.mixedgrid_to_gmsh(grid1; filename = joinpath(path, "testfile.msh"))
     grid2 = ExtendableGrids.mixedgrid_from_gmsh(joinpath(path, "testfile.msh"); Tc = Float32, Ti = UInt64)
+    @test_broken isconsistent(grid2)
 
     @test seemingly_equal(grid1, grid2; sort = true, confidence = :low)
     @test seemingly_equal(grid1, grid2; sort = true, confidence = :full)
@@ -121,6 +135,9 @@ end
     path = joinpath(pkgdir(ExtendableGrids), "test")
     grid = simplexgrid(joinpath(path, "disk1hole.geo"))
     @test num_cells(grid) > 0
+    @test_broken isconsistent(grid)
+
     grid = simplexgrid(joinpath(path, "cube6.geo"))
     @test num_cells(grid) > 0
+    @test isconsistent(grid)
 end

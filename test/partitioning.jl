@@ -17,6 +17,7 @@ import Metis
 
 
             for grid in (grid1, grid2, grid3)
+                @test isconsistent(grid)
                 @test num_pcolors(grid) == 1
                 @test num_partitions(grid) == 1
                 @test pcolors(grid) == 1:1
@@ -28,6 +29,7 @@ import Metis
 
             for npart in [10, 15, 20]
                 grid4 = partition(grid1, PlainMetisPartitioning(npart = npart); nodes = true, keep_nodepermutation = true)
+                @test isconsistent(grid4)
                 @test num_pcolors(grid4) > 1
                 @test num_partitions(grid4) == npart
                 @test pcolors(grid4) |> length > 0
@@ -39,6 +41,7 @@ import Metis
 
             for npart in [3, 4, 5, 6]
                 grid4 = partition(grid1, RecursiveMetisPartitioning(npart = npart); nodes = true, keep_nodepermutation = true)
+                @test isconsistent(grid4)
                 @test num_pcolors(grid4) > 1
                 @test num_partitions(grid4) > npart
                 @test pcolors(grid4) |> length > 0

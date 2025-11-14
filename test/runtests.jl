@@ -200,6 +200,10 @@ end
     end
 end
 
+@testset "Common grids" begin
+    include("test_commongrids.jl")
+end
+
 @testset "Base.map" begin
     X = 0:0.1:1
     fx(x) = x
@@ -291,11 +295,13 @@ end
     sub2 = subgen(; region = 3)
 
     @test numbers_match(subgen(), 756, 3000, 950)
+    @test isconsistent(subgen())
 
     X = collect(0:0.25:1)
     gxy = simplexgrid(X, X)
     gxyz = simplexgrid(gxy, X)
     g = simplexgrid(X, X, X)
+    @test isconsistent(gxyz)
     @test numbers_match(gxyz, 125, 384, 192)
     @test g[Coordinates] ≈ gxyz[Coordinates]
 end
@@ -306,6 +312,7 @@ end
     grid = grid_unitsquare(Triangle2D)
     grid[CellRegions] = Int32[1, 2, 2, 1]
     sgrid = subgrid(grid, [1])
+    @test isconsistent(sgrid)
     @test sgrid[ParentGridRelation] == SubGrid{ON_CELLS}
 
     ## check if CellParents are assigned correctly
@@ -324,9 +331,11 @@ end
 @testset "ParentGridRelation-RefinedGrid" begin
     ## generate a refined
     grid = grid_unitsquare(Triangle2D)
+    @test isconsistent(grid)
 
     ## check uniform refinement
     rgrid = uniform_refine(grid)
+    @test isconsistent(rgrid)
     @test rgrid[ParentGridRelation] == RefinedGrid
 
     ## check if CellParents and BFaceParents are set
@@ -335,6 +344,7 @@ end
 
     ## check barycentric refinement
     rgrid = barycentric_refine(grid)
+    @test isconsistent(rgrid)
     @test rgrid[ParentGridRelation] == RefinedGrid
 
     ## check if CellParents and BFaceParents are set
@@ -373,7 +383,9 @@ function tglue(; dim = 2, breg = 0)
         g2 = simplexgrid(X2, Y2, Z2)
     end
 
-    return glue(g1, g2; interface = breg)
+    grid = glue(g1, g2; interface = breg)
+    @test isconsistent(grid)
+    return grid
 end
 
 @testset "Glue" begin
