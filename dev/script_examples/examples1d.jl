@@ -49,6 +49,11 @@ end
 using Test
 
 function runtests()
+    @test isconsistent(interval_from_vector())
+    @test isconsistent(interval_localref())
+    @test isconsistent(interval_multiregion())
+    @test isconsistent(interval_subgrid())
+
     @test numbers_match(interval_from_vector(), 21, 20, 2)
     @test numbers_match(interval_localref(), 27, 26, 2)
     @test numbers_match(interval_multiregion(), 21, 20, 3)

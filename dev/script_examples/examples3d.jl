@@ -44,6 +44,10 @@ end
 using Test
 
 function runtests()
+    @test isconsistent(quadrilateral())
+    @test isconsistent(cross3d())
+
+
     @test numbers_match(quadrilateral(), 330, 1200, 440)
     @test mask_bedges()
     @test numbers_match(cross3d(), 189, 480, 344)
