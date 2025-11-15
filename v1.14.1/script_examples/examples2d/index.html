@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>examples2d · ExtendableGrids.jl</title><meta name="title" content="examples2d · ExtendableGrids.jl"/><meta property="og:title" content="examples2d · ExtendableGrids.jl"/><meta property="twitter:title" content="examples2d · ExtendableGrids.jl"/><meta name="description" content="Documentation for ExtendableGrids.jl."/><meta property="og:description" content="Documentation for ExtendableGrids.jl."/><meta property="twitter:description" content="Documentation for ExtendableGrids.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/citations.css" rel="stylesheet" type="text/css"/></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">ExtendableGrids.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../changes/">Changes</a></li><li><a class="tocitem" href="../../adjacency/">Adjacency</a></li><li><a class="tocitem" href="../../vectorofconstants/">Vector of constants</a></li><li><a class="tocitem" href="../../typehierarchy/">Type hierarchy</a></li><li><a class="tocitem" href="../../tdict/">The TDict interface pattern</a></li><li><a class="tocitem" href="../../elementgeometry/">Element geometry</a></li><li><a class="tocitem" href="../../shape_specs/">Shape specifications</a></li><li><a class="tocitem" href="../../coordinatesystem/">Coordinate systems</a></li><li><a class="tocitem" href="../../extendablegrid/">Extendable grid</a></li><li><a class="tocitem" href="../../subgrid/">Subgrid</a></li><li><a class="tocitem" href="../../more/">Derived adjacencies</a></li><li><a class="tocitem" href="../../voronoi/">Voronoi tools</a></li><li><a class="tocitem" href="../../assembly/">Assembly support</a></li><li><a class="tocitem" href="../../cellfinder/">Search and Interpolation</a></li><li><a class="tocitem" href="../../arraytools/">Array tools</a></li><li><a class="tocitem" href="../../gridconstructors/">Grid constructors</a></li><li><a class="tocitem" href="../../output/">Grid output</a></li><li><a class="tocitem" href="../../refinement/">Mesh refinement</a></li><li><a class="tocitem" href="../../partitioning/">Grid partitioning</a></li><li><a class="tocitem" href="../../regionedit/">Region editing</a></li><li><a class="tocitem" href="../../tokenstream/">Token streams</a></li><li><a class="tocitem" href="../../binnedpointlist/">BinnedPointList</a></li><li><a class="tocitem" href="../../gmsh/">Gmsh interoperability</a></li><li><a class="tocitem" href="../../allindex/">Index</a></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../examples1d/">examples1d</a></li><li class="is-active"><a class="tocitem" href>examples2d</a><ul class="internal"><li><a class="tocitem" href="#Rectangle"><span>Rectangle</span></a></li><li><a class="tocitem" href="#Rectangle-with-local-refinement"><span>Rectangle with local refinement</span></a></li><li><a class="tocitem" href="#Rectangle-with-multiple-regions"><span>Rectangle with multiple regions</span></a></li><li><a class="tocitem" href="#Subgrid-from-rectangle"><span>Subgrid from rectangle</span></a></li><li><a class="tocitem" href="#Rect2d-with-bregion-function"><span>Rect2d with bregion function</span></a></li><li><a class="tocitem" href="#CI-callbacks-for-[ExampleJuggler.jl](https://github.com/j-fu/ExampleJuggler.jl)"><span>CI callbacks  for ExampleJuggler.jl</span></a></li></ul></li><li><a class="tocitem" href="../examples3d/">examples3d</a></li><li><a class="tocitem" href="../gmsh/">gmsh</a></li><li><a class="tocitem" href="../../plutostatichtml_examples/pluto-partitioning/">Partitioning</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>examples2d</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>examples2d</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/WIAS-PDELib/ExtendableGrids.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="2D-Grid-examples"><a class="docs-heading-anchor" href="#2D-Grid-examples">2D Grid examples</a><a id="2D-Grid-examples-1"></a><a class="docs-heading-anchor-permalink" href="#2D-Grid-examples" title="Permalink"></a></h1><pre><code class="language-julia hljs">using Triangulate, ExtendableGrids, SimplexGridFactory</code></pre><h2 id="Rectangle"><a class="docs-heading-anchor" href="#Rectangle">Rectangle</a><a id="Rectangle-1"></a><a class="docs-heading-anchor-permalink" href="#Rectangle" title="Permalink"></a></h2><pre><code class="language-julia hljs">function rectangle()
+    X = collect(0:0.05:1)
+    Y = collect(0:0.05:1)
+    return simplexgrid(X, X)
+end</code></pre><p><img src="../rectangle.png" alt/></p><h2 id="Rectangle-with-local-refinement"><a class="docs-heading-anchor" href="#Rectangle-with-local-refinement">Rectangle with local refinement</a><a id="Rectangle-with-local-refinement-1"></a><a class="docs-heading-anchor-permalink" href="#Rectangle-with-local-refinement" title="Permalink"></a></h2><pre><code class="language-julia hljs">function rectangle_localref()
+    hmin = 0.01
+    hmax = 0.1
+    XLeft = geomspace(0.0, 0.5, hmax, hmin)
+    XRight = geomspace(0.5, 1.0, hmin, hmax)
+    X = glue(XLeft, XRight)
+    return simplexgrid(X, X)
+end</code></pre><p><img src="../rectangle_localref.png" alt/></p><h2 id="Rectangle-with-multiple-regions"><a class="docs-heading-anchor" href="#Rectangle-with-multiple-regions">Rectangle with multiple regions</a><a id="Rectangle-with-multiple-regions-1"></a><a class="docs-heading-anchor-permalink" href="#Rectangle-with-multiple-regions" title="Permalink"></a></h2><pre><code class="language-julia hljs">function rectangle_multiregion()
+    X = collect(0:0.05:1)
+    Y = collect(0:0.05:1)
+    grid = simplexgrid(X, Y)
+    cellmask!(grid, [0.0, 0.0], [1.0, 0.5], 3)
+    bfacemask!(grid, [0.0, 0.0], [0.0, 0.5], 5)
+    bfacemask!(grid, [1.0, 0.0], [1.0, 0.5], 6)
+    bfacemask!(grid, [0.0, 0.5], [1.0, 0.5], 7)
+    return grid
+end</code></pre><p><img src="../rectangle_multiregion.png" alt/></p><h2 id="Subgrid-from-rectangle"><a class="docs-heading-anchor" href="#Subgrid-from-rectangle">Subgrid from rectangle</a><a id="Subgrid-from-rectangle-1"></a><a class="docs-heading-anchor-permalink" href="#Subgrid-from-rectangle" title="Permalink"></a></h2><pre><code class="language-julia hljs">function rectangle_subgrid()
+    X = collect(0:0.05:1)
+    Y = collect(0:0.05:1)
+    grid = simplexgrid(X, Y)
+    rect!(grid, [0.25, 0.25], [0.75, 0.75]; region = 2, bregion = 5)
+    return subgrid(grid, [1])
+end</code></pre><p><img src="../rectangle_subgrid.png" alt/></p><h2 id="Rect2d-with-bregion-function"><a class="docs-heading-anchor" href="#Rect2d-with-bregion-function">Rect2d with bregion function</a><a id="Rect2d-with-bregion-function-1"></a><a class="docs-heading-anchor-permalink" href="#Rect2d-with-bregion-function" title="Permalink"></a></h2><p>Here, we use function as bregion parameter - this allows to have no bfaces at the interface between the two rects.</p><pre><code class="language-julia hljs">function rect2d_bregion_function()
+    X = collect(0:0.5:10)
+    Y = collect(0:0.5:10)
+    grid = simplexgrid(X, Y)
+    rect!(grid, [5, 4], [9, 6]; region = 2, bregions = [5, 5, 5, 5])
+
+    rect!(grid, [4, 2], [5, 8]; region = 2, bregion = cur -&gt; cur == 5 ? 0 : 8)
+
+    return subgrid(grid, [2])
+end</code></pre><p><img src="../rect2d_bregion_function.png" alt/></p><pre><code class="language-julia hljs">function sorted_subgrid(; maxvolume = 0.01)
+    builder = SimplexGridBuilder(; Generator = Triangulate)
+
+    p1 = point!(builder, 0, 0)
+    p2 = point!(builder, 1, 0)
+    p3 = point!(builder, 1, 2)
+    p4 = point!(builder, 0, 1)
+    p5 = point!(builder, -1, 2)
+
+    facetregion!(builder, 1)
+    facet!(builder, p1, p2)
+    facetregion!(builder, 2)
+    facet!(builder, p2, p3)
+    facetregion!(builder, 3)
+    facet!(builder, p3, p4)
+    facetregion!(builder, 4)
+    facet!(builder, p4, p5)
+    facetregion!(builder, 5)
+    facet!(builder, p5, p1)
+
+    g = simplexgrid(builder; maxvolume)
+    sg = subgrid(g, [2]; boundary = true, transform = (a, b) -&gt; a[1] = b[2])
+    f = map((x, y) -&gt; sin(3x) * cos(3y), g)
+    sf = view(f, sg)
+    return g, sg, sf
+end</code></pre><p><img src="../sorted_subgrid.png" alt/></p><h2 id="CI-callbacks-for-[ExampleJuggler.jl](https://github.com/j-fu/ExampleJuggler.jl)"><a class="docs-heading-anchor" href="#CI-callbacks-for-[ExampleJuggler.jl](https://github.com/j-fu/ExampleJuggler.jl)">CI callbacks  for <a href="https://github.com/j-fu/ExampleJuggler.jl">ExampleJuggler.jl</a></a><a id="CI-callbacks-for-[ExampleJuggler.jl](https://github.com/j-fu/ExampleJuggler.jl)-1"></a><a class="docs-heading-anchor-permalink" href="#CI-callbacks-for-[ExampleJuggler.jl](https://github.com/j-fu/ExampleJuggler.jl)" title="Permalink"></a></h2><p>Unit tests</p><pre><code class="language-julia hljs">using Test
+function runtests()
+
+    @test isconsistent(rectangle())
+    @test isconsistent(rectangle_localref())
+    @test isconsistent(rectangle_multiregion())
+    @test isconsistent(rectangle_subgrid())
+    @test isconsistent(rect2d_bregion_function())
+
+    @test numbers_match(rectangle(), 441, 800, 80)
+    @test numbers_match(rectangle_localref(), 729, 1352, 104)
+    @test numbers_match(rectangle_multiregion(), 441, 800, 100)
+    @test numbers_match(rectangle_subgrid(), 360, 600, 120)
+    @test numbers_match(rect2d_bregion_function(), 79, 112, 44)
+
+    g, sg, sf = sorted_subgrid()
+    @test isconsistent(g)
+    @test isconsistent(sg)
+    @test numbers_match(g, 187, 306, 66)
+    @test numbers_match(sg, 17, 16, 0)
+    @test issorted(view(sg[Coordinates], 1, :))
+    return nothing
+end</code></pre><p>Plot generation</p><pre><code class="language-julia hljs">using GridVisualize
+function generateplots(picdir; Plotter = nothing)
+    if isdefined(Plotter, :Makie)
+        size = (300, 300)
+        Plotter.save(joinpath(picdir, &quot;rectangle.png&quot;), gridplot(rectangle(); Plotter, size))
+        Plotter.save(joinpath(picdir, &quot;rectangle_localref.png&quot;), gridplot(rectangle_localref(); Plotter, size))
+        Plotter.save(joinpath(picdir, &quot;rectangle_multiregion.png&quot;), gridplot(rectangle_multiregion(); Plotter, size))
+        Plotter.save(joinpath(picdir, &quot;rectangle_subgrid.png&quot;), gridplot(rectangle_subgrid(); Plotter, size))
+        Plotter.save(joinpath(picdir, &quot;rect2d_bregion_function.png&quot;), gridplot(rect2d_bregion_function(); Plotter, size))
+
+        g, sg, sf = sorted_subgrid()
+        p = GridVisualizer(; Plotter, layout = (1, 3), size = (800, 300))
+        gridplot!(p[1, 1], g)
+        gridplot!(p[1, 2], sg)
+        scalarplot!(p[1, 3], sg, sf)
+        fname = joinpath(picdir, &quot;sorted_subgrid.png&quot;)
+        Plotter.save(fname, reveal(p))
+    end
+    return nothing
+end</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../examples1d/">« examples1d</a><a class="docs-footer-nextpage" href="../examples3d/">examples3d »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.0 on <span class="colophon-date" title="Saturday 15 November 2025 04:51">Saturday 15 November 2025</span>. Using Julia version 1.12.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
