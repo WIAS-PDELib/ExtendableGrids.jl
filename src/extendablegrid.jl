@@ -459,6 +459,30 @@ or, if `warnoly==true`, return false.
 """
 function isconsistent(grid; warnonly = false)
     consistent = true
+    nnodes = num_nodes(grid)
+
+    if maximum(grid[CellNodes]) != nnodes
+        @warn "maximum(grid[CellNodes])!=nnodes"
+        consistent = false
+    end
+
+    if minimum(grid[CellNodes]) != 1
+        @warn "minimum(grid[CellNodes])!=1"
+        consistent = false
+    end
+
+    if length(grid[BFaceNodes]) > 0
+        if maximum(grid[BFaceNodes]) > nnodes
+            @warn "maximum(grid[BFaceNodes])>nnodes"
+            consistent = false
+        end
+
+        if minimum(grid[BFaceNodes]) < 1
+            @warn "minimum(grid[BFaceNodes])<1"
+            consistent = false
+        end
+    end
+
     dnodes = dangling_nodes(grid)
     if !isnothing(dnodes)
         @warn "Found dangling nodes: $(dnodes)"

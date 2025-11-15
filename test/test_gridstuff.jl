@@ -123,7 +123,7 @@ end
 function check_uniform_refinement(xgrid, bary::Bool)
     xgrid2 = bary ? barycentric_refine(xgrid) : uniform_refine(xgrid)
     minvol = minimum(xgrid2[CellVolumes])
-    return minvol > 0
+    return minvol > 0 && isconsistent(xgrid2)
 end
 
 
@@ -170,5 +170,6 @@ function run_grid_tests()
     @test check_uniform_refinement(reference_domain(Triangle2D), true)
     @test check_uniform_refinement(reference_domain(Parallelogram2D), false)
     @test check_uniform_refinement(reference_domain(Tetrahedron3D), false)
-    return @test check_uniform_refinement(reference_domain(Tetrahedron3D), true)
+    @test check_uniform_refinement(reference_domain(Tetrahedron3D), true)
+    return nothing
 end

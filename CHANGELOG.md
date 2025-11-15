@@ -1,4 +1,9 @@
 # Changelog
+## [1.14.1] - 2025-11-14
+- fix dangling nodes in full ringsector
+- add `isconsistent` checks to CI tests
+- somewhat extend `isconsistent` checks
+
 ## [1.14.0] - 2025-07-01
 
 - add `trim!`/`trim` function to remove precomputed grid components for lightweight storage

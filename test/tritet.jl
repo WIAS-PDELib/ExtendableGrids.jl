@@ -41,7 +41,9 @@ end
 
 @testset "Triangulate" begin
     @test isa(example_domain_regions(), ExtendableGrid)
+    @test isconsistent(example_domain_regions())
     @test isa(example_domain_holes(), ExtendableGrid)
+    @test isconsistent(example_domain_holes())
 end
 
 function prism(vol = 2)
@@ -109,5 +111,7 @@ end
 
 @testset "TetGen" begin
     @test isa(prism(), ExtendableGrid)
+    @test isconsistent(prism())
     @test isa(material_prism(), ExtendableGrid)
+    @test isconsistent(material_prism())
 end

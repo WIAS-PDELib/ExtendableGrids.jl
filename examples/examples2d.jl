@@ -98,6 +98,13 @@ end
 # Unit tests
 using Test
 function runtests()
+
+    @test isconsistent(rectangle())
+    @test isconsistent(rectangle_localref())
+    @test isconsistent(rectangle_multiregion())
+    @test isconsistent(rectangle_subgrid())
+    @test isconsistent(rect2d_bregion_function())
+
     @test numbers_match(rectangle(), 441, 800, 80)
     @test numbers_match(rectangle_localref(), 729, 1352, 104)
     @test numbers_match(rectangle_multiregion(), 441, 800, 100)
@@ -105,6 +112,8 @@ function runtests()
     @test numbers_match(rect2d_bregion_function(), 79, 112, 44)
 
     g, sg, sf = sorted_subgrid()
+    @test isconsistent(g)
+    @test isconsistent(sg)
     @test numbers_match(g, 187, 306, 66)
     @test numbers_match(sg, 17, 16, 0)
     @test issorted(view(sg[Coordinates], 1, :))
