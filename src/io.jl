@@ -7,6 +7,30 @@ WriteVTK.VTKCellType(::Type{<:Quadrilateral2D}) = VTKCellTypes.VTK_QUAD
 WriteVTK.VTKCellType(::Type{<:Tetrahedron3D}) = VTKCellTypes.VTK_TETRA
 WriteVTK.VTKCellType(::Type{<:Hexahedron3D}) = VTKCellTypes.VTK_HEXAHEDRON
 
+function prepare_extension_function(fname::Symbol,x)
+    expr = quote
+        function $fname($x;kwargs...)
+            @info "single parameter function"
+        end
+    end
+    eval(expr)
+end
+
+function prepare_extension_function(fname::Symbol,weakdeps::Vector{Symbol},x::Symbol)
+    expr = quote
+        function $fname($x;kwargs...)
+            if mapreduce(x->x in names(Main,imported=true),&,$weakdeps)
+                @error "Extension was loaded but argument types are wrong"
+            else
+                @error "This specific function is part of an extension.\n"*
+                       "To use it install and load the following modules:"*
+                       mapreduce(x->"\n"*x,*,String.($weakdeps))
+            end
+        end
+    end
+    eval(expr)
+end
+
 """
 $(TYPEDSIGNATURES)
 
@@ -162,19 +186,11 @@ function simplexgrid(file::String; format = "", kwargs...)
 end
 
 function simplexgrid(file::String, ::Type{Val{:msh}}; kwargs...)
-    return try
-        simplexgrid_from_gmsh(file)
-    catch e
-        throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to read msh files."))
-    end
+    return simplexgrid_from_gmsh(file)
 end
 
 function simplexgrid(file::String, ::Type{Val{:geo}}; kwargs...)
-    return try
-        simplexgrid_from_gmsh(file)
-    catch e
-        throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to read geo files."))
-    end
+    return simplexgrid_from_gmsh(file)
 end
 
 function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
@@ -272,7 +288,10 @@ function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
     return g
 end
 
-function simplexgrid_from_gmsh end
+prepare_extension_function(:simplexgrid_from_gmsh,[:Gmsh],:filename)
+# function simplexgrid_from_gmsh(filename; incomplete = false, Tc = Float32, Ti = Int32) 
+#     throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to read msh or geo files."))
+# end
 
 function simplexgrid_to_gmsh end
 
