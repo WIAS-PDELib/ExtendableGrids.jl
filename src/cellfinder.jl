@@ -95,13 +95,12 @@ Upon return, xref contains the barycentric coordinates of the point in the seque
 !!! warning
     Currently implemented for simplex grids only.
 """
-function gFindLocal!(xref, CF::CellFinder{Tv, Ti}, x; icellstart::Int = 1, trybrute = true, eps = 1.0e-14) where {Tv, Ti}
-
-    # works for convex domainsand simplices only !
+function gFindLocal!(xref, CF::CellFinder{Tv, Ti}, x; icellstart = 1, trybrute = true, eps = 1.0e-14) where {Tv, Ti}
+    # works for convex domains and simplices only !
     xCellFaces::Adjacency{Ti} = CF.xCellFaces
     xFaceCells::Adjacency{Ti} = CF.xFaceCells
     xCellGeometries::GridEGTypes = CF.xCellGeometries
-    EG::GridEGTypes = CF.EG
+    EG = CF.EG
     cx::Vector{Tv} = CF.cx
     cEG::Int = 0
     facetogo::Array{Array{Ti, 1}, 1} = CF.facetogo
@@ -124,7 +123,7 @@ function gFindLocal!(xref, CF::CellFinder{Tv, Ti}, x; icellstart::Int = 1, trybr
 
         # update local 2 global map
         L2G = CF.L2G4EG[cEG]
-        update_trafo!(L2G, icell)
+        update_trafo!(L2G, icell) # 1 allocation
         L2Gb = L2G.b
 
         # compute barycentric coordinates of node
