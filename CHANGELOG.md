@@ -1,4 +1,7 @@
 # Changelog
+## [1.14.2] - 2025-11-25
+- less allocations in gFindLocal
+
 ## [1.14.1] - 2025-11-14
 - fix dangling nodes in full ringsector
 - add `isconsistent` checks to CI tests
