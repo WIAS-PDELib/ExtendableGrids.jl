@@ -7,28 +7,50 @@ WriteVTK.VTKCellType(::Type{<:Quadrilateral2D}) = VTKCellTypes.VTK_QUAD
 WriteVTK.VTKCellType(::Type{<:Tetrahedron3D}) = VTKCellTypes.VTK_TETRA
 WriteVTK.VTKCellType(::Type{<:Hexahedron3D}) = VTKCellTypes.VTK_HEXAHEDRON
 
-function prepare_extension_function(fname::Symbol,x)
-    expr = quote
-        function $fname($x;kwargs...)
-            @info "single parameter function"
-        end
-    end
-    eval(expr)
+struct ExtensionLoadError <: Exception
+    fname::Symbol
+    weakdeps::Vector{Symbol}
 end
 
-function prepare_extension_function(fname::Symbol,weakdeps::Vector{Symbol},x::Symbol)
+Base.showerror(io::IO, e::ExtensionLoadError) =
+    print(
+    io,
+    "ExtensionLoadError: "
+        * "The function " * String(e.fname) * " is part of an extension.\n"
+        * "Suggestion: Install and load the following modules:"
+        * mapreduce(x -> "\n" * x, *, String.(e.weakdeps))
+)
+
+struct ExtensionMethodError <: Exception
+    fn::Function
+    x
+end
+
+
+function Base.showerror(io::IO, e::ExtensionMethodError)
+    fname = String(nameof(e.fn))
+    print(
+        io,
+        "ExtensionMethodError: no method matching " * fname * "(::" * String(nameof(typeof(e.x))) * ")\n"
+            * "The function " * fname * " exists in a loaded extension, but no method is defined for this combination of argument types.\n"
+            * "\n"
+            * "Candidates are:\n"
+    )
+    return println.(io, filter(x -> x != which(e.fn, (typeof(e.x),)), methods(e.fn)))
+end
+
+function prepare_extension_function(fname::Symbol, weakdeps::Vector{Symbol}, x::Symbol)
     expr = quote
-        function $fname($x;kwargs...)
-            if mapreduce(x->x in names(Main,imported=true),&,$weakdeps)
-                @error "Extension was loaded but argument types are wrong"
+        function $fname($x; kwargs...)
+            if mapreduce(x -> isdefined(Main, x), &, $weakdeps)
+                throw(ExtensionMethodError($fname, $x))
             else
-                @error "This specific function is part of an extension.\n"*
-                       "To use it install and load the following modules:"*
-                       mapreduce(x->"\n"*x,*,String.($weakdeps))
+                throw(ExtensionLoadError(nameof($fname), $weakdeps))
             end
+            return nothing
         end
     end
-    eval(expr)
+    return eval(expr)
 end
 
 """
@@ -288,8 +310,8 @@ function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
     return g
 end
 
-prepare_extension_function(:simplexgrid_from_gmsh,[:Gmsh],:filename)
-# function simplexgrid_from_gmsh(filename; incomplete = false, Tc = Float32, Ti = Int32) 
+prepare_extension_function(:simplexgrid_from_gmsh, [:Gmsh], :filename)
+# function simplexgrid_from_gmsh(filename; incomplete = false, Tc = Float32, Ti = Int32)
 #     throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to read msh or geo files."))
 # end
 
