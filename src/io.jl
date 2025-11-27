@@ -23,27 +23,30 @@ Base.showerror(io::IO, e::ExtensionLoadError) =
 
 struct ExtensionMethodError <: Exception
     fn::Function
-    x
+    args::Tuple
 end
 
 
 function Base.showerror(io::IO, e::ExtensionMethodError)
     fname = String(nameof(e.fn))
-    print(
-        io,
-        "ExtensionMethodError: no method matching " * fname * "(::" * String(nameof(typeof(e.x))) * ")\n"
-            * "The function " * fname * " exists in a loaded extension, but no method is defined for this combination of argument types.\n"
-            * "\n"
-            * "Candidates are:\n"
+    argtypes = typeof.(e.args)
+    println(io,
+        "ExtensionMethodError: no method matching " * fname
+            * "(" * join(map(x-> "::"*String(nameof(x)),argtypes),',')
+            * ")")
+    println(io,"The function " * fname * " exists in a loaded extension," 
+            *" but no method is defined for this combination of argument types.\n"
+            * "\nCandidates are:\n"
     )
-    return println.(io, filter(x -> x != which(e.fn, (typeof(e.x),)), methods(e.fn)))
+    println.(io, filter(x -> x != which(e.fn, (argtypes...,)), methods(e.fn)))
+    return nothing
 end
 
-function prepare_extension_function(fname::Symbol, weakdeps::Vector{Symbol}, x::Symbol)
+function prepare_extension_function(fname::Symbol, weakdeps::Vector{Symbol}, args::Vector{Symbol})
     expr = quote
-        function $fname($x; kwargs...)
-            if mapreduce(x -> isdefined(Main, x), &, $weakdeps)
-                throw(ExtensionMethodError($fname, $x))
+        function $fname($(args...); kwargs...)
+            if mapreduce(x -> isdefined(Main, x) && isa(getfield(Main,x),Module), &, $weakdeps)
+                throw(ExtensionMethodError($fname, ($(args...),)))
             else
                 throw(ExtensionLoadError(nameof($fname), $weakdeps))
             end
@@ -310,10 +313,11 @@ function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
     return g
 end
 
-prepare_extension_function(:simplexgrid_from_gmsh, [:Gmsh], :filename)
+prepare_extension_function(:simplexgrid_from_gmsh, [:Gmsh], [:filename])
 # function simplexgrid_from_gmsh(filename; incomplete = false, Tc = Float32, Ti = Int32)
 #     throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to read msh or geo files."))
 # end
+
 
 function simplexgrid_to_gmsh end
 
