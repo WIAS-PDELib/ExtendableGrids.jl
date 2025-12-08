@@ -21,7 +21,7 @@ jobs:
         os:
           - ubuntu-latest
           - windows-latest
-          - macOS-13 # intel
+          - macOS-14 # intel
           - macOS-latest # arm
         arch:
           - x64
@@ -31,7 +31,7 @@ jobs:
             arch: aarch64
           - os: windows-latest
             arch: aarch64
-          - os: macOS-13
+          - os: macOS-14
             arch: aarch64
           - os: macOS-latest
             arch: x64
