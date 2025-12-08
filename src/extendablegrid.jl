@@ -823,3 +823,118 @@ function trim(grid::ExtendableGrid; keep = [])
 
     return grid_copy
 end
+
+
+"""
+$(TYPEDSIGNATURES)
+
+Remove all adjacency information from a grid, creating independent cells by duplicating coordinates
+and assigning new node indices while keeping the original coordinates.
+
+This function creates a new grid where each cell has its own independent set of nodes by duplicating
+the coordinate information and creating new node indices. The original coordinates are preserved,
+but adjacency information is removed.
+
+# Arguments
+- `grid::ExtendableGrid`: The input grid to be processed
+
+# Returns
+- `::ExtendableGrid`: A new grid with duplicated coordinates and independent cells
+"""
+function explode(grid::ExtendableGrid)
+    # create a new grid with the same type parameters
+    Tc = coord_type(grid)
+    Ti = index_type(grid)
+    new_grid = ExtendableGrid{Tc, Ti}()
+
+    # get original coordinates and cell-node adjacency
+    coords = grid[Coordinates]
+    cellnodes = grid[CellNodes]
+
+    # create new coordinates array by duplicating nodes for each cell
+    n_cells = num_cells(grid)
+    nodes_per_cell = size(cellnodes, 1)
+    new_coords = similar(coords, size(coords, 1), n_cells * nodes_per_cell)
+
+    # create new cell-node adjacency where each cell gets its own nodes
+    new_cellnodes = similar(cellnodes)
+
+    # fill new coordinates and cell-node adjacency
+    for icell in 1:n_cells
+        for inode in 1:nodes_per_cell
+            original_node = cellnodes[inode, icell]
+            new_node = (icell - 1) * nodes_per_cell + inode
+            new_coords[:, new_node] = coords[:, original_node]
+            new_cellnodes[inode, icell] = new_node
+        end
+    end
+
+    # assign the new coordinates and cell-node adjacency
+    new_grid[Coordinates] = new_coords
+    new_grid[CellNodes] = new_cellnodes
+
+    # reference original grid as parent
+    new_grid[ParentGrid] = grid
+    new_grid[CellParents] = collect(Ti, 1:n_cells)
+
+    # copy other components
+    if haskey(grid, CellGeometries)
+        new_grid[CellGeometries] = grid[CellGeometries]
+    end
+    if haskey(grid, CellRegions)
+        new_grid[CellRegions] = grid[CellRegions]
+    end
+
+    # handle boundary face nodes and regions
+    if haskey(grid, BFaceNodes)
+        # create new boundary face nodes by duplicating for each cell
+        bfacenodes = grid[BFaceNodes]
+        bfacecells = grid[BFaceCells]
+        n_bfaces = num_bfaces(grid)
+        nodes_per_bface = size(bfacenodes, 1)
+        new_bfacenodes = similar(bfacenodes)
+
+        # map boundary face nodes to new node indices using cell information
+        for ibface in 1:n_bfaces
+            # get the cell this boundary face belongs to
+            cell_id = bfacecells[1, ibface]  # first entry is the cell ID
+            for inode in 1:nodes_per_bface
+                original_node = bfacenodes[inode, ibface]
+                # find the local node index within the cell
+                local_node_id = -1
+                for icell_node in 1:nodes_per_cell
+                    if cellnodes[icell_node, cell_id] == original_node
+                        local_node_id = icell_node
+                        break
+                    end
+                end
+                if local_node_id > 0
+                    # calculate new node index based on cell and local node position
+                    new_node = (cell_id - 1) * nodes_per_cell + local_node_id
+                    new_bfacenodes[inode, ibface] = new_node
+                else
+                    error("Could not find node $original_node in cell $cell_id")
+                end
+            end
+        end
+
+        new_grid[BFaceNodes] = new_bfacenodes
+    end
+
+    # transfer other components
+    for Component in [
+            BFaceRegions,
+            CellGeometries,
+            BFaceGeometries,
+            CoordinateSystem,
+        ]
+
+        if haskey(grid, Component)
+            new_grid[Component] = grid[Component]
+        end
+
+    end
+
+
+    return new_grid
+end
