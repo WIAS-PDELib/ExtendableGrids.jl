@@ -11,6 +11,67 @@ grids for finite element and finite volume methods.
 Used by [VoronoiFVM](https://github.com/WIAS-PDELib/VoronoiFVM.jl) and  [ExtendableFEM](https://github.com/WIAS-PDELib/ExtendableFEM.jl),
 a package for novel, gradient robust finite element methods.
 
+
+## Showcase
+
+### Create a grid and discover basic adjacencies
+
+```julia
+using ExtendableGrids
+
+# create a 3D unit cube made of tetrahedra
+unitcube = grid_unitcube(Tetrahedron3D)
+
+@show num_cells(unitcube) # = 6 (the unit cube consists of 6 tetrahedra)
+@show num_nodes(unitcube) # = 8 (the unit cube has 8 corners)
+
+cellnodes = unitcube[CellNodes]  # this is the mapping cell index -> node indices
+typeof(cellnodes) <: Matrix # true: each cell (tetrahedron!) has 4 nodes:
+                            # store mapping as a matrix!
+
+@show cellnodes[: , 2] # = [1,3,4,7], the nodes of the second cell
+
+# create a 2D unit square made of triangles
+unitsquare = grid_unitsquare(Triangle2D)
+
+nodecells = unitsquare[NodeCells] # the node index -> cell indices mapping
+typeof(cellnodes) <: Matrix # false!
+                            # each node has a different number of adjacent cells:
+                            # stored as `VariableTargetAdjacency`
+
+@show nodecells[: , 2] # = [1,2]
+@show nodecells[: , 5] # = [1,2,3,4] # (center node)
+```
+Other adjacency mappings are constructed by combining grid components, see [Notations](https://wias-pdelib.github.io/ExtendableGrids.jl/stable/extendablegrid/#Notations).
+
+### Grid data and plotting
+
+```julia
+using ExtendableGrids
+
+unitsquare = grid_unitsquare(Triangle2D)
+
+coords = unitsquare[Coordinates] # matrix of all node coordinates
+@show coords[: , 5]              # = [ 0.5, 0.5 ] (center node)
+
+regions = unitsquare[CellRegions] # mapping cell index -> region number
+@show all( ==(1), regions)        # in this grid, all cell regions are = 1
+
+ # mapping boundary face index -> boundary region number
+bfaceregions = unitsquare[BFaceRegions]
+@show bfaceregions # = [1,2,3,4], the four boundary regions are labeled by 1,2,3,4
+
+# Plotting is done via GridVisualize.jl and a Plotter (PythonPlot.jl,
+# GLMakie.jl, Plutovista.jl, ...)
+using GridVisualize, PythonPlot
+gridplot(unitsquare, Plotter=PythonPlot) # this opens a window with a plot
+```
+
+Example plots are shown in [GridVisualize.jl](https://wias-pdelib.github.io/GridVisualize.jl/stable/script_examples/plotting/#2D-grids).
+
+
+
+
 ## Additional functionality:
 
 
