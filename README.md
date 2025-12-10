@@ -42,7 +42,7 @@ typeof(cellnodes) <: Matrix # false!
 @show nodecells[: , 2] # = [1,2]
 @show nodecells[: , 5] # = [1,2,3,4] # (center node)
 ```
-Other adjacency mappings are constructed by combining grid components, see [Notations](https://wias-pdelib.github.io/ExtendableGrids.jl/stable/extendablegrid/#Notations).
+Other adjacency mappings are constructed by combining grid components, see [Notations](https://wias-pdelib.github.io/ExtendableGrids.jl/stable/extendablegrid/#Notations). For example `FaceCells`, `BFaceNodes`, `NodeEdges`, ...
 
 ### Grid data and plotting
 
