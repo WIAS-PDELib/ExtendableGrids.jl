@@ -1,60 +1,11 @@
 using WriteVTK
-
+using ExtensionErrors
 # conversion from AbstractElementGeometry to WriteVTK.VTKCellTypes
 WriteVTK.VTKCellType(::Type{<:AbstractElementGeometry1D}) = VTKCellTypes.VTK_LINE
 WriteVTK.VTKCellType(::Type{<:Triangle2D}) = VTKCellTypes.VTK_TRIANGLE
 WriteVTK.VTKCellType(::Type{<:Quadrilateral2D}) = VTKCellTypes.VTK_QUAD
 WriteVTK.VTKCellType(::Type{<:Tetrahedron3D}) = VTKCellTypes.VTK_TETRA
 WriteVTK.VTKCellType(::Type{<:Hexahedron3D}) = VTKCellTypes.VTK_HEXAHEDRON
-
-struct ExtensionLoadError <: Exception
-    fname::Symbol
-    weakdeps::Vector{Symbol}
-end
-
-Base.showerror(io::IO, e::ExtensionLoadError) =
-    print(
-    io,
-    "ExtensionLoadError: "
-        * "The function " * String(e.fname) * " is part of an extension.\n"
-        * "Suggestion: Install and load the following modules:"
-        * mapreduce(x -> "\n" * x, *, String.(e.weakdeps))
-)
-
-struct ExtensionMethodError <: Exception
-    fn::Function
-    args::Tuple
-end
-
-
-function Base.showerror(io::IO, e::ExtensionMethodError)
-    fname = String(nameof(e.fn))
-    argtypes = typeof.(e.args)
-    println(io,
-        "ExtensionMethodError: no method matching " * fname
-            * "(" * join(map(x-> "::"*String(nameof(x)),argtypes),',')
-            * ")")
-    println(io,"The function " * fname * " exists in a loaded extension," 
-            *" but no method is defined for this combination of argument types.\n"
-            * "\nCandidates are:\n"
-    )
-    println.(io, filter(x -> x != which(e.fn, (argtypes...,)), methods(e.fn)))
-    return nothing
-end
-
-function prepare_extension_function(fname::Symbol, weakdeps::Vector{Symbol}, args::Vector{Symbol})
-    expr = quote
-        function $fname($(args...); kwargs...)
-            if mapreduce(x -> isdefined(Main, x) && isa(getfield(Main,x),Module), &, $weakdeps)
-                throw(ExtensionMethodError($fname, ($(args...),)))
-            else
-                throw(ExtensionLoadError(nameof($fname), $weakdeps))
-            end
-            return nothing
-        end
-    end
-    return eval(expr)
-end
 
 """
 $(TYPEDSIGNATURES)
@@ -313,14 +264,10 @@ function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
     return g
 end
 
-prepare_extension_function(:simplexgrid_from_gmsh, [:Gmsh], [:filename])
-# function simplexgrid_from_gmsh(filename; incomplete = false, Tc = Float32, Ti = Int32)
-#     throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to read msh or geo files."))
-# end
-
+@extensionfunction simplexgrid_from_gmsh(filename;incomplete=false,Tc = Float32,Ti=Int32) Gmsh
 
 function simplexgrid_to_gmsh end
 
-function mixedgrid_from_gmsh end
+@extensionfunction mixedgrid_from_gmsh(filename;Tc = Float32, Ti = Int32) Gmsh
 
 function mixedgrid_to_gmsh end

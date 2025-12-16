@@ -1,7 +1,7 @@
 name = "ExtendableGrids"
 uuid = "cfc395e8-590f-11e8-1f13-43a2532b2fa8"
-authors = ["Juergen Fuhrmann <juergen.fuhrmann@wias-berlin.de>", "Christian Merdon  <christian.merdon@wias-berlin.de>", "Johannes Taraz  <johannes.taraz@gmail.com>", "Patrick Jaap <patrick.jaap@wias-berlin.de>"]
 version = "1.14.2"
+authors = ["Juergen Fuhrmann <juergen.fuhrmann@wias-berlin.de>", "Christian Merdon  <christian.merdon@wias-berlin.de>", "Johannes Taraz  <johannes.taraz@gmail.com>", "Patrick Jaap <patrick.jaap@wias-berlin.de>"]
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
@@ -10,6 +10,7 @@ Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 ElasticArrays = "fdbdab4c-e67f-52f5-8c3f-e7b388dad3d4"
+ExtensionErrors = "b7d44a4a-b691-4b61-aae1-e3eded184641"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
@@ -27,6 +28,9 @@ Metis = "2679e427-3c69-5b7f-982b-ece356f1e94b"
 TetGen = "c5d3f3f7-f850-59f6-8a2e-ffc6dc1317ea"
 Triangulate = "f7e6ffb2-c36d-4f8f-a77e-16e897189344"
 
+[sources]
+ExtensionErrors = {rev = "main", url = "https://github.com/jpthiele/ExtensionErrors.jl.git"}
+
 [extensions]
 ExtendableGridsGmshExt = "Gmsh"
 ExtendableGridsMetisExt = "Metis"
@@ -40,6 +44,7 @@ Compat = "4.10"
 Dates = "1.9"
 DocStringExtensions = "0.8,0.9"
 ElasticArrays = "1"
+ExtensionErrors = "1.0.0"
 Gmsh = "0.2.2,0.3"
 Graphs = "1.11.1"
 InteractiveUtils = "1.9"
