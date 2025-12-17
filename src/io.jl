@@ -1,5 +1,5 @@
 using WriteVTK
-
+using ExtensionErrors
 # conversion from AbstractElementGeometry to WriteVTK.VTKCellTypes
 WriteVTK.VTKCellType(::Type{<:AbstractElementGeometry1D}) = VTKCellTypes.VTK_LINE
 WriteVTK.VTKCellType(::Type{<:Triangle2D}) = VTKCellTypes.VTK_TRIANGLE
@@ -162,19 +162,11 @@ function simplexgrid(file::String; format = "", kwargs...)
 end
 
 function simplexgrid(file::String, ::Type{Val{:msh}}; kwargs...)
-    return try
-        simplexgrid_from_gmsh(file)
-    catch e
-        throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to read msh files."))
-    end
+    return simplexgrid_from_gmsh(file)
 end
 
 function simplexgrid(file::String, ::Type{Val{:geo}}; kwargs...)
-    return try
-        simplexgrid_from_gmsh(file)
-    catch e
-        throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to read geo files."))
-    end
+    return simplexgrid_from_gmsh(file)
 end
 
 function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
@@ -272,10 +264,10 @@ function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
     return g
 end
 
-function simplexgrid_from_gmsh end
+@extensionfunction simplexgrid_from_gmsh(filename;incomplete=false,Tc = Float32,Ti=Int32) Gmsh
 
 function simplexgrid_to_gmsh end
 
-function mixedgrid_from_gmsh end
+@extensionfunction mixedgrid_from_gmsh(filename;Tc = Float32, Ti = Int32) Gmsh
 
 function mixedgrid_to_gmsh end
