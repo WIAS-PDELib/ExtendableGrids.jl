@@ -78,7 +78,7 @@ export num_cellregions, num_bfaceregions, num_bedgeregions
 export gridcomponents
 export isconsistent, dangling_nodes
 export seemingly_equal, numbers_match
-export trim!, trim
+export trim!, trim, explode
 
 include("partitioning.jl")
 export PColorPartitions, PartitionCells, PartitionBFaces, PartitionNodes, NodePermutation, PartitionEdges
