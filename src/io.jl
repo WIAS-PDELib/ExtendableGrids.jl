@@ -162,19 +162,12 @@ function simplexgrid(file::String; format = "", kwargs...)
 end
 
 function simplexgrid(file::String, ::Type{Val{:msh}}; kwargs...)
-    return try
-        simplexgrid_from_gmsh(file)
-    catch e
-        throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to read msh files."))
-    end
+    simplexgrid_from_gmsh(file)
 end
 
 function simplexgrid(file::String, ::Type{Val{:geo}}; kwargs...)
-    return try
-        simplexgrid_from_gmsh(file)
-    catch e
-        throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to read geo files."))
-    end
+    
+    simplexgrid_from_gmsh(file)
 end
 
 function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
@@ -272,7 +265,8 @@ function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
     return g
 end
 
-function simplexgrid_from_gmsh end
+@declare_method_is_in_extension WEAKDEP_METHOD_ERROR_HINT_CACHE simplexgrid_from_gmsh (:Gmsh,)
+# function simplexgrid_from_gmsh end
 
 function simplexgrid_to_gmsh end
 

@@ -12,8 +12,10 @@ using Printf
 using Random
 using Dates
 using LinearAlgebra
+using WeakDepHelpers
 import Graphs
 
+const WEAKDEP_METHOD_ERROR_HINT_CACHE = WeakDepCache()
 
 include("adjacency.jl")
 export Adjacency, VariableTargetAdjacency, FixedTargetAdjacency

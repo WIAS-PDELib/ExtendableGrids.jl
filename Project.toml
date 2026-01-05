@@ -1,7 +1,7 @@
 name = "ExtendableGrids"
 uuid = "cfc395e8-590f-11e8-1f13-43a2532b2fa8"
-authors = ["Juergen Fuhrmann <juergen.fuhrmann@wias-berlin.de>", "Christian Merdon  <christian.merdon@wias-berlin.de>", "Johannes Taraz  <johannes.taraz@gmail.com>", "Patrick Jaap <patrick.jaap@wias-berlin.de>"]
 version = "1.14.2"
+authors = ["Juergen Fuhrmann <juergen.fuhrmann@wias-berlin.de>", "Christian Merdon  <christian.merdon@wias-berlin.de>", "Johannes Taraz  <johannes.taraz@gmail.com>", "Patrick Jaap <patrick.jaap@wias-berlin.de>"]
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
@@ -19,6 +19,7 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
+WeakDepHelpers = "7869a13a-7328-4bcf-a489-0f4bb64497c7"
 WriteVTK = "64499a7a-5c06-52f2-abe2-ccb03c286192"
 
 [weakdeps]
@@ -53,5 +54,6 @@ StatsBase = "0.34"
 TetGen = "1.5.1, 2"
 Triangulate = "2.3.2, 3"
 UUIDs = "1.6"
+WeakDepHelpers = "0.1.0"
 WriteVTK = "1.14"
 julia = "1.9"
