@@ -17,6 +17,17 @@ import Graphs
 
 const WEAKDEP_METHOD_ERROR_HINT_CACHE = WeakDepCache()
 
+function register_weakdep_cache(cache::Dict{Function, Tuple{Vararg{Symbol}}})
+    if isdefined(Base.Experimental, :register_error_hint)
+        Base.Experimental.register_error_hint(MethodError) do io, exc, argtypes, kwargs
+            WeakDepHelpers.method_error_hint_callback(cache,io,exc,argtypes,kwargs)
+        end
+    end
+end
+
+function __init__()
+    register_weakdep_cache(WEAKDEP_METHOD_ERROR_HINT_CACHE)
+end
 include("adjacency.jl")
 export Adjacency, VariableTargetAdjacency, FixedTargetAdjacency
 export atranspose, num_targets, num_sources, num_links, append!, max_num_targets_per_source
