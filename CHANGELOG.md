@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.15.0]
+## [1.15.0] - 2026-01-14
  - add and export `explode` function that produces a grid with all adjacencies removed
 
 ## [1.14.2] - 2025-11-25
