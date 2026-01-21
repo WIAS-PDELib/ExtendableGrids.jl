@@ -10,15 +10,15 @@ WriteVTK.VTKCellType(::Type{<:Hexahedron3D}) = VTKCellTypes.VTK_HEXAHEDRON
 """
 $(TYPEDSIGNATURES)
 
-exports grid and optional provided data as a vtk file
+  exports grid and optional provided data as a vtk file
 
-- `filename`: filename of the exported file
-- `grid`: grid
+  - `filename`: filename of the exported file
+  - `grid`: grid
 
-Each '(key, value)' pair adds another data entry to the vtk file via WriteVTK functionality.
+  Each '(key, value)' pair adds another data entry to the vtk file via WriteVTK functionality.
 
-For the arguments 'append' and 'compress', see documentation of vtk_grid of WriteVTK.
-"""
+  For the arguments 'append' and 'compress', see documentation of vtk_grid of WriteVTK.
+  """
 function writeVTK(filename::String, grid::ExtendableGrid{Tc, Ti}; append = false, compress = false, kwargs...) where {Tc, Ti}
     ncells = num_cells(grid)   # get number of cells in grid
     coords = grid[Coordinates] # get coordinates
@@ -42,11 +42,16 @@ end
 
 """
 $(TYPEDSIGNATURES)
-  
-Write grid to file. 
+
+Write grid to file.
 Supported formats:
-- "*.sg": pdelib sg format. See [`simplexgrid(::String;kwargs...)`](@ref)
-        
+- "*.sg": pdelib sg format. Keywords:
+  - `version`: format version
+- "*.msh": gmsh grid format
+- "*.dom": WIAS-TeSCA dom format. Keywords:
+  - domcodes: Vector of boundary codes per boundary region.
+
+See [`simplexgrid(::String;kwargs...)`](@ref)
 """
 function Base.write(fname::String, g::ExtendableGrid; format = "", kwargs...)
     (fbase, fext) = splitext(fname)
@@ -135,20 +140,79 @@ function writegrid(fname::String, g::ExtendableGrid, ::Type{Val{:sg}}; version =
     return nothing
 end
 
+function writegrid(
+        fname::String, g::ExtendableGrid, ::Type{Val{:dom}};
+        domcodes = collect(1:num_bfaceregions(g)),
+        kwargs...
+    )
+    println("Boundary code replacement:")
+    for i in 1:length(domcodes)
+        @printf("%4d => %d\n", i, domcodes[i])
+    end
+    dim_g = dim_grid(g)
+    dim_s = dim_space(g)
+    if dim_g != 2
+        error("dom files are defined for 2D only")
+    end
+    nn = num_nodes(g)
+    nc = num_cells(g)
+    nbf = num_bfaces(g)
+    nbr = num_bfaceregions(g)
+
+    coord = g[Coordinates]
+    cellnodes = g[CellNodes]
+    bfacenodes = g[BFaceNodes]
+    cellregions = g[CellRegions]
+    bfaceregions = g[BFaceRegions]
+    cellfaces = g[CellFaces]
+    bfacefaces = g[BFaceFaces]
+    nf = maximum(cellfaces)
+
+
+    facemarkers = zeros(Int, nf)
+    for ibf in 1:nbf
+        facemarkers[bfacefaces[ibf]] = domcodes[bfaceregions[ibf]]
+    end
+
+    open(fname, "w") do file
+        write(file, @sprintf("%d %d\n", nn, nc))
+        for inode in 1:nn
+            for idim in 1:dim_s
+                write(file, @sprintf("%.20e ", coord[idim, inode]))
+            end
+            write(file, @sprintf("\n"))
+        end
+
+        for icell in 1:nc
+            for inode in 1:(dim_g + 1)
+                write(file, @sprintf("%d ", cellnodes[inode, icell]))
+            end
+            write(file, @sprintf("%d ", facemarkers[cellfaces[2, icell]]))
+            write(file, @sprintf("%d ", facemarkers[cellfaces[3, icell]]))
+            write(file, @sprintf("%d ", facemarkers[cellfaces[1, icell]]))
+            write(file, @sprintf("%d\n", cellregions[icell]))
+        end
+    end
+    return nothing
+end
+
 ######################################################
 """
 $(TYPEDSIGNATURES)
-  
-Read grid from file. 
-Supported formats:
-- "*.sg": pdelib sg files. Format versions:
-  - `format=v"2.0"`:  long version with some unnecessary data
-  - `format=v"2.1"`: shortened version only with cells, cellnodes, cellregions, bfacenodes, bfaceregions
-  - `format=v"2.2"`: like 2.1, but additional info on cell and node partitioning. Edge partitioning is not
-    stored in the file and may be re-established by [`induce_edge_partitioning!`](@ref).
-- "*.geo": gmsh geometry description (requires `using Gmsh`)
-- "*.msh": gmsh mesh (requires `using Gmsh`)
-"""
+
+  Read grid from file.
+  Supported formats:
+  - "*.sg": pdelib sg files. Format versions:
+     - format version 2.0:  long version with some unnecessary data
+     - format versiom 2.1: shortened version only with cells, cellnodes, cellregions, bfacenodes, bfaceregions
+     - format version 2.2: like 2.1, but additional info on cell and node partitioning. Edge partitioning
+       is not  stored in the file and may be re-established by [`induce_edge_partitioning!`](@ref).
+  - "*.geo": gmsh geometry description (requires `using Gmsh`)
+  - "*.msh": gmsh mesh (requires `using Gmsh`)
+  - "*.dom": WIAS-TeSCA dom format
+    - The resulting grid contains `grid[BRegionDomCode]` describing the boundary condition code for
+      each boundary region
+  """
 function simplexgrid(file::String; format = "", kwargs...)
     (fbase, fext) = splitext(file)
     if format == ""
@@ -269,6 +333,66 @@ function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
         g[PartitionBFaces] = partitionbfaces
         g[PartitionNodes] = partitionnodes
     end
+    return g
+end
+
+struct BRegionDomCode <: AbstractGridComponent end
+
+function simplexgrid(
+        file::String, ::Type{Val{:dom}};
+        kwargs...
+    )
+    Ti = Cint
+    tks = TokenStream(file)
+    nn = parse(Ti, gettoken(tks))
+    nc = parse(Ti, gettoken(tks))
+
+    coord = Array{Float64, 2}(undef, 2, nn)
+    cellnodes = Array{Ti, 2}(undef, 3, nc)
+    cellregions = Vector{Ti}(undef, nc)
+    bfacenodes = ElasticArray{Ti, 2}(undef, 2, 0)
+    bfaceregions = Vector{Ti}(undef, 0)
+
+    for inode in 1:nn
+        coord[1, inode] = parse(Float64, gettoken(tks))
+        coord[2, inode] = parse(Float64, gettoken(tks))
+    end
+
+    function add_bface!(bfacenodes, bfaceregions, cn1, cn2, bfr)
+        n1 = min(cn1, cn2)
+        n2 = max(cn1, cn2)
+        found = false
+        for ibface in 1:size(bfacenodes, 2)
+            if bfacenodes[1] == n1 && bfacenodes[2] == n2
+                found = true
+            end
+        end
+        if !found && bfr != 0
+            append!(bfacenodes, (n1, n2))
+            push!(bfaceregions, bfr)
+        end
+        return
+    end
+
+    for icell in 1:nc
+        for inode in 1:3
+            cellnodes[inode, icell] = parse(Ti, gettoken(tks))
+        end
+        add_bface!(bfacenodes, bfaceregions, cellnodes[2, icell], cellnodes[3, icell], parse(Ti, gettoken(tks)))
+        add_bface!(bfacenodes, bfaceregions, cellnodes[1, icell], cellnodes[3, icell], parse(Ti, gettoken(tks)))
+        add_bface!(bfacenodes, bfaceregions, cellnodes[1, icell], cellnodes[2, icell], parse(Ti, gettoken(tks)))
+        cellregions[icell] = parse(Ti, gettoken(tks))
+    end
+    domcodes = sort(unique(bfaceregions))
+    for i in 1:length(bfaceregions)
+        bfaceregions[i] = findfirst(r -> r == bfaceregions[i], domcodes)
+    end
+    println("Boundary code replacement (see grid[BRegionDomCode]):")
+    for i in 1:length(domcodes)
+        @printf("%4d => %d\n", domcodes[i], i)
+    end
+    g = simplexgrid(coord, cellnodes, cellregions, bfacenodes, bfaceregions)
+    g[BRegionDomCode] = domcodes
     return g
 end
 

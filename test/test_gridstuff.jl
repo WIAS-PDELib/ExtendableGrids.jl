@@ -96,8 +96,8 @@ function check_cellfinder(xgrid)
 
     # check xref
     x = zeros(Float64, edim)
-    L2G = L2GTransformer(xgrid[CellGeometries][cell], xgrid, ON_CELLS)
-    update_trafo!(L2G, cell)
+    L2G = L2GTransformer(xgrid[CellGeometries][cell], xgrid, ON_CELLS, xgrid[CoordinateSystem])
+    @time update_trafo!(L2G, cell)
     eval_trafo!(x, L2G, xref)
 
     @info "... found x=$x in cell = $cell by local search (and had to find x=$x_source in cell=$cell_to_find)"

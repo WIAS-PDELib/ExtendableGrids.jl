@@ -184,6 +184,7 @@ export TokenStream, gettoken, expecttoken, trytoken
 
 include("io.jl")
 export writeVTK
+export BRegionDomCode
 
 include("seal.jl")
 
