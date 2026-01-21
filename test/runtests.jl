@@ -222,7 +222,7 @@ end
     @test map(vfxyz, gxyz) == map(vfv, gxyz)
 end
 
-function testrw(grid, format; compare_kwargs=(confidence=:full,), kwargs...)
+function testrw(grid, format; compare_kwargs = (confidence = :full,), kwargs...)
     #@warn format
     ftmp = tempname() * "." * format
     write(ftmp, grid; kwargs...)
@@ -241,7 +241,7 @@ end
 
 @testset "Read/Write dom" begin
     X = collect(0:0.05:1)
-    @test testrw(simplexgrid(X, X), "dom"; compare_kwargs=(sort=true, skipkeys=[XCoordinates, YCoordinates, BRegionDomCode]))
+    @test testrw(simplexgrid(X, X), "dom"; compare_kwargs = (sort = true, skipkeys = [XCoordinates, YCoordinates, BRegionDomCode]))
 end
 
 
