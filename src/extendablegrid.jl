@@ -614,55 +614,83 @@ Keyword args:
   - :low : Point numbers etc are the same
   - :full : all arrays are equal (besides the coordinate array, the arrays only have to be equal up to permutations)
 """
-function seemingly_equal(grid1::ExtendableGrid, grid2::ExtendableGrid; sort = false, confidence = :full)
-    if !sort
-        for key in keys(grid1)
-            if !haskey(grid2, key)
-                return false
-            end
-            if !seemingly_equal(grid1[key], grid2[key])
-                return false
-            end
-        end
-        return true
+function seemingly_equal(grid1::ExtendableGrid, grid2::ExtendableGrid; sort = false, confidence = :full, skipkeys = [], trimgrids = true, keep = [])
+    if trimgrids
+        grid1 = trim(grid1; keep)
+        grid2 = trim(grid2; keep)
     end
-
     if confidence == :full
-        for key in keys(grid1)
-            if !haskey(grid2, key)
-                return false
+        if !sort
+            for key in keys(grid1)
+                if key in skipkeys
+                    continue
+                end
+                if !haskey(grid2, key)
+                    @warn "missing key $(key) in grid2"
+                    return false
+                end
+                if !seemingly_equal(grid1[key], grid2[key])
+                    @warn "grid1[$(key)] and grid2[$(key)] differ"
+                    return false
+                end
             end
-            if !isa(grid1[key], AbstractArray)
-                !seemingly_equal(grid1[key], grid2[key]) && return false
-                continue
-            end
-
-            s1 = size(grid1[key])
-            s2 = size(grid2[key])
-
-            if length(s1) == 0
-                if length(s1) == 1
-                    if eltype(grid1[key]) <: Number
-                        ind1 = sortperm(grid1[key])
-                        ind2 = sortperm(grid2[key])
-                        sa1 = grid1[key][ind1]
-                        sa2 = grid2[key][ind2]
-                        !seemingly_equal(sa1, sa2) && return false
-                    else
-                        !seemingly_equal(grid1[key], grid2[key]) && return false
+            return true
+        else
+            for key in keys(grid1)
+                if key in skipkeys
+                    continue
+                end
+                if !haskey(grid2, key)
+                    @warn "missing key $(key) in grid2"
+                    return false
+                end
+                if !isa(grid1[key], AbstractArray)
+                    if !seemingly_equal(grid1[key], grid2[key])
+                        @warn "grid1[$(key)] and grid2[$(key)] differ"
+                        return false
                     end
-                else
-                    if eltype(grid1[key]) <: Number && key != Coordinates
-                        sa1 = multidimsort(sort(grid1[key]; dims = 1))
-                        sa2 = multidimsort(sort(grid2[key]; dims = 1))
-                        !seemingly_equal(sa1, sa2) && return false
+                    continue
+                end
+
+                s1 = size(grid1[key])
+                s2 = size(grid2[key])
+
+                if length(s1) == 0
+                    if length(s1) == 1
+                        if eltype(grid1[key]) <: Number
+                            ind1 = sortperm(grid1[key])
+                            ind2 = sortperm(grid2[key])
+                            sa1 = grid1[key][ind1]
+                            sa2 = grid2[key][ind2]
+                            if !seemingly_equal(sa1, sa2)
+                                @warn "grid1[$(key)] and grid2[$(key)] differ"
+                                return false
+                            end
+                        else
+                            if !seemingly_equal(grid1[key], grid2[key])
+                                @warn "grid1[$(key)] and grid2[$(key)] differ"
+                                return false
+                            end
+                        end
                     else
-                        !seemingly_equal(grid1[key], grid2[key]) && return false
+                        if eltype(grid1[key]) <: Number && key != Coordinates
+                            sa1 = multidimsort(sort(grid1[key]; dims = 1))
+                            sa2 = multidimsort(sort(grid2[key]; dims = 1))
+                            if !seemingly_equal(sa1, sa2)
+                                @warn "grid1[$(key)] and grid2[$(key)] differ"
+                                return false
+                            end
+                        else
+                            if !seemingly_equal(grid1[key], grid2[key])
+                                @warn "grid1[$(key)] and grid2[$(key)] differ"
+                                return false
+                            end
+                        end
                     end
                 end
             end
+            return true
         end
-        return true
     elseif confidence == :low
         grid1_data = (num_nodes(grid1), num_cells(grid1), num_bfaces(grid1))
         grid2_data = (num_nodes(grid2), num_cells(grid2), num_bfaces(grid2))
