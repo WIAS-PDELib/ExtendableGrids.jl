@@ -52,7 +52,7 @@ $(TYPEDSIGNATURES)
   Supported formats:
   - "*.sg": pdelib sg files. Format versions:
      - format version 2.0:  long version with some unnecessary data
-     - format versiom 2.1: shortened version only with cells, cellnodes, cellregions, bfacenodes, bfaceregions
+     - format version 2.1: shortened version only with cells, cellnodes, cellregions, bfacenodes, bfaceregions
      - format version 2.2: like 2.1, but additional info on cell and node partitioning. Edge partitioning
        is not  stored in the file and may be re-established by [`induce_edge_partitioning!`](@ref).
   - "*.geo": gmsh geometry description (requires `using Gmsh`)
