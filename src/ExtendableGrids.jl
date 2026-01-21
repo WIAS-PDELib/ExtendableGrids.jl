@@ -12,6 +12,7 @@ using Printf
 using Random
 using Dates
 using LinearAlgebra
+using WriteVTK
 import Graphs
 
 
@@ -184,6 +185,7 @@ export TokenStream, gettoken, expecttoken, trytoken
 
 include("io.jl")
 export writeVTK
+export BRegionDomCode
 
 include("seal.jl")
 

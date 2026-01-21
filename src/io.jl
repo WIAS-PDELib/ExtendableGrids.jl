@@ -1,5 +1,6 @@
-using WriteVTK
-
+####################
+## VTK
+###################
 # conversion from AbstractElementGeometry to WriteVTK.VTKCellTypes
 WriteVTK.VTKCellType(::Type{<:AbstractElementGeometry1D}) = VTKCellTypes.VTK_LINE
 WriteVTK.VTKCellType(::Type{<:Triangle2D}) = VTKCellTypes.VTK_TRIANGLE
@@ -10,15 +11,15 @@ WriteVTK.VTKCellType(::Type{<:Hexahedron3D}) = VTKCellTypes.VTK_HEXAHEDRON
 """
 $(TYPEDSIGNATURES)
 
-exports grid and optional provided data as a vtk file
+  exports grid and optional provided data as a vtk file
 
-- `filename`: filename of the exported file
-- `grid`: grid
+  - `filename`: filename of the exported file
+  - `grid`: grid
 
-Each '(key, value)' pair adds another data entry to the vtk file via WriteVTK functionality.
+  Each '(key, value)' pair adds another data entry to the vtk file via WriteVTK functionality.
 
-For the arguments 'append' and 'compress', see documentation of vtk_grid of WriteVTK.
-"""
+  For the arguments 'append' and 'compress', see documentation of vtk_grid of WriteVTK.
+  """
 function writeVTK(filename::String, grid::ExtendableGrid{Tc, Ti}; append = false, compress = false, kwargs...) where {Tc, Ti}
     ncells = num_cells(grid)   # get number of cells in grid
     coords = grid[Coordinates] # get coordinates
@@ -40,13 +41,51 @@ function writeVTK(filename::String, grid::ExtendableGrid{Tc, Ti}; append = false
     end
 end
 
+########################################################
+## Read/Write grids
+#######################################################
+
 """
 $(TYPEDSIGNATURES)
-  
-Write grid to file. 
+
+  Read grid from file.
+  Supported formats:
+  - "*.sg": pdelib sg files. Format versions:
+     - format version 2.0:  long version with some unnecessary data
+     - format version 2.1: shortened version only with cells, cellnodes, cellregions, bfacenodes, bfaceregions
+     - format version 2.2: like 2.1, but additional info on cell and node partitioning. Edge partitioning
+       is not  stored in the file and may be re-established by [`induce_edge_partitioning!`](@ref).
+  - "*.geo": gmsh geometry description (requires `using Gmsh`)
+  - "*.msh": gmsh mesh (requires `using Gmsh`)
+  - "*.dom": WIAS-TeSCA dom format
+    - The resulting grid contains `grid[BRegionDomCode]` describing the boundary condition code for
+      each boundary region
+  """
+function simplexgrid(file::String; format = "", kwargs...)
+    (fbase, fext) = splitext(file)
+    if format == ""
+        format = fext[2:end]
+    end
+    return try
+        simplexgrid(file, Val{Symbol(format)}; kwargs...)
+    catch e
+        throw(ErrorException("Reading $(fext) files not supported"))
+    end
+end
+
+
+"""
+$(TYPEDSIGNATURES)
+
+Write grid to file.
 Supported formats:
-- "*.sg": pdelib sg format. See [`simplexgrid(::String;kwargs...)`](@ref)
-        
+- "*.sg": pdelib sg format. Keywords:
+  - `version`: format version
+- "*.msh": gmsh grid format
+- "*.dom": WIAS-TeSCA dom format. Keywords:
+  - domcodes: Vector of boundary codes per boundary region.
+
+See [`simplexgrid(::String;kwargs...)`](@ref)
 """
 function Base.write(fname::String, g::ExtendableGrid; format = "", kwargs...)
     (fbase, fext) = splitext(fname)
@@ -60,123 +99,10 @@ function Base.write(fname::String, g::ExtendableGrid; format = "", kwargs...)
     end
 end
 
-function writegrid(filename::String, g::ExtendableGrid, ::Type{Val{:msh}}; kwargs...)
-    return try
-        simplexgrid_to_gmsh(g; filename)
-    catch e
-        throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to write msh files."))
-    end
-end
 
-function writegrid(fname::String, g::ExtendableGrid, ::Type{Val{:sg}}; version = v"2.2", kwargs...)
-    dim_g = dim_grid(g)
-    dim_s = dim_space(g)
-    nn = num_nodes(g)
-    nc = num_cells(g)
-    nbf = num_bfaces(g)
-    coord = g[Coordinates]
-    cellnodes = g[CellNodes]
-    bfacenodes = g[BFaceNodes]
-    cellregions = g[CellRegions]
-    bfaceregions = g[BFaceRegions]
-
-    # TODO: replace @sprintf by something non-allocating
-    open(fname, "w") do file
-        write(file, @sprintf("SimplexGrid"))
-        write(file, @sprintf(" "))
-        write(file, @sprintf("%s\n", "$version"[1:(end - 2)]))
-        write(file, @sprintf("#created by ExtendableGrids.jl (c) J.Fuhrmann et al\n"))
-        write(file, @sprintf("#%s\n", Dates.format(Dates.now(), "yyyy-mm-ddTHH-mm-SS")))
-
-        write(file, @sprintf("DIMENSION %d\n", dim_g))
-        write(file, @sprintf("NODES %d %d\n", nn, dim_s))
-
-        for inode in 1:nn
-            for idim in 1:dim_s
-                write(file, @sprintf("%.20e ", coord[idim, inode]))
-                write(file, @sprintf("\n"))
-            end
-        end
-
-        write(file, @sprintf("CELLS %d\n", nc))
-        for icell in 1:nc
-            for inode in 1:(dim_g + 1)
-                write(file, @sprintf("%d ", cellnodes[inode, icell]))
-            end
-            write(file, @sprintf("%d\n", cellregions[icell]))
-        end
-
-        write(file, @sprintf("FACES %d\n", nbf))
-        for ibface in 1:nbf
-            for inode in 1:dim_g
-                write(file, @sprintf("%d ", bfacenodes[inode, ibface]))
-            end
-            write(file, @sprintf("%d\n", bfaceregions[ibface]))
-        end
-
-        if version > v"2.1"
-            function writeitems(key, label)
-                data = g[key]
-                write(file, "$(label) $(length(data))\n")
-                for d in data
-                    write(file, "$d\n")
-                end
-                return
-            end
-            writeitems(PColorPartitions, "PCOLORPARTITIONS")
-            writeitems(PartitionCells, "PARTITIONCELLS")
-            writeitems(PartitionBFaces, "PARTITIONBFACES")
-            writeitems(PartitionNodes, "PARTITIONNODES")
-        end
-        write(file, @sprintf("END\n"))
-        flush(file)
-        flush(file)
-    end
-    return nothing
-end
-
-######################################################
-"""
-$(TYPEDSIGNATURES)
-  
-Read grid from file. 
-Supported formats:
-- "*.sg": pdelib sg files. Format versions:
-  - `format=v"2.0"`:  long version with some unnecessary data
-  - `format=v"2.1"`: shortened version only with cells, cellnodes, cellregions, bfacenodes, bfaceregions
-  - `format=v"2.2"`: like 2.1, but additional info on cell and node partitioning. Edge partitioning is not
-    stored in the file and may be re-established by [`induce_edge_partitioning!`](@ref).
-- "*.geo": gmsh geometry description (requires `using Gmsh`)
-- "*.msh": gmsh mesh (requires `using Gmsh`)
-"""
-function simplexgrid(file::String; format = "", kwargs...)
-    (fbase, fext) = splitext(file)
-    if format == ""
-        format = fext[2:end]
-    end
-    return try
-        simplexgrid(file, Val{Symbol(format)}; kwargs...)
-    catch e
-        throw(ErrorException("Reading $(fext) files not supported"))
-    end
-end
-
-function simplexgrid(file::String, ::Type{Val{:msh}}; kwargs...)
-    return try
-        simplexgrid_from_gmsh(file)
-    catch e
-        throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to read msh files."))
-    end
-end
-
-function simplexgrid(file::String, ::Type{Val{:geo}}; kwargs...)
-    return try
-        simplexgrid_from_gmsh(file)
-    catch e
-        throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to read geo files."))
-    end
-end
-
+########################################################
+## PDELIB sg format
+#######################################################
 function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
     Ti = Cint
     tks = TokenStream(file)
@@ -271,6 +197,219 @@ function simplexgrid(file::String, ::Type{Val{:sg}}; kwargs...)
     end
     return g
 end
+
+function writegrid(fname::String, g::ExtendableGrid, ::Type{Val{:sg}}; version = v"2.2", kwargs...)
+    dim_g = dim_grid(g)
+    dim_s = dim_space(g)
+    nn = num_nodes(g)
+    nc = num_cells(g)
+    nbf = num_bfaces(g)
+    coord = g[Coordinates]
+    cellnodes = g[CellNodes]
+    bfacenodes = g[BFaceNodes]
+    cellregions = g[CellRegions]
+    bfaceregions = g[BFaceRegions]
+
+    # TODO: replace @sprintf by something non-allocating
+    open(fname, "w") do file
+        write(file, @sprintf("SimplexGrid"))
+        write(file, @sprintf(" "))
+        write(file, @sprintf("%s\n", "$version"[1:(end - 2)]))
+        write(file, @sprintf("#created by ExtendableGrids.jl (c) J.Fuhrmann et al\n"))
+        write(file, @sprintf("#%s\n", Dates.format(Dates.now(), "yyyy-mm-ddTHH-mm-SS")))
+
+        write(file, @sprintf("DIMENSION %d\n", dim_g))
+        write(file, @sprintf("NODES %d %d\n", nn, dim_s))
+
+        for inode in 1:nn
+            for idim in 1:dim_s
+                write(file, @sprintf("%.20e ", coord[idim, inode]))
+                write(file, @sprintf("\n"))
+            end
+        end
+
+        write(file, @sprintf("CELLS %d\n", nc))
+        for icell in 1:nc
+            for inode in 1:(dim_g + 1)
+                write(file, @sprintf("%d ", cellnodes[inode, icell]))
+            end
+            write(file, @sprintf("%d\n", cellregions[icell]))
+        end
+
+        write(file, @sprintf("FACES %d\n", nbf))
+        for ibface in 1:nbf
+            for inode in 1:dim_g
+                write(file, @sprintf("%d ", bfacenodes[inode, ibface]))
+            end
+            write(file, @sprintf("%d\n", bfaceregions[ibface]))
+        end
+
+        if version > v"2.1"
+            function writeitems(key, label)
+                data = g[key]
+                write(file, "$(label) $(length(data))\n")
+                for d in data
+                    write(file, "$d\n")
+                end
+                return
+            end
+            writeitems(PColorPartitions, "PCOLORPARTITIONS")
+            writeitems(PartitionCells, "PARTITIONCELLS")
+            writeitems(PartitionBFaces, "PARTITIONBFACES")
+            writeitems(PartitionNodes, "PARTITIONNODES")
+        end
+        write(file, @sprintf("END\n"))
+        flush(file)
+        flush(file)
+    end
+    return nothing
+end
+
+########################################################
+## WIAS-TeSCA dom format
+#######################################################
+struct BRegionDomCode <: AbstractGridComponent end
+
+function simplexgrid(
+        file::String, ::Type{Val{:dom}};
+        kwargs...
+    )
+    Ti = Cint
+    tks = TokenStream(file)
+    nn = parse(Ti, gettoken(tks))
+    nc = parse(Ti, gettoken(tks))
+
+    coord = Array{Float64, 2}(undef, 2, nn)
+    cellnodes = Array{Ti, 2}(undef, 3, nc)
+    cellregions = Vector{Ti}(undef, nc)
+    bfacenodes = ElasticArray{Ti, 2}(undef, 2, 0)
+    bfaceregions = Vector{Ti}(undef, 0)
+
+    for inode in 1:nn
+        coord[1, inode] = parse(Float64, gettoken(tks))
+        coord[2, inode] = parse(Float64, gettoken(tks))
+    end
+
+    function add_bface!(bfacenodes, bfaceregions, cn1, cn2, bfr)
+        n1 = min(cn1, cn2)
+        n2 = max(cn1, cn2)
+        found = false
+        for ibface in 1:size(bfacenodes, 2)
+            if bfacenodes[1] == n1 && bfacenodes[2] == n2
+                found = true
+            end
+        end
+        if !found && bfr != 0
+            append!(bfacenodes, (n1, n2))
+            push!(bfaceregions, bfr)
+        end
+        return
+    end
+
+    for icell in 1:nc
+        for inode in 1:3
+            cellnodes[inode, icell] = parse(Ti, gettoken(tks))
+        end
+        add_bface!(bfacenodes, bfaceregions, cellnodes[2, icell], cellnodes[3, icell], parse(Ti, gettoken(tks)))
+        add_bface!(bfacenodes, bfaceregions, cellnodes[1, icell], cellnodes[3, icell], parse(Ti, gettoken(tks)))
+        add_bface!(bfacenodes, bfaceregions, cellnodes[1, icell], cellnodes[2, icell], parse(Ti, gettoken(tks)))
+        cellregions[icell] = parse(Ti, gettoken(tks))
+    end
+    domcodes = sort(unique(bfaceregions))
+    for i in 1:length(bfaceregions)
+        bfaceregions[i] = findfirst(r -> r == bfaceregions[i], domcodes)
+    end
+    println("Boundary code replacement (see grid[BRegionDomCode]):")
+    for i in 1:length(domcodes)
+        @printf("%4d => %d\n", domcodes[i], i)
+    end
+    g = simplexgrid(coord, cellnodes, cellregions, bfacenodes, bfaceregions)
+    g[BRegionDomCode] = domcodes
+    return g
+end
+
+function writegrid(
+        fname::String, g::ExtendableGrid, ::Type{Val{:dom}};
+        domcodes = collect(1:num_bfaceregions(g)),
+        kwargs...
+    )
+    println("Boundary code replacement:")
+    for i in 1:length(domcodes)
+        @printf("%4d => %d\n", i, domcodes[i])
+    end
+    dim_g = dim_grid(g)
+    dim_s = dim_space(g)
+    if dim_g != 2
+        error("dom files are defined for 2D only")
+    end
+    nn = num_nodes(g)
+    nc = num_cells(g)
+    nbf = num_bfaces(g)
+    nbr = num_bfaceregions(g)
+
+    coord = g[Coordinates]
+    cellnodes = g[CellNodes]
+    bfacenodes = g[BFaceNodes]
+    cellregions = g[CellRegions]
+    bfaceregions = g[BFaceRegions]
+    cellfaces = g[CellFaces]
+    bfacefaces = g[BFaceFaces]
+    nf = maximum(cellfaces)
+
+
+    facemarkers = zeros(Int, nf)
+    for ibf in 1:nbf
+        facemarkers[bfacefaces[ibf]] = domcodes[bfaceregions[ibf]]
+    end
+
+    open(fname, "w") do file
+        write(file, @sprintf("%d %d\n", nn, nc))
+        for inode in 1:nn
+            for idim in 1:dim_s
+                write(file, @sprintf("%.20e ", coord[idim, inode]))
+            end
+            write(file, @sprintf("\n"))
+        end
+
+        for icell in 1:nc
+            for inode in 1:(dim_g + 1)
+                write(file, @sprintf("%d ", cellnodes[inode, icell]))
+            end
+            write(file, @sprintf("%d ", facemarkers[cellfaces[2, icell]]))
+            write(file, @sprintf("%d ", facemarkers[cellfaces[3, icell]]))
+            write(file, @sprintf("%d ", facemarkers[cellfaces[1, icell]]))
+            write(file, @sprintf("%d\n", cellregions[icell]))
+        end
+    end
+    return nothing
+end
+
+########################################################
+## Wrapper to gmsh extension
+#######################################################
+function simplexgrid(file::String, ::Type{Val{:msh}}; kwargs...)
+    return try
+        simplexgrid_from_gmsh(file)
+    catch e
+        throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to read msh files."))
+    end
+end
+
+function simplexgrid(file::String, ::Type{Val{:geo}}; kwargs...)
+    return try
+        simplexgrid_from_gmsh(file)
+    catch e
+        throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to read geo files."))
+    end
+end
+function writegrid(filename::String, g::ExtendableGrid, ::Type{Val{:msh}}; kwargs...)
+    return try
+        simplexgrid_to_gmsh(g; filename)
+    catch e
+        throw(ErrorException("Missing Gmsh extension. Add Gmsh.jl to your environment and import it to write msh files."))
+    end
+end
+
 
 function simplexgrid_from_gmsh end
 
