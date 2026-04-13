@@ -55,6 +55,7 @@ $(TYPEDSIGNATURES)
      - format version 2.1: shortened version only with cells, cellnodes, cellregions, bfacenodes, bfaceregions
      - format version 2.2: like 2.1, but additional info on cell and node partitioning. Edge partitioning
        is not  stored in the file and may be re-established by [`induce_edge_partitioning!`](@ref).
+  - "*.ele": TetGen output file (requires presence of *.node and *.face file)
   - "*.geo": gmsh geometry description (requires `using Gmsh`)
   - "*.msh": gmsh mesh (requires `using Gmsh`)
   - "*.dom": WIAS-TeSCA dom format
@@ -264,6 +265,95 @@ function writegrid(fname::String, g::ExtendableGrid, ::Type{Val{:sg}}; version =
     end
     return nothing
 end
+
+########################################################
+## TetGen ele format
+#######################################################
+function simplexgrid(file::String, ::Type{Val{:ele}}; kwargs...)
+    Ti = Cint
+    fname, fext = splitext(file)
+    tks_ele = TokenStream(fname * ".ele")
+    tks_face = TokenStream(fname * ".face")
+    tks_node = TokenStream(fname * ".node")
+
+
+    npoints = parse(Ti, gettoken(tks_node))
+    dim = parse(Ti, gettoken(tks_node))
+    if dim != 3
+        throw(ErrorException("Dimension $dim not supported so far for .ele format"))
+    end
+    npointboundarymarkers = parse(Ti, gettoken(tks_node))
+    if npointboundarymarkers > 0
+        @warn "ingnoring point boundary markers"
+    end
+    npointattributes = parse(Ti, gettoken(tks_node))
+    if npointattributes > 0
+        @warn "ingnoring point attributes"
+    end
+    coord = Array{Float64, 2}(undef, dim, npoints)
+    for ipoint in 1:npoints
+        idx = parse(Ti, gettoken(tks_node)) + 1
+        for idim in 1:dim
+            coord[idim, idx] = parse(Float64, gettoken(tks_node))
+        end
+        for i in 1:npointboundarymarkers
+            gettoken(tks_node)
+        end
+        for i in 1:npointattributes
+            gettoken(tks_node)
+        end
+    end
+
+
+    ncells = parse(Ti, gettoken(tks_ele))
+    ncellnodes = parse(Ti, gettoken(tks_ele))
+    ncellattributes = parse(Ti, gettoken(tks_ele))
+    cells = Array{Ti, 2}(undef, ncellnodes, ncells)
+    regions = Array{Ti, 1}(undef, ncells)
+    if ncellattributes > 1
+        @warn "ignoring more than one cell attribute"
+    end
+    for icell in 1:ncells
+        idx = parse(Ti, gettoken(tks_ele)) + 1
+        for inode in 1:ncellnodes
+            cells[inode, idx] = parse(Ti, gettoken(tks_ele)) + 1
+        end
+        if ncellattributes == 0
+            regions[idx] = 1
+        else
+            regions[idx] = parse(Ti, gettoken(tks_ele))
+            for i in 2:ncellattributes
+                gettoken(tks_ele)
+            end
+        end
+    end
+
+    nfaces = parse(Ti, gettoken(tks_face))
+    nfaceattributes = parse(Ti, gettoken(tks_face))
+    nfacenodes = 3
+    if nfaceattributes > 1
+        @warn "ignoring more than one face attribute"
+    end
+    faces = Array{Ti, 2}(undef, dim, nfaces)
+    bregions = Array{Ti, 1}(undef, nfaces)
+    for iface in 1:nfaces
+        idx = parse(Ti, gettoken(tks_face)) + 1
+        for inode in 1:nfacenodes
+            faces[inode, idx] = parse(Ti, gettoken(tks_face)) + 1
+        end
+        if nfaceattributes == 0
+            bregions[idx] = 1
+        else
+            bregions[idx] = parse(Ti, gettoken(tks_face))
+            for i in 2:nfaceattributes
+                gettoken(tks_face)
+            end
+        end
+    end
+    g = simplexgrid(coord, cells, regions, faces, bregions)
+    return g
+end
+
 
 ########################################################
 ## WIAS-TeSCA dom format
