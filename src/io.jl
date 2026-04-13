@@ -284,11 +284,11 @@ function simplexgrid(file::String, ::Type{Val{:ele}}; kwargs...)
     end
     npointboundarymarkers = parse(Ti, gettoken(tks_node))
     if npointboundarymarkers > 0
-        @warn "ingnoring point boundary markers"
+        @warn "ignoring point boundary markers"
     end
     npointattributes = parse(Ti, gettoken(tks_node))
     if npointattributes > 0
-        @warn "ingnoring point attributes"
+        @warn "ignoring point attributes"
     end
     coord = Array{Float64, 2}(undef, dim, npoints)
     for ipoint in 1:npoints
