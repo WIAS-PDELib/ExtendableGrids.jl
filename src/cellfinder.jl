@@ -263,7 +263,7 @@ end
 
 Mutating form of [`interpolate`](@ref)
 """
-function interpolate!(u_to::AbstractArray, grid_to, u_from::AbstractArray, grid_from; eps = 1.0e-14, not_in_domain_value = NaN, trybrute = true)
+function interpolate!(u_to::AbstractArray, grid_to, u_from::AbstractArray, grid_from; eps = 1.0e-14, not_in_domain_value = nothing, check_if_not_in_domain = isnothing(not_in_domain_value), trybrute = true)
     shuffle = [[2, 1], [3, 1, 2], [4, 1, 2, 3]]
 
     update!(u_to::AbstractVector, inode_to, λ, u_from::AbstractVector, inode_from) = u_to[inode_to] += λ * u_from[inode_from]
@@ -291,9 +291,10 @@ function interpolate!(u_to::AbstractArray, grid_to, u_from::AbstractArray, grid_
     icellstart = 1
     for inode_to in 1:nnodes_to
         @views icell_from = gFindLocal!(λ, cf, coord[:, inode_to]; icellstart, eps, trybrute)
-        if icell_from <= 0
+        if icell_from <= 0 && !check_if_not_in_domain
             u_to[inode_to] = not_in_domain_value
         else
+            @assert icell_from > 0 "could not find cell for node $inode_to with coordinate $(coord[:, inode_to])"
             for i in 1:(dim + 1)
                 inode_from = cn_from[i, icell_from]
                 update!(u_to, inode_to, λ_shuffle[i], u_from, inode_from)
