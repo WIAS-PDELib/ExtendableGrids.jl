@@ -248,6 +248,13 @@ end
     @test testrw(simplexgrid(X, X), "dom"; compare_kwargs = (sort = true, skipkeys = [XCoordinates, YCoordinates, BRegionDomCode]))
 end
 
+@testset "Read ele" begin
+    g = simplexgrid("cube.1.ele")
+    @test num_nodes(g) == 156
+    @test num_cells(g) == 537
+    @test first.(extrema(g)) ≈ zeros(3)
+    @test last.(extrema(g)) ≈ ones(3)
+end
 
 @testset "rectnd" begin
     function rect1d()

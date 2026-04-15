@@ -55,7 +55,7 @@ $(TYPEDSIGNATURES)
      - format version 2.1: shortened version only with cells, cellnodes, cellregions, bfacenodes, bfaceregions
      - format version 2.2: like 2.1, but additional info on cell and node partitioning. Edge partitioning
        is not  stored in the file and may be re-established by [`induce_edge_partitioning!`](@ref).
-  - "*.ele": TetGen output file (requires presence of *.node and *.face file)
+  - "*.ele": TetGen output format (requires presence of *.ele, *.node and *.face file)
   - "*.geo": gmsh geometry description (requires `using Gmsh`)
   - "*.msh": gmsh mesh (requires `using Gmsh`)
   - "*.dom": WIAS-TeSCA dom format
