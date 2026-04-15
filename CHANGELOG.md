@@ -3,6 +3,10 @@
 # [1.17.0] - 2026-04-15
 - new kwargs `not_in_domain_value = nothing` and `check_if_not_in_domain = isnothing(not_in_domain_value)` for grid interpolation.
   This enables the user to interpolate values between grids which do not share the same domain. The value _outside_ the target domain has to be provided by the user.
+- Allow to read simplexgrid data from TetGen .ele file sets
+
+## [1.16.0] - 2026-01-21
+- Allow to read/write WIAS-TeSCA dom files
 
 ## [1.15.0] - 2026-01-14
  - add and export `explode` function that produces a grid with all adjacencies removed
