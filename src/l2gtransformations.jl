@@ -16,7 +16,7 @@
 Transforms reference coordinates to global coordinates
 """
 mutable struct L2GTransformer{Tv <: Real, Ti <: Integer, EG <: AbstractElementGeometry, CS <: AbstractCoordinateSystem}
-    citem::Int
+    citem::Ti
     nonlinear::Bool # so that users know if derivatives of map change in every quadrature point of cell or not
     Coords::Array{Tv, 2}
     Nodes::Adjacency{Ti}

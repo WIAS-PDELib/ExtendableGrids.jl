@@ -95,7 +95,7 @@ Upon return, xref contains the barycentric coordinates of the point in the seque
 !!! warning
     Currently implemented for simplex grids only.
 """
-function gFindLocal!(xref, CF::CellFinder{Tv, Ti}, x; icellstart = 1, stay_in_cell = false, trybrute = true, eps = 1.0e-14) where {Tv, Ti}
+function gFindLocal!(xref, CF::CellFinder{Tv, Ti}, x; icellstart = Ti(1), stay_in_cell = false, trybrute = true, eps = 1.0e-14) where {Tv, Ti}
     # works for convex domains and simplices only !
     xCellFaces::Adjacency{Ti} = CF.xCellFaces
     xFaceCells::Adjacency{Ti} = CF.xFaceCells
