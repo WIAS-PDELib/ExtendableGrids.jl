@@ -213,7 +213,7 @@ function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x; eps = 1.0e-14) where 
     invA::Matrix{Tv} = CF.invA
     imin::Int = 0
 
-    for icell in 1:num_sources(CF.xgrid[CellNodes])
+    for icell::Ti in 1:num_sources(CF.xgrid[CellNodes])
 
         # find current cell geometry index
         cEG = 1
