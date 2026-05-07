@@ -39,12 +39,12 @@ function L2GTransformer(EG::Union{Type{<:Tetrahedron3D}, Type{<:Parallelepiped3D
     return L2GTransformer{Tv, Ti, EG, grid[CoordinateSystem]}(0, false, grid[Coordinates], grid[GridComponentNodes4AssemblyType(AT)], grid[GridComponentVolumes4AssemblyType(AT)], A, b, zeros(Tv, 3, 3), 0)
 end
 
-function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Vertex0D, Cartesian1D}, item::Int)
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Vertex0D, Cartesian1D}, item::Ti) where {Ti}
     T.b[1] = T.Coords[1, T.Nodes[1, item]]
     return nothing
 end
 
-function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Edge1D, Cartesian1D}, item::Int)
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Edge1D, Cartesian1D}, item::Ti) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
@@ -54,7 +54,7 @@ function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Edge1D, Cartesian1
     return nothing
 end
 
-function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Edge1D, Cartesian2D}, item::Int)
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Edge1D, Cartesian2D}, item::Ti) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
@@ -66,7 +66,7 @@ function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Edge1D, Cartesian2
     return nothing
 end
 
-function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Edge1D, Cartesian3D}, item::Int)
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Edge1D, Cartesian3D}, item::Ti) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
@@ -80,7 +80,7 @@ function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Edge1D, Cartesian3
     return nothing
 end
 
-function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Triangle2D, Cartesian2D}, item::Int)
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Triangle2D, Cartesian2D}, item::Ti) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
@@ -94,7 +94,7 @@ function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Triangle2D, Cartes
     return nothing
 end
 
-function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Parallelogram2D, Cartesian2D}, item::Int)
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Parallelogram2D, Cartesian2D}, item::Ti) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
@@ -108,7 +108,7 @@ function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Parallelogram2D, C
     return nothing
 end
 
-function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Triangle2D, Cartesian3D}, item::Int)
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Triangle2D, Cartesian3D}, item::Ti) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
@@ -125,7 +125,7 @@ function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Triangle2D, Cartes
     return nothing
 end
 
-function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Parallelogram2D, Cartesian3D}, item::Int)
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Parallelogram2D, Cartesian3D}, item::Ti) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
@@ -143,7 +143,7 @@ function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Parallelogram2D, C
 end
 
 
-function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Tetrahedron3D, Cartesian3D}, item::Int)
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Tetrahedron3D, Cartesian3D}, item::Ti) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
@@ -163,7 +163,7 @@ function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Tetrahedron3D, Car
     return nothing
 end
 
-function update_trafo!(T::L2GTransformer{<:Real, <:Integer, <:Parallelepiped3D, Cartesian3D}, item::Int)
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Parallelepiped3D, Cartesian3D}, item::Ti) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]

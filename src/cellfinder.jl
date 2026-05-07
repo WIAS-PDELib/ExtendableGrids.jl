@@ -104,7 +104,7 @@ function gFindLocal!(xref, CF::CellFinder{Tv, Ti}, x; icellstart = 1, stay_in_ce
     cx::Vector{Tv} = CF.cx
     cEG::Int = 0
     facetogo::Array{Array{Ti, 1}, 1} = CF.facetogo
-    icell::Int = icellstart
+    icell::Ti = icellstart
     previous_cells::Array{Ti, 1} = CF.previous_cells
     fill!(previous_cells, 0)
     xreftest::Array{Tv, 1} = CF.xreftest
