@@ -95,7 +95,16 @@ Upon return, xref contains the barycentric coordinates of the point in the seque
 !!! warning
     Currently implemented for simplex grids only.
 """
-function gFindLocal!(xref, CF::CellFinder{Tv, Ti}, x; icellstart = Ti(1), stay_in_cell = false, trybrute = true, eps = 1.0e-14) where {Tv, Ti}
+function gFindLocal!(
+        xref,
+        CF::CellFinder{Tv, Ti},
+        x,
+        use_typestable_api::Val{true};
+        icellstart = Ti(1),
+        stay_in_cell = false,
+        trybrute = true,
+        eps = 1.0e-14
+    ) where {Tv, Ti}
     # works for convex domains and simplices only !
     xCellFaces::Adjacency{Ti} = CF.xCellFaces
     xFaceCells::Adjacency{Ti} = CF.xFaceCells
@@ -186,6 +195,22 @@ function gFindLocal!(xref, CF::CellFinder{Tv, Ti}, x; icellstart = Ti(1), stay_i
     end
 
     return 0
+end
+
+
+# Backwards compatibility with type-unstable API
+function gFindLocal!(
+        xref,
+        CF::CellFinder{Tv, Ti},
+        x,
+        use_typestable_api::Val{false} = Val(false);
+        icellstart = Ti(1),
+        stay_in_cell = false,
+        trybrute = true,
+        eps = 1.0e-14
+    ) where {Tv, Ti}
+    Base.depwarn("use the type-stable API with last argument use_typestable_api = Val(true); this returns icell::Ti !", :gFindLocal!, force = true)
+    return Int64(gFindLocal!(xref, CF, x, Val(true); icellstart, stay_in_cell, trybrute, eps))
 end
 
 """
