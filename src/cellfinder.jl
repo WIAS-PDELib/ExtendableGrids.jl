@@ -123,7 +123,7 @@ function gFindLocal!(xref, CF::CellFinder{Tv, Ti}, x; icellstart = Ti(1), stay_i
 
         # update local 2 global map
         L2G = CF.L2G4EG[cEG]
-        update_trafo!(L2G, icell) # 1 allocation
+        update_trafo!(L2G, icell, Val(true)) # 1 allocation
         L2Gb = L2G.b
 
         # compute barycentric coordinates of node
@@ -223,7 +223,7 @@ function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x; eps = 1.0e-14) where 
 
         # update local 2 global map
         L2G = CF.L2G4EG[cEG]
-        update_trafo!(L2G, icell)
+        update_trafo!(L2G, icell, Val(true))
         L2Gb = L2G.b
 
         # compute barycentric coordinates of node
