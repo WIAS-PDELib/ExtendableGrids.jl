@@ -226,7 +226,7 @@ Upon return, xref contains the barycentric coordinates of the point in the seque
     Currently implemented for simplex grids only.
 
 """
-function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x; eps = 1.0e-14) where {Tv, Ti}
+function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x, use_typestable_api::Val{true}; eps = 1.0e-14) where {Tv, Ti}
 
     cx::Vector{Tv} = CF.cx
     cEG::Int = 0
@@ -282,6 +282,11 @@ function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x; eps = 1.0e-14) where 
     return 0
 end
 
+# Backwards compatibility with type-unstable API
+function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x, use_typestable_api::Val{false} = Val(false); eps = 1.0e-14) where {Tv, Ti}
+    Base.depwarn("use the type-stable API with last argument use_typestable_api = Val(true); this returns icell::Ti !", :gFindBruteForce!, force = true)
+    return Int64(gFindBruteForce!(xref, CF, x, Val{true}; eps))
+end
 
 """
     interpolate!(u_to,grid_to, u_from, grid_from;eps=1.0e-14,trybrute=true)
@@ -315,7 +320,7 @@ function interpolate!(u_to::AbstractArray, grid_to, u_from::AbstractArray, grid_
     cf = CellFinder(grid_from)
     icellstart = 1
     for inode_to in 1:nnodes_to
-        @views icell_from = gFindLocal!(λ, cf, coord[:, inode_to]; icellstart, eps, trybrute)
+        @views icell_from = gFindLocal!(λ, cf, coord[:, inode_to], Val(true); icellstart, eps, trybrute)
         if icell_from <= 0 && !check_if_not_in_domain
             u_to[inode_to] = not_in_domain_value
         else

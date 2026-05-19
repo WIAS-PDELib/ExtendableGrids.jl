@@ -92,7 +92,7 @@ function check_cellfinder(xgrid)
     @show x_source
     # find cell by local strategy
     xref = zeros(Float64, edim + 1)
-    cell = gFindLocal!(xref, CF, x_source; icellstart = 1)
+    cell = gFindLocal!(xref, CF, x_source, Val(true); icellstart = 1)
 
     # check xref
     x = zeros(Float64, edim)
@@ -105,7 +105,7 @@ function check_cellfinder(xgrid)
     @assert cell == cell_to_find
 
     # find cell again by brute force
-    cell = gFindBruteForce!(xref, CF, x_source)
+    cell = gFindBruteForce!(xref, CF, x_source, Val(true))
 
     # check xref
     x = zeros(Float64, edim)
