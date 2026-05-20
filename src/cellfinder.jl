@@ -95,7 +95,15 @@ Upon return, xref contains the barycentric coordinates of the point in the seque
 !!! warning
     Currently implemented for simplex grids only.
 """
-function gFindLocal!(xref, CF::CellFinder{Tv, Ti}, x; icellstart = 1, stay_in_cell = false, trybrute = true, eps = 1.0e-14) where {Tv, Ti}
+function gFindLocal!(
+        xref,
+        CF::CellFinder{Tv, Ti},
+        x;
+        icellstart = Ti(1),
+        stay_in_cell = false,
+        trybrute = true,
+        eps = 1.0e-14
+    )::Ti where {Tv, Ti}
     # works for convex domains and simplices only !
     xCellFaces::Adjacency{Ti} = CF.xCellFaces
     xFaceCells::Adjacency{Ti} = CF.xFaceCells
@@ -104,7 +112,7 @@ function gFindLocal!(xref, CF::CellFinder{Tv, Ti}, x; icellstart = 1, stay_in_ce
     cx::Vector{Tv} = CF.cx
     cEG::Int = 0
     facetogo::Array{Array{Ti, 1}, 1} = CF.facetogo
-    icell::Int = icellstart
+    icell::Ti = icellstart
     previous_cells::Array{Ti, 1} = CF.previous_cells
     fill!(previous_cells, 0)
     xreftest::Array{Tv, 1} = CF.xreftest
@@ -201,7 +209,7 @@ Upon return, xref contains the barycentric coordinates of the point in the seque
     Currently implemented for simplex grids only.
 
 """
-function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x; eps = 1.0e-14) where {Tv, Ti}
+function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x; eps = 1.0e-14)::Ti where {Tv, Ti}
 
     cx::Vector{Tv} = CF.cx
     cEG::Int = 0
@@ -213,7 +221,7 @@ function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x; eps = 1.0e-14) where 
     invA::Matrix{Tv} = CF.invA
     imin::Int = 0
 
-    for icell in 1:num_sources(CF.xgrid[CellNodes])
+    for icell::Ti in 1:num_sources(CF.xgrid[CellNodes])
 
         # find current cell geometry index
         cEG = 1
@@ -256,7 +264,6 @@ function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x; eps = 1.0e-14) where 
 
     return 0
 end
-
 
 """
     interpolate!(u_to,grid_to, u_from, grid_from;eps=1.0e-14,trybrute=true)

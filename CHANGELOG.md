@@ -1,5 +1,9 @@
 # Changelog
 
+# [1.17.1] - 2026-05-20
+- update_trafo! of L2GTransformer does not require item to be of type Int anymore
+- CellFinder result type is always of type Ti (grid items index type)
+
 # [1.17.0] - 2026-04-15
 - new kwargs `not_in_domain_value = nothing` and `check_if_not_in_domain = isnothing(not_in_domain_value)` for grid interpolation.
   This enables the user to interpolate values between grids which do not share the same domain. The value _outside_ the target domain has to be provided by the user.
