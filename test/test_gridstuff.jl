@@ -92,12 +92,12 @@ function check_cellfinder(xgrid)
     @show x_source
     # find cell by local strategy
     xref = zeros(Float64, edim + 1)
-    cell = gFindLocal!(xref, CF, x_source, Val(true); icellstart = 1)
+    cell = gFindLocal!(xref, CF, x_source; icellstart = 1)
 
     # check xref
     x = zeros(Float64, edim)
     L2G = L2GTransformer(xgrid[CellGeometries][cell], xgrid, ON_CELLS)
-    update_trafo!(L2G, cell, Val(true))
+    update_trafo!(L2G, cell)
     eval_trafo!(x, L2G, xref)
 
     @info "... found x=$x in cell = $cell by local search (and had to find x=$x_source in cell=$cell_to_find)"
@@ -105,11 +105,11 @@ function check_cellfinder(xgrid)
     @assert cell == cell_to_find
 
     # find cell again by brute force
-    cell = gFindBruteForce!(xref, CF, x_source, Val(true))
+    cell = gFindBruteForce!(xref, CF, x_source)
 
     # check xref
     x = zeros(Float64, edim)
-    update_trafo!(L2G, cell, Val(true))
+    update_trafo!(L2G, cell)
     eval_trafo!(x, L2G, xref)
 
     @info "... found x=$x in cell = $cell by brute force (and had to find  x=$x_source in cell=$cell_to_find)"
