@@ -103,7 +103,7 @@ function gFindLocal!(
         stay_in_cell = false,
         trybrute = true,
         eps = 1.0e-14
-    ) where {Tv, Ti}
+    )::Ti where {Tv, Ti}
     # works for convex domains and simplices only !
     xCellFaces::Adjacency{Ti} = CF.xCellFaces
     xFaceCells::Adjacency{Ti} = CF.xFaceCells
@@ -178,7 +178,7 @@ function gFindLocal!(
                     return gFindBruteForce!(xref, CF, x; eps)
                 else
                     @debug  "could not find point in any cell and ended up at boundary of domain (maybe x lies outside of the domain ?)"
-                    return Ti(0)
+                    return 0
                 end
             end
         end
@@ -188,12 +188,12 @@ function gFindLocal!(
                 return gFindBruteForce!(xref, CF, x; eps)
             else
                 @debug  "could not find point in any cell and ended up at boundary of domain (maybe x lies outside of the domain ?)"
-                return Ti(0)
+                return 0
             end
         end
     end
 
-    return Ti(0)
+    return 0
 end
 
 """
@@ -209,7 +209,7 @@ Upon return, xref contains the barycentric coordinates of the point in the seque
     Currently implemented for simplex grids only.
 
 """
-function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x; eps = 1.0e-14) where {Tv, Ti}
+function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x; eps = 1.0e-14)::Ti where {Tv, Ti}
 
     cx::Vector{Tv} = CF.cx
     cEG::Int = 0
@@ -262,7 +262,7 @@ function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x; eps = 1.0e-14) where 
 
     @debug "gFindBruteForce did not find any cell that contains x = $x (make sure that x is inside the domain, or try reducing $eps)"
 
-    return Ti(0)
+    return 0
 end
 
 """
