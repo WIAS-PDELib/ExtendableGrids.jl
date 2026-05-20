@@ -98,8 +98,7 @@ Upon return, xref contains the barycentric coordinates of the point in the seque
 function gFindLocal!(
         xref,
         CF::CellFinder{Tv, Ti},
-        x,
-        use_typestable_api::Val{true};
+        x;
         icellstart = Ti(1),
         stay_in_cell = false,
         trybrute = true,
@@ -132,7 +131,7 @@ function gFindLocal!(
 
         # update local 2 global map
         L2G = CF.L2G4EG[cEG]
-        update_trafo!(L2G, icell, Val(true)) # 1 allocation
+        update_trafo!(L2G, icell) # 1 allocation
         L2Gb = L2G.b
 
         # compute barycentric coordinates of node
@@ -179,7 +178,7 @@ function gFindLocal!(
                     return gFindBruteForce!(xref, CF, x; eps)
                 else
                     @debug  "could not find point in any cell and ended up at boundary of domain (maybe x lies outside of the domain ?)"
-                    return 0
+                    return Ti(0)
                 end
             end
         end
@@ -189,28 +188,12 @@ function gFindLocal!(
                 return gFindBruteForce!(xref, CF, x; eps)
             else
                 @debug  "could not find point in any cell and ended up at boundary of domain (maybe x lies outside of the domain ?)"
-                return 0
+                return Ti(0)
             end
         end
     end
 
-    return 0
-end
-
-
-# Backwards compatibility with type-unstable API
-function gFindLocal!(
-        xref,
-        CF::CellFinder{Tv, Ti},
-        x,
-        use_typestable_api::Val{false} = Val(false);
-        icellstart = Ti(1),
-        stay_in_cell = false,
-        trybrute = true,
-        eps = 1.0e-14
-    ) where {Tv, Ti}
-    Base.depwarn("use the type-stable API with last argument use_typestable_api = Val(true); this returns icell::Ti !", :gFindLocal!, force = true)
-    return Int64(gFindLocal!(xref, CF, x, Val(true); icellstart, stay_in_cell, trybrute, eps))
+    return Ti(0)
 end
 
 """
@@ -226,7 +209,7 @@ Upon return, xref contains the barycentric coordinates of the point in the seque
     Currently implemented for simplex grids only.
 
 """
-function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x, use_typestable_api::Val{true}; eps = 1.0e-14) where {Tv, Ti}
+function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x; eps = 1.0e-14) where {Tv, Ti}
 
     cx::Vector{Tv} = CF.cx
     cEG::Int = 0
@@ -248,7 +231,7 @@ function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x, use_typestable_api::V
 
         # update local 2 global map
         L2G = CF.L2G4EG[cEG]
-        update_trafo!(L2G, icell, Val(true))
+        update_trafo!(L2G, icell)
         L2Gb = L2G.b
 
         # compute barycentric coordinates of node
@@ -279,13 +262,7 @@ function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x, use_typestable_api::V
 
     @debug "gFindBruteForce did not find any cell that contains x = $x (make sure that x is inside the domain, or try reducing $eps)"
 
-    return 0
-end
-
-# Backwards compatibility with type-unstable API
-function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x, use_typestable_api::Val{false} = Val(false); eps = 1.0e-14) where {Tv, Ti}
-    Base.depwarn("use the type-stable API with last argument use_typestable_api = Val(true); this returns icell::Ti !", :gFindBruteForce!, force = true)
-    return Int64(gFindBruteForce!(xref, CF, x, Val{true}; eps))
+    return Ti(0)
 end
 
 """
@@ -320,7 +297,7 @@ function interpolate!(u_to::AbstractArray, grid_to, u_from::AbstractArray, grid_
     cf = CellFinder(grid_from)
     icellstart = 1
     for inode_to in 1:nnodes_to
-        @views icell_from = gFindLocal!(λ, cf, coord[:, inode_to], Val(true); icellstart, eps, trybrute)
+        @views icell_from = gFindLocal!(λ, cf, coord[:, inode_to]; icellstart, eps, trybrute)
         if icell_from <= 0 && !check_if_not_in_domain
             u_to[inode_to] = not_in_domain_value
         else

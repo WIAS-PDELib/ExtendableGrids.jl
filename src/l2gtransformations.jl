@@ -39,19 +39,12 @@ function L2GTransformer(EG::Union{Type{<:Tetrahedron3D}, Type{<:Parallelepiped3D
     return L2GTransformer{Tv, Ti, EG, grid[CoordinateSystem]}(0, false, grid[Coordinates], grid[GridComponentNodes4AssemblyType(AT)], grid[GridComponentVolumes4AssemblyType(AT)], A, b, zeros(Tv, 3, 3), 0)
 end
 
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Vertex0D, Cartesian1D}, item::Ti) where {Ti}
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Vertex0D, Cartesian1D}, item) where {Ti}
     T.b[1] = T.Coords[1, T.Nodes[1, item]]
     return nothing
 end
 
-# Backwards compatibility overload for non-type-stable API
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Edge1D, Cartesian1D}, item::Int, use_typestable_api::Val{false} = Val(false)) where {Ti <: Integer}
-    Base.depwarn("use the type-stable API: typeof(item) must match the L2GTransformer Ti type", :update_trafo!, force = true)
-    return update_trafo!(T, Ti(item), Val(true))
-end
-
-
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Edge1D, Cartesian1D}, item::Ti, use_typestable_api::Val{true}) where {Ti}
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Edge1D, Cartesian1D}, item) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
@@ -61,13 +54,7 @@ function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Edge1D, Cartesian1D}, ite
     return nothing
 end
 
-# Backwards compatibility overload for non-type-stable API
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Edge1D, Cartesian2D}, item::Int, use_typestable_api::Val{false} = Val(false)) where {Ti <: Integer}
-    Base.depwarn("use the type-stable API: typeof(item) must match the L2GTransformer Ti type", :update_trafo!, force = true)
-    return update_trafo!(T, Ti(item), Val(true))
-end
-
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Edge1D, Cartesian2D}, item::Ti, use_typestable_api::Val{true}) where {Ti}
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Edge1D, Cartesian2D}, item) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
@@ -79,13 +66,7 @@ function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Edge1D, Cartesian2D}, ite
     return nothing
 end
 
-# Backwards compatibility overload for non-type-stable API
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Edge1D, Cartesian3D}, item::Int, use_typestable_api::Val{false} = Val(false)) where {Ti <: Integer}
-    Base.depwarn("use the type-stable API: typeof(item) must match the L2GTransformer Ti type", :update_trafo!, force = true)
-    return update_trafo!(T, Ti(item), Val(true))
-end
-
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Edge1D, Cartesian3D}, item::Ti, use_typestable_api::Val{true}) where {Ti}
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Edge1D, Cartesian3D}, item) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
@@ -99,13 +80,7 @@ function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Edge1D, Cartesian3D}, ite
     return nothing
 end
 
-# Backwards compatibility overload for non-type-stable API
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Triangle2D, Cartesian2D}, item::Int, use_typestable_api::Val{false} = Val(false)) where {Ti <: Integer}
-    Base.depwarn("use the type-stable API: typeof(item) must match the L2GTransformer Ti type", :update_trafo!, force = true)
-    return update_trafo!(T, Ti(item), Val(true))
-end
-
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Triangle2D, Cartesian2D}, item::Ti, use_typestable_api::Val{true}) where {Ti}
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Triangle2D, Cartesian2D}, item) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
@@ -119,13 +94,8 @@ function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Triangle2D, Cartesian2D},
     return nothing
 end
 
-# Backwards compatibility overload for non-type-stable API
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Parallelogram2D, Cartesian2D}, item::Int, use_typestable_api::Val{false} = Val(false)) where {Ti <: Integer}
-    Base.depwarn("use the type-stable API: typeof(item) must match the L2GTransformer Ti type", :update_trafo!, force = true)
-    return update_trafo!(T, Ti(item), Val(true))
-end
 
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Parallelogram2D, Cartesian2D}, item::Ti, use_typestable_api::Val{true}) where {Ti}
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Parallelogram2D, Cartesian2D}, item) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
@@ -139,14 +109,7 @@ function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Parallelogram2D, Cartesia
     return nothing
 end
 
-
-# Backwards compatibility overload for non-type-stable API
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Triangle2D, Cartesian3D}, item::Int, use_typestable_api::Val{false} = Val(false)) where {Ti <: Integer}
-    Base.depwarn("use the type-stable API: typeof(item) must match the L2GTransformer Ti type", :update_trafo!, force = true)
-    return update_trafo!(T, Ti(item), Val(true))
-end
-
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Triangle2D, Cartesian3D}, item::Ti, use_typestable_api::Val{true}) where {Ti}
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Triangle2D, Cartesian3D}, item) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
@@ -163,14 +126,7 @@ function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Triangle2D, Cartesian3D},
     return nothing
 end
 
-
-# Backwards compatibility overload for non-type-stable API
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Parallelogram2D, Cartesian3D}, item::Int, use_typestable_api::Val{false} = Val(false)) where {Ti <: Integer}
-    Base.depwarn("use the type-stable API: typeof(item) must match the L2GTransformer Ti type", :update_trafo!, force = true)
-    return update_trafo!(T, Ti(item), Val(true))
-end
-
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Parallelogram2D, Cartesian3D}, item::Ti, use_typestable_api::Val{true}) where {Ti}
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Parallelogram2D, Cartesian3D}, item) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
@@ -187,13 +143,7 @@ function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Parallelogram2D, Cartesia
     return nothing
 end
 
-# Backwards compatibility overload for non-type-stable API
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Tetrahedron3D, Cartesian3D}, item::Int, use_typestable_api::Val{false} = Val(false)) where {Ti <: Integer}
-    Base.depwarn("use the type-stable API: typeof(item) must match the L2GTransformer Ti type", :update_trafo!, force = true)
-    return update_trafo!(T, Ti(item), Val(true))
-end
-
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Tetrahedron3D, Cartesian3D}, item::Ti, use_typestable_api::Val{true}) where {Ti}
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Tetrahedron3D, Cartesian3D}, item) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
@@ -213,14 +163,7 @@ function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Tetrahedron3D, Cartesian3
     return nothing
 end
 
-
-# Backwards compatibility overload for non-type-stable API
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Parallelepiped3D, Cartesian3D}, item::Int, use_typestable_api::Val{false} = Val(false)) where {Ti <: Integer}
-    Base.depwarn("use the type-stable API: typeof(item) must match the L2GTransformer Ti type", :update_trafo!, force = true)
-    return update_trafo!(T, Ti(item), Val(true))
-end
-
-function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Parallelepiped3D, Cartesian3D}, item::Ti, use_typestable_api::Val{true}) where {Ti}
+function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Parallelepiped3D, Cartesian3D}, item) where {Ti}
     if T.citem != item
         T.citem = item
         T.b[1] = T.Coords[1, T.Nodes[1, item]]
