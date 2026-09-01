@@ -1,5 +1,8 @@
 # Changelog
 
+# [1.17.2] - 2026-09-02
+- Fix stack overflow and bounds errors when accessing grid[CellEdges] for subgrids
+
 # [1.17.1] - 2026-05-20
 - update_trafo! of L2GTransformer does not require item to be of type Int anymore
 - CellFinder result type is always of type Ti (grid items index type)
