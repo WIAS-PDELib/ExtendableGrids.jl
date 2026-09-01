@@ -843,7 +843,11 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeN
             # quick and dirty solution: go via SparseMatrixCSC
             EdgeCells_CSC = asparse(pgrid[EdgeCells])[:, pEdges]
             SEdgeCells = VariableTargetAdjacency(EdgeCells_CSC)
-            SEdgeCells.colentries .= pcell2scell[SEdgeCells.colentries]
+            for i in 1:length(SEdgeCells.colentries)
+                if SEdgeCells.colentries[i] != 0
+                    SEdgeCells.colentries[i] = pcell2scell[SEdgeCells.colentries[i]]
+                end
+            end
             xgrid[EdgeCells] = SEdgeCells
             xgrid[EdgeParents] = pEdges
             return SEdgeNodes
