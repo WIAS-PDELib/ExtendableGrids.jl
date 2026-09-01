@@ -310,6 +310,13 @@ end
     @test numbers_match(subgen(), 756, 3000, 950)
     @test isconsistent(subgen())
 
+
+    X = range(0, 1, length = 11)
+    grid = simplexgrid(X, X)
+    rect!(grid, [0.1, 0.1], [0.9, 0.9], region = 2, bregions = [1, 2, 3, 4])
+    gsub = subgrid(grid, [2])
+    @test size(gsub[CellEdges]) == (3, 128)
+
     X = collect(0:0.25:1)
     gxy = simplexgrid(X, X)
     gxyz = simplexgrid(gxy, X)

@@ -868,6 +868,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeN
     # in 2D edges = faces
     if dim == 2
         xgrid[CellEdges] = xgrid[CellFaces]
+        xgrid[CellEdgeSigns] = xgrid[CellFaceSigns]
         xgrid[EdgeCells] = xgrid[FaceCells]
         xgrid[EdgeNodes] = xgrid[FaceNodes]
         xgrid[EdgeGeometries] = xgrid[FaceGeometries]
