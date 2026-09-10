@@ -195,7 +195,11 @@ function _rebin_all_points!(bpl)
 
             # Slightly increase binning region further in order to
             # include all existing points with tolerance
-            delta = max(bpl.binning_region_max[i] - bpl.binning_region_min[i], bpl.tol)
+            width = bpl.binning_region_max[i] - bpl.binning_region_min[i]
+            # Scale the minimum expansion to the coordinate magnitude
+            scale = max(abs(bpl.binning_region_min[i]), abs(bpl.binning_region_max[i]))
+            min_delta = max(bpl.tol, bpl.binning_region_increase_factor * scale)
+            delta = max(width, min_delta)
             bpl.binning_region_min[i] -= bpl.binning_region_increase_factor * delta
             bpl.binning_region_max[i] += bpl.binning_region_increase_factor * delta
         end
