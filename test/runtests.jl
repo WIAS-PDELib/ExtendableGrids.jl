@@ -249,7 +249,7 @@ end
 end
 
 @testset "Read ele" begin
-    g = simplexgrid("cube.1.ele")
+    g = simplexgrid(joinpath(@__DIR__, "cube.1.ele"))
     @test num_nodes(g) == 156
     @test num_cells(g) == 537
     @test first.(extrema(g)) ≈ zeros(3)
