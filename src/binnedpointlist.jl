@@ -193,9 +193,13 @@ function _rebin_all_points!(bpl)
             bpl.binning_region_min[i] = min(bpl.binning_region_min[i], e[i][1])
             bpl.binning_region_max[i] = max(bpl.binning_region_max[i], e[i][2])
 
+            reltol = bpl.tol * (abs(bpl.binning_region_max[i]) + abs(bpl.binning_region_min[i])) / 2
+            if reltol == 0.0
+                reltol = bpl.tol
+            end
             # Slightly increase binning region further in order to
             # include all existing points with tolerance
-            delta = max(bpl.binning_region_max[i] - bpl.binning_region_min[i], bpl.tol)
+            delta = max(bpl.binning_region_max[i] - bpl.binning_region_min[i], reltol)
             bpl.binning_region_min[i] -= bpl.binning_region_increase_factor * delta
             bpl.binning_region_max[i] += bpl.binning_region_increase_factor * delta
         end
