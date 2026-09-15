@@ -1,5 +1,8 @@
 # Changelog
 
+# [1.17.3] - 2026-09-15
+- Fix cornercases in BinnedPointlist and improve documentation
+
 # [1.17.2] - 2026-09-02
 - Fix stack overflow and bounds errors when accessing grid[CellEdges] for subgrids
 
