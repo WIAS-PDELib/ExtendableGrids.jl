@@ -43,6 +43,54 @@ function postprocess_xreftest!(xreftest::AbstractArray{Tv}, ::Type{<:Parallelepi
     return nothing
 end
 
+## shape function values (in local node order) of a point with local coordinates `xref`
+## (as returned by [`gFindLocal!`](@ref)) for the cell geometries supported by CellFinder:
+## - simplices: `xref[k]` (k=1..dim) is the barycentric weight of node k+1,
+##   `xref[dim+1]` the barycentric weight of node 1
+## - Parallelogram2D: `xref = (ξ, η, 1-ξ)` with ξ along the reference edge (1,2), η along (1,4)
+## - Parallelepiped3D: `xref = (ξ, η, ζ, 1-ξ)` with ξ,η,ζ along the reference edges (1,2),(1,4),(1,5)
+function shapevalues!(w, xref, ::Type{<:Edge1D})
+    w[1] = xref[2]
+    w[2] = xref[1]
+    return nothing
+end
+function shapevalues!(w, xref, ::Type{<:Triangle2D})
+    w[1] = xref[3]
+    w[2] = xref[1]
+    w[3] = xref[2]
+    return nothing
+end
+function shapevalues!(w, xref, ::Type{<:Tetrahedron3D})
+    w[1] = xref[4]
+    w[2] = xref[1]
+    w[3] = xref[2]
+    w[4] = xref[3]
+    return nothing
+end
+function shapevalues!(w, xref, ::Type{<:Parallelogram2D})
+    xi = xref[1]
+    eta = xref[2]
+    w[1] = (1 - xi) * (1 - eta)
+    w[2] = xi * (1 - eta)
+    w[3] = xi * eta
+    w[4] = (1 - xi) * eta
+    return nothing
+end
+function shapevalues!(w, xref, ::Type{<:Parallelepiped3D})
+    xi = xref[1]
+    eta = xref[2]
+    zeta = xref[3]
+    w[1] = (1 - xi) * (1 - eta) * (1 - zeta)
+    w[2] = xi * (1 - eta) * (1 - zeta)
+    w[3] = xi * eta * (1 - zeta)
+    w[4] = (1 - xi) * eta * (1 - zeta)
+    w[5] = (1 - xi) * (1 - eta) * zeta
+    w[6] = xi * (1 - eta) * zeta
+    w[7] = xi * eta * zeta
+    w[8] = (1 - xi) * eta * zeta
+    return nothing
+end
+
 """
     CellFinder(grid)
 
@@ -89,11 +137,16 @@ end
 Find cell containing point `p`  starting with cell number `icellstart`.
 
 Returns cell number if found, zero otherwise. If `trybrute==true` try [`gFindBruteForce!`](@ref) before giving up.
-Upon return, xref contains the barycentric coordinates of the point in the sequence 
-`dim+1, 1...dim`
+Upon return, `xref` contains the local (barycentric) coordinates of the point:
+`xref[1]:xref[dim]` are the coordinates along the reference edges from node 1 to
+nodes 2..dim+1 (i.e., the barycentric weights of nodes 2..dim+1) and `xref[dim+1]`
+is the barycentric weight of node 1. On Parallelogram2D cells `xref = (ξ, η, 1-ξ)`
+and on Parallelepiped3D cells `xref = (ξ, η, ζ, 1-ξ)`, where (ξ,η[,ζ]) are the
+coordinates in the reference cell.
 
-!!! warning
-    Currently implemented for simplex grids only.
+!!! note
+    Supported cell geometries: Edge1D, Triangle2D, Tetrahedron3D, Parallelogram2D,
+    and Parallelepiped3D (also in mixed grids).
 """
 function gFindLocal!(
         xref,
@@ -202,11 +255,16 @@ end
 Find cell containing point `p`  starting with cell number `icellstart`.
 
 Returns cell number if found, zero otherwise.
-Upon return, xref contains the barycentric coordinates of the point in the sequence 
-`dim+1, 1...dim`
+Upon return, `xref` contains the local (barycentric) coordinates of the point:
+`xref[1]:xref[dim]` are the coordinates along the reference edges from node 1 to
+nodes 2..dim+1 (i.e., the barycentric weights of nodes 2..dim+1) and `xref[dim+1]`
+is the barycentric weight of node 1. On Parallelogram2D cells `xref = (ξ, η, 1-ξ)`
+and on Parallelepiped3D cells `xref = (ξ, η, ζ, 1-ξ)`, where (ξ,η[,ζ]) are the
+coordinates in the reference cell.
 
-!!! warning
-    Currently implemented for simplex grids only.
+!!! note
+    Supported cell geometries: Edge1D, Triangle2D, Tetrahedron3D, Parallelogram2D,
+    and Parallelepiped3D (also in mixed grids).
 
 """
 function gFindBruteForce!(xref, CF::CellFinder{Tv, Ti}, x; eps = 1.0e-14)::Ti where {Tv, Ti}
@@ -271,8 +329,6 @@ end
 Mutating form of [`interpolate`](@ref)
 """
 function interpolate!(u_to::AbstractArray, grid_to, u_from::AbstractArray, grid_from; eps = 1.0e-14, not_in_domain_value = nothing, check_if_not_in_domain = isnothing(not_in_domain_value), trybrute = true)
-    shuffle = [[2, 1], [3, 1, 2], [4, 1, 2, 3]]
-
     update!(u_to::AbstractVector, inode_to, λ, u_from::AbstractVector, inode_from) = u_to[inode_to] += λ * u_from[inode_from]
     update!(u_to::AbstractMatrix, inode_to, λ, u_from::AbstractMatrix, inode_from) = @views u_to[:, inode_to] += λ * u_from[:, inode_from]
 
@@ -291,23 +347,26 @@ function interpolate!(u_to::AbstractArray, grid_to, u_from::AbstractArray, grid_
         @assert ndims(u_from) < 3
     end
 
-    λ = zeros(dim + 1)
-    λ_shuffle = view(λ, shuffle[dim])
+    xref = zeros(dim + 1)
+    w = zeros(2^dim)                             # shape function values of the point (max. number of vertices of a cell)
     cn_from = grid_from[CellNodes]
+    cellgeoms = grid_from[CellGeometries]
     cf = CellFinder(grid_from)
     icellstart = 1
     for inode_to in 1:nnodes_to
-        @views icell_from = gFindLocal!(λ, cf, coord[:, inode_to]; icellstart, eps, trybrute)
+        @views icell_from = gFindLocal!(xref, cf, coord[:, inode_to]; icellstart, eps, trybrute)
         if icell_from <= 0 && !check_if_not_in_domain
             u_to[inode_to] = not_in_domain_value
         else
             @assert icell_from > 0 "could not find cell for node $inode_to with coordinate $(coord[:, inode_to])"
-            for i in 1:(dim + 1)
+            ## evaluate the shape functions of the found cell at the point
+            shapevalues!(w, xref, cellgeoms[icell_from])
+            for i in 1:num_nodes(cellgeoms[icell_from])
                 inode_from = cn_from[i, icell_from]
-                update!(u_to, inode_to, λ_shuffle[i], u_from, inode_from)
+                update!(u_to, inode_to, w[i], u_from, inode_from)
             end
         end
-        icell_start = icell_from
+        icellstart = max(icell_from, 1)
     end
     return u_to
 end
@@ -316,13 +375,17 @@ end
 """
 	u_to=interpolate(grid_to, u_from, grid_from;eps=1.0e-14,trybrute=true)
 
-Piecewise linear interpolation of function `u_from` on grid `grid_from` to `grid_to`.
+Piecewise polynomial interpolation of function `u_from` on grid `grid_from` to `grid_to`;
+the value at each node of `grid_to` is reconstructed with the shape functions of the cell
+of `grid_from` the node lies in (linear on simplices, bilinear on Parallelogram2D cells,
+trilinear on Parallelepiped3D cells).
 Works for matrices with second dimension corresponding to grid nodes and for vectors.
 !!! warning
     May be slow on non-convex domains. If `trybrute==false` it may even fail.
 
-!!! warning
-    Currently implemented for simplex grids only.
+!!! note
+    Supported cell geometries: Edge1D, Triangle2D, Tetrahedron3D, Parallelogram2D,
+    and Parallelepiped3D (also in mixed grids).
 """
 function interpolate(grid_to, u_from::AbstractVector, grid_from; eps = 1.0e-14, trybrute = true)
     u_to = zeros(eltype(u_from), num_nodes(grid_to))

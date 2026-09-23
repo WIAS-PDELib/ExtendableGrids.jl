@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.17.4] - 2026-09-23
+- `interpolate`/`interpolate!`: reconstruct values with the shape functions of the actually found cell
+  (bilinear on Parallelogram2D, trilinear on Parallelepiped3D) instead of the simplex-only
+  barycentric weights; mixed grids with simplices and parallelograms/parallelepipeds are now
+  supported
+- `interpolate!`: use the found cell as start cell for the next lookup (hot start)
+
 # [1.17.3] - 2026-09-15
 - Fix cornercases in BinnedPointlist and improve documentation
 
