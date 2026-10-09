@@ -358,6 +358,15 @@ end
 ########################################################
 ## WIAS-TeSCA dom format
 #######################################################
+"""
+$(TYPEDEF)
+
+Array of original WIAS-TeSCA dom boundary condition codes.
+
+Grid component created when reading "*.dom" files. Since the boundary
+region numbers in [`BFaceRegions`](@ref) are renumbered to start from 1,
+`BRegionDomCode` stores the dom code behind each of them.
+"""
 struct BRegionDomCode <: AbstractGridComponent end
 
 function simplexgrid(
@@ -501,8 +510,21 @@ function writegrid(filename::String, g::ExtendableGrid, ::Type{Val{:msh}}; kwarg
 end
 
 
+"""
+    simplexgrid_from_gmsh(file; incomplete=false, Tc=Float32, Ti=Int32)
+    simplexgrid_from_gmsh(mod::Module; incomplete=false, Tc=Float32, Ti=Int32)
+
+Create a grid from a gmsh mesh file (or from a mesh in a gmsh module).
+Requires the Gmsh.jl extension.
+"""
 function simplexgrid_from_gmsh end
 
+"""
+    simplexgrid_to_gmsh(g::ExtendableGrid; filename::String="")
+
+Load a grid into a gmsh module, optionally writing the mesh to `filename`.
+Requires the Gmsh.jl extension.
+"""
 function simplexgrid_to_gmsh end
 
 function mixedgrid_from_gmsh end

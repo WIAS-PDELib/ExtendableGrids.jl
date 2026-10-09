@@ -22,7 +22,25 @@
 #    return Edge1DWithParent{CEG}
 #end
 
+"""
+````
 const GridEGTypes = Vector{ElementGeometries}
+````
+
+Array type for element geometry types of grid items, as used e.g.
+by [`CellGeometries`](@ref).
+"""
+const GridEGTypes = Vector{ElementGeometries}
+
+"""
+````
+const GridRegionTypes{Ti} = Union{VectorOfConstants{Ti}, Array{Ti, 1}}
+````
+
+Array type for region numbers of grid items. If all items share the same
+region, it can be stored in an economical form as a
+[`VectorOfConstants`](@ref), as used e.g. by [`CellRegions`](@ref).
+"""
 const GridRegionTypes{Ti} = Union{VectorOfConstants{Ti}, Array{Ti, 1}}
 
 
@@ -320,20 +338,97 @@ abstract type NodeEdges <: AbstractGridAdjacency end
 
 
 ## grid item types to dispatch certain things to the correct GridComponents
+"""
+$(TYPEDEF)
+
+ItemType marker for nodes of the grid.
+"""
 abstract type ITEMTYPE_NODE end
+
+"""
+$(TYPEDEF)
+
+ItemType marker for cells of the grid.
+"""
 abstract type ITEMTYPE_CELL end
+
+"""
+$(TYPEDEF)
+
+ItemType marker for faces of the grid.
+"""
 abstract type ITEMTYPE_FACE end
+
+"""
+$(TYPEDEF)
+
+ItemType marker for boundary faces of the grid.
+"""
 abstract type ITEMTYPE_BFACE end
+
+"""
+$(TYPEDEF)
+
+ItemType marker for edges of the grid (only in 3D).
+"""
 abstract type ITEMTYPE_EDGE end
+
+"""
+$(TYPEDEF)
+
+ItemType marker for boundary edges of the grid (only in 3D).
+"""
 abstract type ITEMTYPE_BEDGE end
 
+"""
+$(TYPEDEF)
+
+Property marker for the node adjacency of grid items.
+"""
 abstract type PROPERTY_NODES end
+
+"""
+$(TYPEDEF)
+
+Property marker for the volumes of grid items.
+"""
 abstract type PROPERTY_VOLUME end
+
+"""
+$(TYPEDEF)
+
+Property marker for the region numbers of grid items.
+"""
 abstract type PROPERTY_REGION end
+
+"""
+$(TYPEDEF)
+
+Property marker for the element geometries of grid items.
+"""
 abstract type PROPERTY_GEOMETRY end
+
+"""
+$(TYPEDEF)
+
+Property marker for the unique element geometries of grid items.
+"""
 abstract type PROPERTY_UNIQUEGEOMETRY end
+
+"""
+$(TYPEDEF)
+
+Property marker for the assembly groups of grid items.
+"""
 abstract type PROPERTY_ASSEMBLYGROUP end
 
+"""
+$(TYPEDSIGNATURES)
+
+Grid component type for items of the given ItemType and the given Property,
+e.g. `CellNodes` for `ITEMTYPE_CELL`/`PROPERTY_NODES`. Used by the
+`GridComponent*4AssemblyType` methods.
+"""
 GridComponent4TypeProperty(::Type{ITEMTYPE_CELL}, ::Type{PROPERTY_NODES}) = CellNodes
 GridComponent4TypeProperty(::Type{ITEMTYPE_CELL}, ::Type{PROPERTY_VOLUME}) = CellVolumes
 GridComponent4TypeProperty(::Type{ITEMTYPE_CELL}, ::Type{PROPERTY_REGION}) = CellRegions

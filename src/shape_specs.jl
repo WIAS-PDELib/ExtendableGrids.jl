@@ -115,11 +115,23 @@ Geometries of faces of 1D edge
 facetype_of_cellface(::Type{<:AbstractElementGeometry1D}, k) = Vertex0D
 
 
+"""
+$(SIGNATURES)
+
+Maps of reference coordinates on a face of the geometry to reference
+coordinates in the cell, one map per face.
+"""
 xrefFACE2xrefCELL(::Type{<:AbstractElementGeometry1D}) = [
     [(xref4FACE) -> [1]],
     [(xref4FACE) -> [1]],
 ]
 
+"""
+$(SIGNATURES)
+
+Maps of reference coordinates on a face to reference coordinates on the
+same face with different orientation, one map per orientation.
+"""
 xrefFACE2xrefOFACE(::Type{<:AbstractElementGeometry1D}) = [(xref4FACE) -> xref4FACE, (xref4FACE) -> 1 .- xref4FACE]
 
 
@@ -477,6 +489,15 @@ end
 ### NORMALS ###
 ###############
 
+"""
+$(SIGNATURES)
+
+Compute unit normal vector of an item of given geometry embedded in higher
+dimensional space and store it in `normal`. For 2D surface items in 3D, it
+is the normalized cross product of two edge vectors, its direction depends
+on the node numbering of the item. For an edge in 2D, its tangent is
+rotated. Used to instantiate [`FaceNormals`](@ref).
+"""
 function Normal4ElemType!(normal, Coords, Nodes, item, ::Type{<:Vertex0D}, ::Type{Cartesian2D})
     normal[1] = 0.0
     return normal[2] = 0.0
@@ -530,6 +551,13 @@ end
 ### TANGENTS ###
 ################
 
+"""
+$(SIGNATURES)
+
+Compute unit tangent vector of an edge, pointing from its first to its
+second node, and store it in `tangent`. Used to instantiate
+[`EdgeTangents`](@ref).
+"""
 function Tangent4ElemType!(tangent, Coords, Nodes, item, ::Type{<:Edge1D}, ::Type{Cartesian2D})
     tangent[1] = Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]
     tangent[2] = Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]

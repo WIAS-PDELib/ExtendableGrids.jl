@@ -428,6 +428,12 @@ Type of indices
 """
 index_type(grid::ExtendableGrid{Tc, Ti}) where {Tc, Ti} = Ti
 
+"""
+$(SIGNATURES)
+
+Coordinates of nodes that belong to no cell, as columns of the coordinate
+array, `nothing` if there are none.
+"""
 function dangling_nodes(grid)
     coord = grid[Coordinates]
     nnodes = size(coord, 2)
@@ -752,6 +758,11 @@ seemingly_equal(x1::Type, x2::Type) = (x1 == x2)
 seemingly_equal(x1::Number, x2::Number) = (x1 ≈ x2)
 seemingly_equal(x1::Any, x2::Any) = (x1 == x2)
 
+"""
+$(SIGNATURES)
+
+Check whether the grid has exactly `nn` nodes, `nc` cells and `nb` boundary faces.
+"""
 function numbers_match(grid, nn, nc, nb)
     return num_nodes(grid) == nn &&
         num_cells(grid) == nc &&

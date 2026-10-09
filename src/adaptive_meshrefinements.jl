@@ -1,3 +1,15 @@
+"""
+$(TYPEDSIGNATURES)
+
+Bulk (Doerfler) marking of faces for adaptive refinement.
+
+The refinement_indicators are given on cells (`indicator_AT == ON_CELLS`)
+or on faces (`indicator_AT == ON_FACES`). In the first case, they are
+averaged to the faces from their adjacent cells. Faces with the largest
+indicators are marked until the cumulative sum reaches `theta` times the
+total sum. Returns a Bool array which can be used as `facemarkers` in
+[`RGB_refine`](@ref).
+"""
 function bulk_mark(xgrid::ExtendableGrid{Tv, Ti}, refinement_indicators::AbstractVector{T}, theta = 0.5; indicator_AT = ON_CELLS) where {T, Tv, Ti}
 
     xFaceCells = xgrid[FaceCells]
