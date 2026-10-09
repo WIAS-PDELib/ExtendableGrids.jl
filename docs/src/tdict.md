@@ -1,4 +1,4 @@
-# The TDict interface pattern
+# [The TDict interface pattern](@id TDict)
 
 Here we describe the idea behind the data structure used in this package.
 TDict means: extendable containers with type stable content access and lazy content creation via the Julia type system.

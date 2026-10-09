@@ -16,3 +16,8 @@ Private = false
 Modules = [ExtendableGrids]
 Pages = ["commongrids.jl"]
 ```
+
+## Grid components from file formats
+```@docs
+BRegionDomCode
+```
