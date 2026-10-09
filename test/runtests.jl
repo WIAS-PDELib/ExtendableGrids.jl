@@ -17,6 +17,7 @@ using AbstractTrees, StatsBase
     Aqua.test_persistent_tasks(ExtendableGrids)
 end
 
+testinputdir(fname) = joinpath(pkgdir(ExtendableGrids), "test", "testinputs", fname)
 
 @testset "Constructors" begin
     # test whether the show() function throws an error
@@ -228,7 +229,7 @@ end
 
 function testrw(grid, format; compare_kwargs = (confidence = :full,), kwargs...)
     #@warn format
-    ftmp = tempname() * "." * format
+    ftmp = tempname(; suffix = "." * format, cleanup = true)
     write(ftmp, grid; kwargs...)
     grid1 = simplexgrid(ftmp)
     return seemingly_equal(grid1, grid; compare_kwargs...)
@@ -249,11 +250,17 @@ end
 end
 
 @testset "Read ele" begin
-    g = simplexgrid(joinpath(@__DIR__, "cube.1.ele"))
+    g = simplexgrid(testinputdir("cube.1.ele"))
     @test num_nodes(g) == 156
     @test num_cells(g) == 537
     @test first.(extrema(g)) ≈ zeros(3)
     @test last.(extrema(g)) ≈ ones(3)
+
+    g = simplexgrid(testinputdir("cubecut3x3.1.ele"))
+    @test num_nodes(g) == 657
+    @test num_cells(g) == 2622
+    @test first.(extrema(g)) ≈ fill(0, 3)
+    @test last.(extrema(g)) ≈ fill(10, 3)
 end
 
 @testset "rectnd" begin
@@ -514,15 +521,16 @@ end
     # ensure calculation of these data is free of roundoff errors
     point_data = map((x, y, z) -> (x + y + z), g)
     field_data = [1.0, 2, 3, 4, 5, 6]
+    tempvtu = tempname(suffix = ".vtu", cleanup = true)
 
     writeVTK(
-        "testfile_writevtk.vtu", g;
+        tempvtu, g;
         cellregions = g[CellRegions],
         point_data = point_data,
         field_data = field_data
     )
 
-    sha_code = open("testfile_writevtk.vtu") do f
+    sha_code = open(tempvtu) do f
         sha256(f)
     end |> bytes2hex
 
@@ -530,11 +538,9 @@ end
 end
 
 
-if VERSION < v"1.12.0-DEV.0"
-    notebooks = ["pluto-partitioning.jl"]
-    @testset "Notebooks" begin
-        @testscripts(joinpath(@__DIR__, "..", "examples"), notebooks)
-    end
+notebooks = ["pluto-partitioning.jl"]
+@testset "Notebooks" begin
+    @testscripts(joinpath(@__DIR__, "..", "examples"), notebooks)
 end
 
 
