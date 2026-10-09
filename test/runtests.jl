@@ -23,7 +23,10 @@ testinputdir(fname) = joinpath(pkgdir(ExtendableGrids), "test", "testinputs", fn
     function mytempname(; suffix = "", cleanup = true)
         return tempname(; cleanup = false) * suffix
     end
-    myrm(fname) = rm(fname)
+    function myrm(fname)
+        sleep(1)
+        rm(fname)
+    end
 else
     const mytempname = tempname
     myrm(fname) = nothing
