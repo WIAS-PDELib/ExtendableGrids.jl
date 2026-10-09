@@ -1,3 +1,8 @@
+"""
+    ExtendableGrids
+
+$(read(joinpath(@__DIR__,"..","README.md"),String))
+"""
 module ExtendableGrids
 
 using DocStringExtensions

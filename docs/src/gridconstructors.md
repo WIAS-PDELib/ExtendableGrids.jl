@@ -4,6 +4,9 @@
 
 ```@docs
 simplexgrid
+XCoordinates
+YCoordinates
+ZCoordinates
 glue
 ```
 

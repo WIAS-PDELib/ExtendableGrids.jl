@@ -1,10 +1,16 @@
 # Extendable grid
 
-An ExtendableGrid in form of a dictionary with types as keys and type stable value access.
-This means that grid components are accessed as dict entries, e.g. `grid[Coordinates]` .
-The rationale of this approach is explained [here](tdict.md).
 
-## Notations
+An ExtendableGrid in form of a dictionary with types as keys and type stable value access.
+This means that grid components are accessed as dict entries, e.g. `grid[Coordinates]`.
+The rationale behind this decision is described [below](@ref TDict).
+
+```@contents
+Pages = ["extendablegrid.md"]
+Depth = 2:6
+```
+
+## Extendable grid notations
 A grid is assumed to be a subset of components of a polyhedral complex in d-dimensional space.
 We distinguish the following element classes characterized by their dimension:
 
