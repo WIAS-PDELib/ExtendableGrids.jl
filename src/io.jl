@@ -70,7 +70,7 @@ function simplexgrid(file::String; format = "", kwargs...)
     return try
         simplexgrid(file, Val{Symbol(format)}; kwargs...)
     catch e
-        throw(ErrorException("Reading $(fext) files not supported"))
+        throw(ErrorException("Reading $(file) file failed or $(fext) files not supported"))
     end
 end
 
@@ -275,7 +275,7 @@ function simplexgrid(file::String, ::Type{Val{:ele}}; kwargs...)
     tks_ele = TokenStream(fname * ".ele")
     tks_face = TokenStream(fname * ".face")
     tks_node = TokenStream(fname * ".node")
-
+    shift = 1
 
     npoints = parse(Ti, gettoken(tks_node))
     dim = parse(Ti, gettoken(tks_node))
@@ -292,7 +292,15 @@ function simplexgrid(file::String, ::Type{Val{:ele}}; kwargs...)
     end
     coord = Array{Float64, 2}(undef, dim, npoints)
     for ipoint in 1:npoints
-        idx = parse(Ti, gettoken(tks_node)) + 1
+        idx = parse(Ti, gettoken(tks_node))
+        if ipoint == 1
+            if idx == 1
+                shift = 0
+            else
+                shift = 1
+            end
+        end
+        idx = idx + shift
         for idim in 1:dim
             coord[idim, idx] = parse(Float64, gettoken(tks_node))
         end
@@ -314,9 +322,9 @@ function simplexgrid(file::String, ::Type{Val{:ele}}; kwargs...)
         @warn "ignoring more than one cell attribute"
     end
     for icell in 1:ncells
-        idx = parse(Ti, gettoken(tks_ele)) + 1
+        idx = parse(Ti, gettoken(tks_ele)) + shift
         for inode in 1:ncellnodes
-            cells[inode, idx] = parse(Ti, gettoken(tks_ele)) + 1
+            cells[inode, idx] = parse(Ti, gettoken(tks_ele)) + shift
         end
         if ncellattributes == 0
             regions[idx] = 1
@@ -337,9 +345,9 @@ function simplexgrid(file::String, ::Type{Val{:ele}}; kwargs...)
     faces = Array{Ti, 2}(undef, dim, nfaces)
     bregions = Array{Ti, 1}(undef, nfaces)
     for iface in 1:nfaces
-        idx = parse(Ti, gettoken(tks_face)) + 1
+        idx = parse(Ti, gettoken(tks_face)) + shift
         for inode in 1:nfacenodes
-            faces[inode, idx] = parse(Ti, gettoken(tks_face)) + 1
+            faces[inode, idx] = parse(Ti, gettoken(tks_face)) + shift
         end
         if nfaceattributes == 0
             bregions[idx] = 1
@@ -349,6 +357,12 @@ function simplexgrid(file::String, ::Type{Val{:ele}}; kwargs...)
                 gettoken(tks_face)
             end
         end
+    end
+    if minimum(regions) < 1
+        @warn "detected zero or negative cell region numbers"
+    end
+    if minimum(bregions) < 1
+        @warn "detected zero or negative bface region numbers"
     end
     g = simplexgrid(coord, cells, regions, faces, bregions)
     return g
