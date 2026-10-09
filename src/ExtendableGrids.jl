@@ -1,7 +1,7 @@
 """
     ExtendableGrids
 
-$(read(joinpath(@__DIR__,"..","README.md"),String))
+$(read(joinpath(@__DIR__, "..", "README.md"), String))
 """
 module ExtendableGrids
 
