@@ -45,7 +45,7 @@ end
 @testset "Read/write simplex gmsh 2d / 3d" begin
     X = collect(0:0.02:2)
     Y = collect(0:2:4)
-    testfilemsh = tempname(; suffix = ".msh", cleanup = true)
+    testfilemsh = mytempname(; suffix = ".msh", cleanup = true)
     grid1 = simplexgrid(X, Y)
     ExtendableGrids.simplexgrid_to_gmsh(grid1; filename = testfilemsh)
 
@@ -115,10 +115,12 @@ end
     @test seemingly_equal(grid2, grid1; sort = true, confidence = :full)
     @test seemingly_equal(grid3, grid1; sort = true, confidence = :low)
     @test seemingly_equal(grid3, grid1; sort = true, confidence = :full)
+
+    myrm(testfilemsh)
 end
 
 @testset "Read/write mixed gmsh 2d" begin
-    testfilemsh = tempname(; suffix = ".msh", cleanup = true)
+    testfilemsh = mytempname(; suffix = ".msh", cleanup = true)
 
     grid1 = ExtendableGrids.mixedgrid_from_gmsh(testinputdir("mixedgrid_2d.msh"); Tc = Float64, Ti = Int64)
     @test_broken isconsistent(grid1)
@@ -129,6 +131,8 @@ end
 
     @test seemingly_equal(grid1, grid2; sort = true, confidence = :low)
     @test seemingly_equal(grid1, grid2; sort = true, confidence = :full)
+
+    myrm(testfilemsh)
 end
 
 @testset "Read .geo files" begin

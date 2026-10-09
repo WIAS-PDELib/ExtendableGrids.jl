@@ -19,6 +19,17 @@ end
 
 testinputdir(fname) = joinpath(pkgdir(ExtendableGrids), "test", "testinputs", fname)
 
+@static if VERSION < v"1.12.0"
+    function mytempname(; suffix = "", cleanup = true)
+        return tempname(; cleanup = false) * suffix
+    end
+    myrm(fname) = rm(fname)
+else
+    const mytempname = tempname
+    myrm(fname) = nothing
+end
+
+
 @testset "Constructors" begin
     # test whether the show() function throws an error
     @test show(ExtendableGrid{Float64, Int32}()) === nothing
@@ -229,9 +240,10 @@ end
 
 function testrw(grid, format; compare_kwargs = (confidence = :full,), kwargs...)
     #@warn format
-    ftmp = tempname(; suffix = "." * format, cleanup = true)
+    ftmp = mytempname(; suffix = "." * format, cleanup = true)
     write(ftmp, grid; kwargs...)
     grid1 = simplexgrid(ftmp)
+    myrm(ftmp)
     return seemingly_equal(grid1, grid; compare_kwargs...)
 end
 
@@ -521,7 +533,7 @@ end
     # ensure calculation of these data is free of roundoff errors
     point_data = map((x, y, z) -> (x + y + z), g)
     field_data = [1.0, 2, 3, 4, 5, 6]
-    tempvtu = tempname(suffix = ".vtu", cleanup = true)
+    tempvtu = mytempname(suffix = ".vtu", cleanup = true)
 
     writeVTK(
         tempvtu, g;
@@ -533,6 +545,8 @@ end
     sha_code = open(tempvtu) do f
         sha256(f)
     end |> bytes2hex
+
+    myrm(tempvtu)
 
     @test sha_code == "9596c59f6b0870dd4a42a7a48725c2257f260757e15cc5ac433e5e8e235659d9"
 end
