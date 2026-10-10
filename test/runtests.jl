@@ -24,8 +24,9 @@ testinputdir(fname) = joinpath(pkgdir(ExtendableGrids), "test", "testinputs", fn
         return tempname(; cleanup = false) * suffix
     end
     function myrm(fname)
-        sleep(1)
-        rm(fname)
+        if !sys.iswindows()
+            rm(fname)
+        end
     end
 else
     const mytempname = tempname
