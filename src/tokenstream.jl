@@ -69,8 +69,11 @@ $(TYPEDSIGNATURES)
         
 Create Tokenstream with file name argument.
 """
-TokenStream(filename::String; comment = '#', dlm = isspace) = TokenStream(open(filename), comment = comment, dlm = dlm)
-
+function TokenStream(filename::String; comment = '#', dlm = isspace)
+    tks = TokenStream(open(filename), comment = comment, dlm = dlm)
+    finalizer(destruct!, tks)
+    return tks
+end
 """
 $(TYPEDSIGNATURES) 
 

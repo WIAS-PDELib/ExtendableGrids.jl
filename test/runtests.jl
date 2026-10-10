@@ -17,6 +17,22 @@ using AbstractTrees, StatsBase
     Aqua.test_persistent_tasks(ExtendableGrids)
 end
 
+testinputdir(fname) = joinpath(pkgdir(ExtendableGrids), "test", "testinputs", fname)
+
+@static if VERSION < v"1.12.0"
+    function mytempname(; suffix = "", cleanup = true)
+        return tempname(; cleanup = false) * suffix
+    end
+    function myrm(fname)
+        if !Sys.iswindows()
+            rm(fname)
+        end
+    end
+else
+    const mytempname = tempname
+    myrm(fname) = nothing
+end
+
 
 @testset "Constructors" begin
     # test whether the show() function throws an error
@@ -228,9 +244,10 @@ end
 
 function testrw(grid, format; compare_kwargs = (confidence = :full,), kwargs...)
     #@warn format
-    ftmp = tempname() * "." * format
+    ftmp = mytempname(; suffix = "." * format, cleanup = true)
     write(ftmp, grid; kwargs...)
     grid1 = simplexgrid(ftmp)
+    myrm(ftmp)
     return seemingly_equal(grid1, grid; compare_kwargs...)
 end
 
@@ -249,11 +266,17 @@ end
 end
 
 @testset "Read ele" begin
-    g = simplexgrid(joinpath(@__DIR__, "cube.1.ele"))
+    g = simplexgrid(testinputdir("cube.1.ele"))
     @test num_nodes(g) == 156
     @test num_cells(g) == 537
     @test first.(extrema(g)) ≈ zeros(3)
     @test last.(extrema(g)) ≈ ones(3)
+
+    g = simplexgrid(testinputdir("cubecut3x3.1.ele"))
+    @test num_nodes(g) == 657
+    @test num_cells(g) == 2622
+    @test first.(extrema(g)) ≈ fill(0, 3)
+    @test last.(extrema(g)) ≈ fill(10, 3)
 end
 
 @testset "rectnd" begin
@@ -514,27 +537,28 @@ end
     # ensure calculation of these data is free of roundoff errors
     point_data = map((x, y, z) -> (x + y + z), g)
     field_data = [1.0, 2, 3, 4, 5, 6]
+    tempvtu = mytempname(suffix = ".vtu", cleanup = true)
 
     writeVTK(
-        "testfile_writevtk.vtu", g;
+        tempvtu, g;
         cellregions = g[CellRegions],
         point_data = point_data,
         field_data = field_data
     )
 
-    sha_code = open("testfile_writevtk.vtu") do f
+    sha_code = open(tempvtu) do f
         sha256(f)
     end |> bytes2hex
+
+    myrm(tempvtu)
 
     @test sha_code == "9596c59f6b0870dd4a42a7a48725c2257f260757e15cc5ac433e5e8e235659d9"
 end
 
 
-if VERSION < v"1.12.0-DEV.0"
-    notebooks = ["pluto-partitioning.jl"]
-    @testset "Notebooks" begin
-        @testscripts(joinpath(@__DIR__, "..", "examples"), notebooks)
-    end
+notebooks = ["pluto-partitioning.jl"]
+@testset "Notebooks" begin
+    @testscripts(joinpath(@__DIR__, "..", "examples"), notebooks)
 end
 
 

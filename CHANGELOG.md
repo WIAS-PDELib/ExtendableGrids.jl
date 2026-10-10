@@ -1,16 +1,19 @@
 # Changelog
 
-# [1.17.3] - 2026-09-15
+# Unreleased
+- Fix reading of one based indexed tetgen .ele files
+
+## [1.17.3] - 2026-09-15
 - Fix cornercases in BinnedPointlist and improve documentation
 
-# [1.17.2] - 2026-09-02
+## [1.17.2] - 2026-09-02
 - Fix stack overflow and bounds errors when accessing grid[CellEdges] for subgrids
 
-# [1.17.1] - 2026-05-20
+## [1.17.1] - 2026-05-20
 - update_trafo! of L2GTransformer does not require item to be of type Int anymore
 - CellFinder result type is always of type Ti (grid items index type)
 
-# [1.17.0] - 2026-04-15
+## [1.17.0] - 2026-04-15
 - new kwargs `not_in_domain_value = nothing` and `check_if_not_in_domain = isnothing(not_in_domain_value)` for grid interpolation.
   This enables the user to interpolate values between grids which do not share the same domain. The value _outside_ the target domain has to be provided by the user.
 - Allow to read simplexgrid data from TetGen .ele file sets
