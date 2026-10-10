@@ -91,8 +91,25 @@ end
 
 
 ##########################################################
+"""
+$(TYPEDEF)
+
+Array of x-coordinates of grid nodes
+"""
 abstract type XCoordinates <: AbstractGridFloatArray1D end
+
+"""
+$(TYPEDEF)
+
+Array of y-coordinates of grid nodes
+"""
 abstract type YCoordinates <: AbstractGridFloatArray1D end
+
+"""
+$(TYPEDEF)
+
+Array of z-coordinates of grid nodes
+"""
 abstract type ZCoordinates <: AbstractGridFloatArray1D end
 
 

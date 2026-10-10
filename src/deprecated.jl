@@ -1,4 +1,9 @@
 ## NodeInParent was renamed to NodeParents in v1.3
+"""
+$(TYPEDEF)
+
+Deprecated, use [`NodeParents`](@ref) instead (renamed in v1.3).
+"""
 abstract type NodeInParent <: AbstractGridIntegerArray1D end
 export NodeInParent
 

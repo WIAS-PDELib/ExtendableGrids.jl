@@ -148,4 +148,11 @@ const allgeometrytypes = vcat(
     allsubtypes(AbstractElementGeometry3D)
 )
 
+"""
+````
+const ElementGeometries = Union{[Type{t} for t in allgeometrytypes]...}
+````
+
+Union type of the types of all supported element geometries.
+"""
 const ElementGeometries = Union{[Type{t} for t in allgeometrytypes]...}

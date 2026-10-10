@@ -39,6 +39,16 @@ function L2GTransformer(EG::Union{Type{<:Tetrahedron3D}, Type{<:Parallelepiped3D
     return L2GTransformer{Tv, Ti, EG, grid[CoordinateSystem]}(0, false, grid[Coordinates], grid[GridComponentNodes4AssemblyType(AT)], grid[GridComponentVolumes4AssemblyType(AT)], A, b, zeros(Tv, 3, 3), 0)
 end
 
+"""
+    update_trafo!(T::L2GTransformer, item)
+
+Update mapping data of `T` for the current item.
+
+Must be called when entering a new item (e.g. cell). It (re)computes
+the affine map `x = A*xref + b` of that item and its determinant `T.det`
+which are used by [`eval_trafo!`](@ref) and [`mapderiv!`](@ref).
+Nothing is done if the item has not changed.
+"""
 function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Vertex0D, Cartesian1D}, item) where {Ti}
     T.b[1] = T.Coords[1, T.Nodes[1, item]]
     return nothing
@@ -183,6 +193,14 @@ function update_trafo!(T::L2GTransformer{<:Real, Ti, <:Parallelepiped3D, Cartesi
     return nothing
 end
 
+"""
+    eval_trafo!(x::AbstractArray, T::L2GTransformer, xref)
+
+Map reference coordinates `xref` to global coordinates `x`.
+
+Uses the mapping data of the item which was last set by
+[`update_trafo!`](@ref). Result is stored in `x`.
+"""
 function eval_trafo!(x::AbstractArray, T::L2GTransformer{<:Real, <:Integer, <:Vertex0D, Cartesian1D}, xref)
     x[1] = T.b[1]
     return nothing
@@ -232,6 +250,17 @@ end
 # EDGE1D/CARTESIAN1D map derivative
 # x = a*xref + b
 # Dxref/dx = a^{-1} = |E|^{-1}
+"""
+    mapderiv!(M::Matrix, T::L2GTransformer, xref)
+
+Store derivative of the inverse mapping in `M`.
+
+`M[j,k]` holds `dxref[k]/dx[j]`, i.e. the transposed inverse of the
+Jacobian of the affine map `x = A*xref + b` of the item which was last
+set by [`update_trafo!`](@ref). Used for computation of derivatives of
+basis functions. For edges embedded in higher dimensions this is the
+tangential derivative.
+"""
 function mapderiv!(M::Matrix, T::L2GTransformer{<:Real, <:Integer, <:Edge1D, Cartesian1D}, xref)
     # transposed inverse of A
     M[1, 1] = 1.0 / T.det
