@@ -24,7 +24,7 @@ testinputdir(fname) = joinpath(pkgdir(ExtendableGrids), "test", "testinputs", fn
         return tempname(; cleanup = false) * suffix
     end
     function myrm(fname)
-        if !sys.iswindows()
+        if !Sys.iswindows()
             rm(fname)
         end
     end
