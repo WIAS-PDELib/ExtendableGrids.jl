@@ -1,7 +1,8 @@
 # Changelog
 
-# Unreleased
-- Fix reading of one based indexed tetgen .ele files
+## [1.17.4] - 2026-10-10
+- Fix reading of one-based indexed tetgen .ele files
+- Bump TetGen compat to include v3
 
 ## [1.17.3] - 2026-09-15
 - Fix cornercases in BinnedPointlist and improve documentation
