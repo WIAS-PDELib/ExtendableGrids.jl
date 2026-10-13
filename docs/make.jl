@@ -1,6 +1,7 @@
 using Documenter, ExtendableGrids, ExampleJuggler
+using DocumenterInterLinks, DocumenterCodeBlocks
 import Gmsh
-import CairoMakie, Pluto, PlutoStaticHTML
+import CairoMakie, Pluto, PlutoStaticHTML, GridVisualize
 CairoMakie.activate!(; type = "png", visible = false)
 ExampleJuggler.verbose!(true)
 ExtendableGridsGmshExt = Base.get_extension(ExtendableGrids, :ExtendableGridsGmshExt)
@@ -15,7 +16,7 @@ function mkdocs()
     )
 
     notebooks = ["Partitioning" => "pluto-partitioning.jl"]
-    notebook_examples = @docplutonotebooks(exampledir, notebooks, iframe = false)
+    notebook_examples = @docplutonotebooks(exampledir, notebooks, iframe = false, documenter_code_blocks = true)
     size_threshold_ignore = last.(notebook_examples)
 
     generated_examples = vcat(generated_examples, notebook_examples)
@@ -32,6 +33,14 @@ function mkdocs()
             assets = String["assets/citations.css"],
             mathengine = MathJax3()
         ),
+        plugins = [
+            InterLinks(
+                "Julia" => "https://docs.julialang.org/en/v1/",
+                "GridVisualize" => "https://wias-pdelib.github.io/GridVisualize.jl/stable/"
+            ),
+            CodeBlocks(),
+        ],
+
         pages = [
             "Home" => "index.md",
             "Changes" => "changes.md",
