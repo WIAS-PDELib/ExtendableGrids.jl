@@ -402,21 +402,21 @@ function showmore(io::IO, xgrid::ExtendableGrid{Tc, Ti}) where {Tc, Ti}
     return
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{NodeCells}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{NodeCells}) where {Tc, Ti}
     return atranspose(xgrid[CellNodes])
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{NodeFaces}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{NodeFaces}) where {Tc, Ti}
     return atranspose(xgrid[FaceNodes])
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{NodeEdges}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{NodeEdges}) where {Tc, Ti}
     return atranspose(xgrid[EdgeNodes])
 end
 
 
 # FaceNodes = nodes for each face (implicitly defines the enumerations of faces)
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceNodes}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceNodes}) where {Tc, Ti}
 
     if haskey(xgrid, ParentGrid) && haskey(xgrid, ParentGridRelation)
         if xgrid[ParentGridRelation] <: SubGrid{ON_CELLS}
@@ -735,7 +735,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceN
 end
 
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{NodePatchGroups}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{NodePatchGroups}) where {Tc, Ti}
     xCellNodes::Adjacency = xgrid[CellNodes]
     # note: we could use xgrid[NodeCells] here (but causes storage)
     xNodeCells = atranspose(xCellNodes)
@@ -773,7 +773,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{NodeP
 end
 
 # EdgeNodes = nodes for each edge (implicitly defines the enumerations of edges)
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeNodes}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeNodes}) where {Tc, Ti}
 
     if haskey(xgrid, ParentGrid) && haskey(xgrid, ParentGridRelation)
         if xgrid[ParentGridRelation] <: SubGrid{ON_CELLS}
@@ -1045,7 +1045,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeN
 end
 
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellFaceOrientations}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellFaceOrientations}) where {Tc, Ti}
     xCellFaceSigns = xgrid[CellFaceSigns]
     xCellGeometries = xgrid[CellGeometries]
     xCellFaces = xgrid[CellFaces]
@@ -1126,7 +1126,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellF
 end
 
 # FaceEdges = Edges for each face (in 3D)
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceEdges}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceEdges}) where {Tc, Ti}
     xFaceNodes = xgrid[FaceNodes]
     xFaceCells = xgrid[FaceCells]
     xEdgeNodes = xgrid[EdgeNodes]
@@ -1272,41 +1272,41 @@ end
 
 
 # CellFaces = faces for each cell
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellFaces}) where {Tc, Ti}
-    ExtendableGrids.instantiate(xgrid, FaceNodes)
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellFaces}) where {Tc, Ti}
+    instantiate(xgrid, FaceNodes)
     return xgrid[CellFaces]
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceGeometries}) where {Tc, Ti}
-    ExtendableGrids.instantiate(xgrid, FaceNodes)
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceGeometries}) where {Tc, Ti}
+    instantiate(xgrid, FaceNodes)
     return xgrid[FaceGeometries]
 end
 
 # CellEdges = edges for each cell
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellEdges}) where {Tc, Ti}
-    ExtendableGrids.instantiate(xgrid, EdgeNodes)
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellEdges}) where {Tc, Ti}
+    instantiate(xgrid, EdgeNodes)
     return xgrid[CellEdges]
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeCells}) where {Tc, Ti}
-    ExtendableGrids.instantiate(xgrid, EdgeNodes)
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeCells}) where {Tc, Ti}
+    instantiate(xgrid, EdgeNodes)
     return xgrid[EdgeCells]
 end
 
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellEdgeSigns}) where {Tc, Ti}
-    ExtendableGrids.instantiate(xgrid, EdgeNodes)
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellEdgeSigns}) where {Tc, Ti}
+    instantiate(xgrid, EdgeNodes)
     return xgrid[CellEdgeSigns]
 end
 
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceEdgeSigns}) where {Tc, Ti}
-    ExtendableGrids.instantiate(xgrid, FaceEdges)
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceEdgeSigns}) where {Tc, Ti}
+    instantiate(xgrid, FaceEdges)
     return xgrid[FaceEdgeSigns]
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellFaceSigns}) where {Tc, Ti}
-    ExtendableGrids.instantiate(xgrid, FaceNodes)
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellFaceSigns}) where {Tc, Ti}
+    instantiate(xgrid, FaceNodes)
     return xgrid[CellFaceSigns]
 end
 
@@ -1339,28 +1339,28 @@ function collectVolumes4Geometries(xgrid::ExtendableGrid{Tc, Ti}, ItemType) wher
 end
 
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellVolumes}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellVolumes}) where {Tc, Ti}
     return collectVolumes4Geometries(xgrid, ITEMTYPE_CELL)
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceVolumes}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceVolumes}) where {Tc, Ti}
     return collectVolumes4Geometries(xgrid, ITEMTYPE_FACE)
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFaceVolumes}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFaceVolumes}) where {Tc, Ti}
     return collectVolumes4Geometries(xgrid, ITEMTYPE_BFACE)
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeVolumes}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeVolumes}) where {Tc, Ti}
     return collectVolumes4Geometries(xgrid, ITEMTYPE_EDGE)
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeVolumes}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeVolumes}) where {Tc, Ti}
     return collectVolumes4Geometries(xgrid, ITEMTYPE_BEDGE)
 end
 
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFaceFaces}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFaceFaces}) where {Tc, Ti}
     # get links to other stuff
     xCoordinates = xgrid[Coordinates]
     xFaceNodes = xgrid[FaceNodes]
@@ -1496,18 +1496,18 @@ function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeNodes}) where {T
 end
 
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeEdges}) where {Tc, Ti}
-    ExtendableGrids.instantiate(xgrid, BEdgeNodes)
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeEdges}) where {Tc, Ti}
+    instantiate(xgrid, BEdgeNodes)
     return xgrid[BEdgeEdges]
 end
 
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceCells}) where {Tc, Ti}
-    ExtendableGrids.instantiate(xgrid, FaceNodes)
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceCells}) where {Tc, Ti}
+    instantiate(xgrid, FaceNodes)
     return xgrid[FaceCells]
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceRegions}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceRegions}) where {Tc, Ti}
     # interior faces get region number 0, boundary faces get their boundary region
     xBFaceFaces = xgrid[BFaceFaces]
     xBFaceRegions = xgrid[BFaceRegions]
@@ -1520,24 +1520,24 @@ end
 
 
 ### Not a good idea to have them as vectors of constants
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeRegions}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeRegions}) where {Tc, Ti}
     return VectorOfConstants(Ti(0), num_sources(xgrid[EdgeNodes]))
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeRegions}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeRegions}) where {Tc, Ti}
     return Array{Int32, 1}(1:num_bedges(xgrid))
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeGeometries}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeGeometries}) where {Tc, Ti}
     return VectorOfConstants{ElementGeometries, Ti}(Edge1D, num_sources(xgrid[EdgeNodes]))
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeGeometries}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeGeometries}) where {Tc, Ti}
     return VectorOfConstants{ElementGeometries, Ti}(Edge1D, num_sources(xgrid[BEdgeNodes]))
 end
 
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFaceCellPos}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFaceCellPos}) where {Tc, Ti}
     # gets the local position of a bface in the CellFaces row of its adjacent cell
 
     # get links to other stuff
@@ -1568,7 +1568,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFace
 end
 
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceNormals}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceNormals}) where {Tc, Ti}
     dim::Int = size(xgrid[Coordinates], 1)
     xCoordinates::Array{Tc, 2} = xgrid[Coordinates]
     xFaceNodes::Adjacency{Ti} = xgrid[FaceNodes]
@@ -1591,7 +1591,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceN
 end
 
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeTangents}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeTangents}) where {Tc, Ti}
     dim::Int = size(xgrid[Coordinates], 1)
     xCoordinates::Array{Tc, 2} = xgrid[Coordinates]
     xEdgeNodes::Adjacency{Ti} = xgrid[EdgeNodes]
@@ -1613,28 +1613,28 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeT
     return xEdgeTangents
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{UniqueCellGeometries}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{UniqueCellGeometries}) where {Tc, Ti}
     return xUniqueCellGeometries = ElementGeometries[unique(xgrid[CellGeometries])...]
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{UniqueFaceGeometries}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{UniqueFaceGeometries}) where {Tc, Ti}
     return xUniqueFaceGeometries = ElementGeometries[unique(xgrid[FaceGeometries])...]
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{UniqueBFaceGeometries}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{UniqueBFaceGeometries}) where {Tc, Ti}
     return xUniqueBFaceGeometries = ElementGeometries[unique(xgrid[BFaceGeometries])...]
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{UniqueEdgeGeometries}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{UniqueEdgeGeometries}) where {Tc, Ti}
     return xUniqueEdgeGeometries = ElementGeometries[unique(xgrid[EdgeGeometries])...]
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{UniqueBEdgeGeometries}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{UniqueBEdgeGeometries}) where {Tc, Ti}
     return xUniqueBEdgeGeometries = ElementGeometries[unique(xgrid[BEdgeGeometries])...]
 end
 
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellAssemblyGroups}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellAssemblyGroups}) where {Tc, Ti}
     xGeometryGroups = VariableTargetAdjacency(Ti)
     xCellGeometries = xgrid[CellGeometries]
     xUniqueCellGeometries = xgrid[UniqueCellGeometries]
@@ -1644,7 +1644,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellA
     return xGeometryGroups
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceAssemblyGroups}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceAssemblyGroups}) where {Tc, Ti}
     xGeometryGroups = VariableTargetAdjacency(Ti)
     xFaceGeometries = xgrid[FaceGeometries]
     xUniqueFaceGeometries = xgrid[UniqueFaceGeometries]
@@ -1654,7 +1654,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceA
     return xGeometryGroups
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFaceAssemblyGroups}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFaceAssemblyGroups}) where {Tc, Ti}
     xGeometryGroups = VariableTargetAdjacency(Ti)
     xBFaceGeometries = xgrid[BFaceGeometries]
     xUniqueBFaceGeometries = xgrid[UniqueBFaceGeometries]
@@ -1665,7 +1665,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFace
 end
 
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeAssemblyGroups}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeAssemblyGroups}) where {Tc, Ti}
     xGeometryGroups = VariableTargetAdjacency(Ti)
     xEdgeGeometries = xgrid[EdgeGeometries]
     xUniqueEdgeGeometries = xgrid[UniqueEdgeGeometries]
@@ -1675,7 +1675,7 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeA
     return xGeometryGroups
 end
 
-function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeAssemblyGroups}) where {Tc, Ti}
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeAssemblyGroups}) where {Tc, Ti}
     xGeometryGroups = VariableTargetAdjacency(Ti)
     xBEdgeGeometries = xgrid[BEdgeGeometries]
     xUniqueBEdgeGeometries = xgrid[UniqueBEdgeGeometries]

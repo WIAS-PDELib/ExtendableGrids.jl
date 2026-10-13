@@ -1,21 +1,49 @@
-using Test, Aqua
+using Test, Aqua, ExplicitImports
 using ExampleJuggler
+
 
 using ExtendableGrids, SHA
 using ExtendableGrids: seal!
-
 using AbstractTrees, StatsBase
+
+
+@testset "explicitimports" begin
+    @test ExplicitImports.check_no_implicit_imports(ExtendableGrids) === nothing
+    @test ExplicitImports.check_all_explicit_imports_via_owners(ExtendableGrids) === nothing
+    @test ExplicitImports.check_no_stale_explicit_imports(ExtendableGrids) === nothing
+    @test ExplicitImports.check_all_qualified_accesses_via_owners(ExtendableGrids) === nothing
+    @test ExplicitImports.check_no_self_qualified_accesses(ExtendableGrids) === nothing
+    @static if VERSION >= v"1.11.0"
+        @test ExplicitImports.check_all_explicit_imports_are_public(ExtendableGrids) == nothing
+        @test ExplicitImports.check_all_qualified_accesses_are_public(
+            ExtendableGrids,
+            ignore = (
+                :Forward,
+                # See https://github.com/JuliaVTK/VTKBase.jl/pull/15
+                :VTK_HEXAHEDRON,
+                :VTK_LINE,
+                :VTK_QUAD,
+                :VTK_TETRA,
+                :VTK_TRIANGLE,
+                # will be exported on julia  1.14
+                :getrowval,
+            )
+        ) === nothing
+    end
+end
+
 
 @testset "Aqua" begin
     Aqua.test_ambiguities([ExtendableGrids, Base, Core], exclude = [view, ==, StatsBase.TestStat, copyto!])
     Aqua.test_unbound_args(ExtendableGrids)
     Aqua.test_undefined_exports(ExtendableGrids)
     Aqua.test_project_extras(ExtendableGrids)
-    Aqua.test_stale_deps(ExtendableGrids, ignore = [:Requires, :Bijections])
+    Aqua.test_stale_deps(ExtendableGrids, ignore = [:Bijections, :UUIDs])
     Aqua.test_deps_compat(ExtendableGrids)
     Aqua.test_piracies(ExtendableGrids, treat_as_own = [AbstractTrees.children])
     Aqua.test_persistent_tasks(ExtendableGrids)
 end
+
 
 testinputdir(fname) = joinpath(pkgdir(ExtendableGrids), "test", "testinputs", fname)
 

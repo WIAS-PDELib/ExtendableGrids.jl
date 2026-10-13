@@ -1,20 +1,18 @@
 module ExtendableGrids
 
-using DocStringExtensions
-using ElasticArrays
-using StaticArrays
-using AbstractTrees
-using WriteVTK
-using Compat: @compat
-using InteractiveUtils
-using SparseArrays
-using Printf
-using Random
-using Dates
-using LinearAlgebra
-using WriteVTK
-import Graphs
-
+using AbstractTrees: AbstractTrees
+using Dates: Dates
+using DocStringExtensions: DocStringExtensions, SIGNATURES, TYPEDEF,
+    TYPEDFIELDS, TYPEDSIGNATURES
+using ElasticArrays: ElasticArrays, ElasticArray
+using Graphs: Graph, add_edge!
+using InteractiveUtils: InteractiveUtils, subtypes
+using LinearAlgebra: LinearAlgebra, dot, norm
+using Printf: Printf, @printf, @sprintf
+using Random: Random, randsubseq
+using SparseArrays: SparseArrays, SparseMatrixCSC, dropzeros!, nzrange
+using StaticArrays: StaticArrays, SVector
+using WriteVTK: WriteVTK, MeshCell, VTKCellType, VTKCellTypes, vtk_grid
 
 include("adjacency.jl")
 export Adjacency, VariableTargetAdjacency, FixedTargetAdjacency
