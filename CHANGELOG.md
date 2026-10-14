@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.18.0] - 2026-10-14
+- `interpolate`/`interpolate!`: reconstruct values with the shape functions of the actually found cell
+  (bilinear on Parallelogram2D, trilinear on Parallelepiped3D) instead of the simplex-only
+  barycentric weights; mixed grids with simplices and parallelograms/parallelepipeds are now
+  supported
+- `interpolate!`: use the found cell as start cell for the next lookup (hot start)
+- Add docstrings for all undocumented exports; test for undocumented names merged from #40 (#147)
+- Add ExplicitImports test (#153)
+
 ## [1.17.4] - 2026-10-10
 - Fix reading of one-based indexed tetgen .ele files
 - Bump TetGen compat to include v3
