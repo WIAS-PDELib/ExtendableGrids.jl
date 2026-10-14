@@ -1,6 +1,8 @@
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+DocumenterCodeBlocks = "b6400b83-267f-4b55-9fd8-bffc853bdfd8"
+DocumenterInterLinks = "d12716ef-a0f6-4df4-a9f1-a5a34e75c656"
 ExampleJuggler = "3bbe58f8-ed81-4c4e-a134-03e85fcf4a1a"
 ExtendableGrids = "cfc395e8-590f-11e8-1f13-43a2532b2fa8"
 Gmsh = "705231aa-382f-11e9-3f0c-b7cb4346fdeb"
@@ -14,6 +16,10 @@ Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SimplexGridFactory = "57bfcd06-606e-45d6-baf4-4ba06da0efd5"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Triangulate = "f7e6ffb2-c36d-4f8f-a77e-16e897189344"
+
+[sources]
+DocumenterCodeBlocks = {url = "https://github.com/fredrikekre/DocumenterCodeBlocks.jl", rev="external-interlinks"}
+ExtendableGrids = {path = ".."}
 
 [compat]
 Documenter = "1"

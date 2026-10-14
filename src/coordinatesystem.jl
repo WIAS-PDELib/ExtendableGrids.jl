@@ -68,6 +68,14 @@ $(TYPEDEF)
 abstract type Spherical1D <: AbstractCoordinateSystem end  #r (integral over ϕ,\theta)
 
 
+"""
+````
+const CoordinateSystems = Union{[Type{t} for t in leaftypes(AbstractCoordinateSystem)]...}
+````
+
+Union type of the types of all supported coordinate systems, as stored
+in the [`CoordinateSystem`](@ref) grid component.
+"""
 const CoordinateSystems = Union{[Type{t} for t in leaftypes(AbstractCoordinateSystem)]...}
 
 

@@ -3,7 +3,10 @@ This functionality is in beta stage.
 Breaking changes for this API are considered non-breaking for the package.
 Therefore, these functions are not exported yet.
 
-
+```@contents
+Pages = ["gmsh.md"]
+Depth = 2:4
+```
 
 ## API
 These methods become available via a package extension which is loaded together with 

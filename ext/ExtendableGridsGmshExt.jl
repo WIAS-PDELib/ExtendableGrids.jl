@@ -143,11 +143,12 @@ end
 gmshfile_to_mixedgrid(filename::String, Tc, Ti)
 ````
 
-This function just reads an msh file, and creates a gmsh.model and then calls the 'mod_to_mixedgrid' function
-This function is called in 'mixedgrid_from_gmsh'
+Read an msh file, create a gmsh model from it and convert it to a mixed grid.
+
+The function then calls `mod_to_mixedgrid`, which is also reachable through `mixedgrid_from_gmsh`.
 `Tc` is the type of coordinates, `Ti` is the index type.
 
-This function initializes and finalized gmsh.
+This function initializes and finalizes gmsh.
 
 """
 function gmshfile_to_mixedgrid(filename::String, Tc, Ti)
@@ -256,6 +257,8 @@ end
 ````
 multiply_indices(indices, n)
 ````
+
+Expand cell indices to the indices of all their nodes in a flattened node list.
 
 for n=3:
 [i, j, ..., k], 3 -> [3*i-2, 3*i-1, 3*i, 3*j-1, 3*j-2, 3*j, ..., 3*k-2, 3*k-1, 3*k]

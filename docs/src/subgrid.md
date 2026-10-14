@@ -30,3 +30,8 @@ println(subv)
 Modules = [ExtendableGrids]
 Pages = ["subgrid.jl"]
 ```
+
+## Deprecated component names
+```@docs
+NodeInParent
+```

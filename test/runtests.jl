@@ -6,6 +6,12 @@ using ExtendableGrids, SHA
 using ExtendableGrids: seal!
 using AbstractTrees, StatsBase
 
+if isdefined(Base.Docs, :undocumented_names) # Julia >= 1.11
+    @testset "undocumented names" begin
+        undocnames = Base.Docs.undocumented_names(ExtendableGrids)
+        @test isempty(undocnames)
+    end
+end
 
 @testset "explicitimports" begin
     @test ExplicitImports.check_no_implicit_imports(ExtendableGrids) === nothing
@@ -31,7 +37,6 @@ using AbstractTrees, StatsBase
         ) === nothing
     end
 end
-
 
 @testset "Aqua" begin
     Aqua.test_ambiguities([ExtendableGrids, Base, Core], exclude = [view, ==, StatsBase.TestStat, copyto!])

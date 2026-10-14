@@ -18,8 +18,8 @@ end
 
 """
     $(SIGNATURES)
-    
-    Comparison of two adjacencies
+
+Comparison of two adjacencies
 """
 function Base.:(==)(a::VariableTargetAdjacency{Ta}, b::VariableTargetAdjacency{Tb}) where {Ta, Tb}
     return Ta == Tb && a.colentries == b.colentries &&  a.colstart == b.colstart
@@ -186,8 +186,10 @@ Maximum number of targets per source
 """
 max_num_targets_per_source(adj::FixedTargetAdjacency) = size(adj, 1)
 
+# explicit signature instead of $(TYPEDEF): DocStringExtensions prints nothing for
+# Union aliases, since format(::TypeDefinition) only handles DataType objects
 """
-$(TYPEDEF)
+    Adjacency{T}
 
 Adjacency type as union of FixedTargetAdjacency and VariableTargetAdjacency
 """
@@ -203,6 +205,7 @@ Adjacency{T}(a::FixedTargetAdjacency{T}) where {T} = a
 Adjacency{T}(a::VariableTargetAdjacency{T}) where {T} = a
 
 """
+    atranspose(adj::Adjacency{T}) where {T}
 
 Transpose adjacency
 """
