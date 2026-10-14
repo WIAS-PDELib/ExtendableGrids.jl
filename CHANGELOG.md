@@ -1,23 +1,29 @@
 # Changelog
 
-# [1.17.4] - 2026-09-23
+## [1.18.0] - 2026-10-14
 - `interpolate`/`interpolate!`: reconstruct values with the shape functions of the actually found cell
   (bilinear on Parallelogram2D, trilinear on Parallelepiped3D) instead of the simplex-only
   barycentric weights; mixed grids with simplices and parallelograms/parallelepipeds are now
   supported
 - `interpolate!`: use the found cell as start cell for the next lookup (hot start)
+- Add docstrings for all undocumented exports; test for undocumented names merged from #40 (#147)
+- Add ExplicitImports test (#153)
 
-# [1.17.3] - 2026-09-15
+## [1.17.4] - 2026-10-10
+- Fix reading of one-based indexed tetgen .ele files
+- Bump TetGen compat to include v3
+
+## [1.17.3] - 2026-09-15
 - Fix cornercases in BinnedPointlist and improve documentation
 
-# [1.17.2] - 2026-09-02
+## [1.17.2] - 2026-09-02
 - Fix stack overflow and bounds errors when accessing grid[CellEdges] for subgrids
 
-# [1.17.1] - 2026-05-20
+## [1.17.1] - 2026-05-20
 - update_trafo! of L2GTransformer does not require item to be of type Int anymore
 - CellFinder result type is always of type Ti (grid items index type)
 
-# [1.17.0] - 2026-04-15
+## [1.17.0] - 2026-04-15
 - new kwargs `not_in_domain_value = nothing` and `check_if_not_in_domain = isnothing(not_in_domain_value)` for grid interpolation.
   This enables the user to interpolate values between grids which do not share the same domain. The value _outside_ the target domain has to be provided by the user.
 - Allow to read simplexgrid data from TetGen .ele file sets
