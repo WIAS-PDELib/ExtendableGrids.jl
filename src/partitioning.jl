@@ -99,7 +99,7 @@ end
 
 If not given otherwise, instantiate partition data with trivial partitioning.
 """
-function ExtendableGrids.instantiate(grid::ExtendableGrid, ::Type{PColorPartitions})
+function instantiate(grid::ExtendableGrid, ::Type{PColorPartitions})
     trivial_partitioning!(grid)
     return grid[PColorPartitions]
 end
@@ -109,7 +109,7 @@ end
 
 If not given otherwise, instantiate partition data with trivial partitioning.
 """
-function ExtendableGrids.instantiate(grid::ExtendableGrid, ::Type{PartitionCells})
+function instantiate(grid::ExtendableGrid, ::Type{PartitionCells})
     trivial_partitioning!(grid)
     return grid[PartitionCells]
 end
@@ -119,7 +119,7 @@ end
 
 If not given otherwise, instantiate partition data with trivial partitioning.
 """
-function ExtendableGrids.instantiate(grid::ExtendableGrid, ::Type{PartitionBFaces})
+function instantiate(grid::ExtendableGrid, ::Type{PartitionBFaces})
     trivial_partitioning!(grid)
     return grid[PartitionBFaces]
 end
@@ -129,7 +129,7 @@ end
 
 If not given otherwise, instantiate partition data with trivial partitioning.
 """
-function ExtendableGrids.instantiate(grid::ExtendableGrid, ::Type{PartitionNodes})
+function instantiate(grid::ExtendableGrid, ::Type{PartitionNodes})
     trivial_partitioning!(grid)
     return grid[PartitionNodes]
 end
@@ -139,7 +139,7 @@ end
 
 If not given otherwise, instantiate partition data with trivial partitioning.
 """
-function ExtendableGrids.instantiate(grid::ExtendableGrid{Tc, Ti}, ::Type{PartitionEdges}) where {Tc, Ti}
+function instantiate(grid::ExtendableGrid{Tc, Ti}, ::Type{PartitionEdges}) where {Tc, Ti}
     trivial_partitioning!(grid)
     grid[PartitionEdges] = Ti[1, num_edges(grid) + 1]
     return grid[PartitionEdges]
@@ -372,13 +372,13 @@ end
 Create neighbourhood graph for given partitioning.
 """
 function partgraph(cellpartitions, ncellpartitions, cellcelladj)
-    gr = Graphs.Graph(ncellpartitions)
+    gr = Graph(ncellpartitions)
     for ic in 1:size(cellcelladj, 2)
         ir = cellpartitions[ic]
         for k in cellcelladj.colptr[ic]:(cellcelladj.colptr[ic + 1] - 1)
             jr = cellpartitions[cellcelladj.rowval[k]]
             if ir != jr
-                Graphs.add_edge!(gr, ir, jr)
+                add_edge!(gr, ir, jr)
             end
         end
     end

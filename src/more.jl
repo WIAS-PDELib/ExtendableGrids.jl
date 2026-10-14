@@ -149,9 +149,9 @@ function prepare_edges!(grid::ExtendableGrid)
 end
 
 
-#ExtendableGrids.instantiate(grid, ::Type{CellEdges})=prepare_edges!(grid) && grid[CellEdges]
-#ExtendableGrids.instantiate(grid, ::Type{EdgeCells})=prepare_edges!(grid) && grid[EdgeCells]
-#ExtendableGrids.instantiate(grid, ::Type{EdgeNodes})=prepare_edges!(grid) && grid[EdgeNodes]
+#instantiate(grid, ::Type{CellEdges})=prepare_edges!(grid) && grid[CellEdges]
+#instantiate(grid, ::Type{EdgeCells})=prepare_edges!(grid) && grid[EdgeCells]
+#instantiate(grid, ::Type{EdgeNodes})=prepare_edges!(grid) && grid[EdgeNodes]
 
 function prepare_bfacecells!(grid)
     cn = grid[CellNodes]
@@ -236,9 +236,9 @@ function prepare_bedges!(grid)
     return true
 end
 
-#ExtendableGrids.instantiate(grid, ::Type{BEdgeNodes})=prepare_bedges!(grid) && grid[BEdgeNodes]
-ExtendableGrids.instantiate(grid, ::Type{BFaceEdges}) = prepare_bedges!(grid) && grid[BFaceEdges]
-ExtendableGrids.instantiate(grid, ::Type{BFaceCells}) = prepare_bfacecells!(grid) && grid[BFaceCells]
+#instantiate(grid, ::Type{BEdgeNodes})=prepare_bedges!(grid) && grid[BEdgeNodes]
+instantiate(grid, ::Type{BFaceEdges}) = prepare_bedges!(grid) && grid[BFaceEdges]
+instantiate(grid, ::Type{BFaceCells}) = prepare_bfacecells!(grid) && grid[BFaceCells]
 
 normal!(normal, nodes, coord, ::Type{Val{1}}) = normal[1] = 1.0
 
@@ -307,4 +307,4 @@ function prepare_bfacenormals!(grid)
     return true
 end
 
-ExtendableGrids.instantiate(grid, ::Type{BFaceNormals}) = prepare_bfacenormals!(grid) && grid[BFaceNormals]
+instantiate(grid, ::Type{BFaceNormals}) = prepare_bfacenormals!(grid) && grid[BFaceNormals]

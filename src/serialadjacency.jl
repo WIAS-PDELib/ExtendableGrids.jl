@@ -52,19 +52,19 @@ Base.view(adj::SerialVariableTargetAdjacency{Ti}, ::Colon, isource) where {Ti} =
 $(TYPEDSIGNATURES)
 Number of targets for given source
 """
-ExtendableGrids.num_targets(adj::SerialVariableTargetAdjacency, isource) = adj.colstart[isource + 1] - adj.colstart[isource]
+num_targets(adj::SerialVariableTargetAdjacency, isource) = adj.colstart[isource + 1] - adj.colstart[isource]
 
 """
 $(TYPEDSIGNATURES)
 Number of sources in adjacency
 """
-ExtendableGrids.num_sources(adj::SerialVariableTargetAdjacency) = length(adj.colstart) - 1
+num_sources(adj::SerialVariableTargetAdjacency) = length(adj.colstart) - 1
 
 """
 $(TYPEDSIGNATURES)
 Maximum number of targets per source
 """
-ExtendableGrids.max_num_targets_per_source(adj::SerialVariableTargetAdjacency) = maximum(adj.colstart[2:end] .- adj.colstart[1:(end - 1)])
+max_num_targets_per_source(adj::SerialVariableTargetAdjacency) = maximum(adj.colstart[2:end] .- adj.colstart[1:(end - 1)])
 
 
 """

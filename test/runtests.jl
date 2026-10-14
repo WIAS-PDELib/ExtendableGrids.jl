@@ -1,9 +1,9 @@
-using Test, Aqua
+using Test, Aqua, ExplicitImports
 using ExampleJuggler
+
 
 using ExtendableGrids, SHA
 using ExtendableGrids: seal!
-
 using AbstractTrees, StatsBase
 
 if isdefined(Base.Docs, :undocumented_names) # Julia >= 1.11
@@ -13,15 +13,57 @@ if isdefined(Base.Docs, :undocumented_names) # Julia >= 1.11
     end
 end
 
+@testset "explicitimports" begin
+    @test ExplicitImports.check_no_implicit_imports(ExtendableGrids) === nothing
+    @test ExplicitImports.check_all_explicit_imports_via_owners(ExtendableGrids) === nothing
+    @test ExplicitImports.check_no_stale_explicit_imports(ExtendableGrids) === nothing
+    @test ExplicitImports.check_all_qualified_accesses_via_owners(ExtendableGrids) === nothing
+    @test ExplicitImports.check_no_self_qualified_accesses(ExtendableGrids) === nothing
+    @static if VERSION >= v"1.11.0"
+        @test ExplicitImports.check_all_explicit_imports_are_public(ExtendableGrids) == nothing
+        @test ExplicitImports.check_all_qualified_accesses_are_public(
+            ExtendableGrids,
+            ignore = (
+                :Forward,
+                # See https://github.com/JuliaVTK/VTKBase.jl/pull/15
+                :VTK_HEXAHEDRON,
+                :VTK_LINE,
+                :VTK_QUAD,
+                :VTK_TETRA,
+                :VTK_TRIANGLE,
+                # will be exported on julia  1.14
+                :getrowval,
+            )
+        ) === nothing
+    end
+end
+
 @testset "Aqua" begin
     Aqua.test_ambiguities([ExtendableGrids, Base, Core], exclude = [view, ==, StatsBase.TestStat, copyto!])
     Aqua.test_unbound_args(ExtendableGrids)
     Aqua.test_undefined_exports(ExtendableGrids)
     Aqua.test_project_extras(ExtendableGrids)
-    Aqua.test_stale_deps(ExtendableGrids, ignore = [:Requires, :Bijections])
+    Aqua.test_stale_deps(ExtendableGrids, ignore = [:Bijections, :UUIDs])
     Aqua.test_deps_compat(ExtendableGrids)
     Aqua.test_piracies(ExtendableGrids, treat_as_own = [AbstractTrees.children])
     Aqua.test_persistent_tasks(ExtendableGrids)
+end
+
+
+testinputdir(fname) = joinpath(pkgdir(ExtendableGrids), "test", "testinputs", fname)
+
+@static if VERSION < v"1.12.0"
+    function mytempname(; suffix = "", cleanup = true)
+        return tempname(; cleanup = false) * suffix
+    end
+    function myrm(fname)
+        if !Sys.iswindows()
+            rm(fname)
+        end
+    end
+else
+    const mytempname = tempname
+    myrm(fname) = nothing
 end
 
 
@@ -235,9 +277,10 @@ end
 
 function testrw(grid, format; compare_kwargs = (confidence = :full,), kwargs...)
     #@warn format
-    ftmp = tempname() * "." * format
+    ftmp = mytempname(; suffix = "." * format, cleanup = true)
     write(ftmp, grid; kwargs...)
     grid1 = simplexgrid(ftmp)
+    myrm(ftmp)
     return seemingly_equal(grid1, grid; compare_kwargs...)
 end
 
@@ -256,11 +299,17 @@ end
 end
 
 @testset "Read ele" begin
-    g = simplexgrid(joinpath(@__DIR__, "cube.1.ele"))
+    g = simplexgrid(testinputdir("cube.1.ele"))
     @test num_nodes(g) == 156
     @test num_cells(g) == 537
     @test first.(extrema(g)) ≈ zeros(3)
     @test last.(extrema(g)) ≈ ones(3)
+
+    g = simplexgrid(testinputdir("cubecut3x3.1.ele"))
+    @test num_nodes(g) == 657
+    @test num_cells(g) == 2622
+    @test first.(extrema(g)) ≈ fill(0, 3)
+    @test last.(extrema(g)) ≈ fill(10, 3)
 end
 
 @testset "rectnd" begin
@@ -521,27 +570,28 @@ end
     # ensure calculation of these data is free of roundoff errors
     point_data = map((x, y, z) -> (x + y + z), g)
     field_data = [1.0, 2, 3, 4, 5, 6]
+    tempvtu = mytempname(suffix = ".vtu", cleanup = true)
 
     writeVTK(
-        "testfile_writevtk.vtu", g;
+        tempvtu, g;
         cellregions = g[CellRegions],
         point_data = point_data,
         field_data = field_data
     )
 
-    sha_code = open("testfile_writevtk.vtu") do f
+    sha_code = open(tempvtu) do f
         sha256(f)
     end |> bytes2hex
+
+    myrm(tempvtu)
 
     @test sha_code == "9596c59f6b0870dd4a42a7a48725c2257f260757e15cc5ac433e5e8e235659d9"
 end
 
 
-if VERSION < v"1.12.0-DEV.0"
-    notebooks = ["pluto-partitioning.jl"]
-    @testset "Notebooks" begin
-        @testscripts(joinpath(@__DIR__, "..", "examples"), notebooks)
-    end
+notebooks = ["pluto-partitioning.jl"]
+@testset "Notebooks" begin
+    @testscripts(joinpath(@__DIR__, "..", "examples"), notebooks)
 end
 
 
