@@ -277,7 +277,7 @@ Base.get!(grid::ExtendableGrid, T::Type{<:AbstractGridComponent}) = get!(
 )
 
 """
-$(TYPEDSIGNATURES)
+    instantiate(xgrid::ExtendableGrid, ComponentType::Type)
 
 "Hook" for methods instantiating lazy components. 
 """

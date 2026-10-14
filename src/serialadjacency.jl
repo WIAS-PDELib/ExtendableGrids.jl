@@ -7,8 +7,8 @@ end
 
 """
     $(SIGNATURES)
-    
-    Comparison of two adjacencies
+
+Comparison of two adjacencies
 """
 function Base.:(==)(a::SerialVariableTargetAdjacency{Ta}, b::SerialVariableTargetAdjacency{Tb}) where {Ta, Tb}
     return Ta == Tb && a.colstart == b.colstart

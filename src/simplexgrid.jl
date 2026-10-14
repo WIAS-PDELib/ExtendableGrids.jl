@@ -67,9 +67,11 @@ function simplexgrid(coord::Array{Tc,2},
                      ) where {Tc,Ti}
 ````
 
-Create simplex grid from coordinates, cell-nodes-adjancency, cell-region-numbers,
+Create simplex grid from seven arrays.
+
+The arrays are: coordinates, cell-nodes-adjacency, cell-region-numbers,
 boundary-face-nodes adjacency, boundary-face-region-numbers, boundary-edge-nodes, and
-boundary-edge-region-numbers arrays.
+boundary-edge-region-numbers.
 
 The index type `Ti` is detected from `cellnodes`, all other arrays besides `coord`
 are converted to this index type.
