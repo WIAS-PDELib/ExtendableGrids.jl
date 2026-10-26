@@ -797,6 +797,7 @@ function trim!(grid::ExtendableGrid; keep = [])
         BFaceCellPos,
         BFaceCells,
         BFaceEdges,
+        BFaceEdgeSigns,
         BFaceFaces,
         BFaceNormals,
         BFaceVolumes,

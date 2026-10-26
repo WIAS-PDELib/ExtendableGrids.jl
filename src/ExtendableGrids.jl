@@ -141,7 +141,7 @@ export GridRegionTypes
 
 include("more.jl")
 # export EdgeNodes, CellEdges, EdgeCells,
-export BFaceCells, BFaceNormals, BFaceEdges, BEdgeNodes
+export BFaceCells, BFaceNormals, BFaceEdges, BFaceEdgeSigns, BEdgeNodes
 
 include("voronoi.jl")
 export tricircumcenter!, VoronoiFaceCenters

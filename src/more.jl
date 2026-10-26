@@ -39,7 +39,9 @@ $(TYPEDEF)
 
 Adjacency describing edges per boundary or interior face
 """
-abstract type BFaceEdges <: AbstractGridAdjacency end
+# abstract type BFaceEdges <: AbstractGridAdjacency end
+# abstract type BFaceEdgeSigns <: AbstractGridAdjacency end
+# (defined in derived.jl which is included before this file)
 
 """
 $(TYPEDEF)
@@ -53,10 +55,13 @@ $(SIGNATURES)
 
 Prepare edge adjacencies (celledges, edgecells, edgenodes)
 
-Currently depends on ExtendableSparse, we may want to remove this
-adjacency.
+Deprecated: use the lazily instantiated grid components `grid[EdgeNodes]`,
+`grid[CellEdges]`, `grid[EdgeCells]` instead. This variant recomputes the edge
+enumeration from scratch and overwrites potentially externally provided edge
+components, and it depends on ExtendableSparse.
 """
 function prepare_edges!(grid::ExtendableGrid)
+    Base.depwarn("prepare_edges!(grid) is deprecated, use grid[EdgeNodes] instead", :prepare_edges!)
     Ti = eltype(grid[CellNodes])
     cellnodes = grid[CellNodes]
     geom = grid[CellGeometries][1]
@@ -177,67 +182,12 @@ function prepare_bfacecells!(grid)
     return true
 end
 
-function prepare_bedges!(grid)
-    Ti = eltype(grid[CellNodes])
-    bgeom = grid[BFaceGeometries][1]
-    bfacenodes = grid[BFaceNodes]
+# Edge-related components (BEdgeNodes, BEdgeEdges, BFaceEdges, BFaceEdgeSigns)
+# are instantiated in derived.jl based on the canonical EdgeNodes enumeration.
+# The former prepare_bedges! routine used to create an edge enumeration of its
+# own and silently overwrite grid[BEdgeNodes] upon grid[BFaceEdges] access,
+# leading to sequence-dependent results (issue #24). It has been removed.
 
-    # Create bface-node incidence matrix
-    bfacenode_adj = asparse(bfacenodes)
-    nodenode_adj = bfacenode_adj * transpose(bfacenode_adj)
-
-    # To get unique edges, we set the lower triangular part
-    # including the diagonal to 0
-    for icol in 1:(length(nodenode_adj.colptr) - 1)
-        for irow in nodenode_adj.colptr[icol]:(nodenode_adj.colptr[icol + 1] - 1)
-            if nodenode_adj.rowval[irow] >= icol
-                nodenode_adj.nzval[irow] = 0
-            end
-        end
-    end
-    dropzeros!(nodenode_adj)
-
-    # Now we know the number of bedges and
-    nbedges = length(nodenode_adj.nzval)
-
-
-    bedgenodes = zeros(Ti, 2, nbedges)
-    bfaceedges = zeros(Ti, num_edges(bgeom), num_bfaces(grid))
-
-    cen = local_celledgenodes(bgeom)
-    for ibface in 1:num_bfaces(grid)
-        for ibedge in 1:num_edges(bgeom)
-            n1 = bfacenodes[cen[1, ibedge], ibface]
-            n2 = bfacenodes[cen[2, ibedge], ibface]
-
-            # We need to look in nodenod_adj for upper triangular part entries
-            # therefore, we need to swap accordingly before looking
-            if (n1 < n2)
-                n0 = n1
-                n1 = n2
-                n2 = n0
-            end
-
-            for irow in nodenode_adj.colptr[n1]:(nodenode_adj.colptr[n1 + 1] - 1)
-                if nodenode_adj.rowval[irow] == n2
-                    # If the corresponding entry has been found, set its
-                    # value. Note that this introduces a different edge orientation
-                    # compared to the one found locally from cell data
-                    bfaceedges[ibedge, ibface] = irow
-                    bedgenodes[1, irow] = n1
-                    bedgenodes[2, irow] = n2
-                end
-            end
-        end
-
-    end
-    grid[BEdgeNodes] = bedgenodes
-    grid[BFaceEdges] = bfaceedges
-    return true
-end
-
-#instantiate(grid, ::Type{BEdgeNodes})=prepare_bedges!(grid) && grid[BEdgeNodes]
-instantiate(grid, ::Type{BFaceEdges}) = prepare_bedges!(grid) && grid[BFaceEdges]
 instantiate(grid, ::Type{BFaceCells}) = prepare_bfacecells!(grid) && grid[BFaceCells]
 
 normal!(normal, nodes, coord, ::Type{Val{1}}) = normal[1] = 1.0

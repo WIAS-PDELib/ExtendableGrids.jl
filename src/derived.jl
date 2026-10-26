@@ -267,7 +267,26 @@ abstract type EdgeAssemblyGroups <: AbstractGridAdjacency end
 """
 $(TYPEDEF)
 
-Adjacency describing nodes for boundary edges
+Adjacency describing edges per boundary or interior face
+"""
+abstract type BFaceEdges <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing orientation signs (+1/-1) of boundary face edges
+relative to the orientation of the corresponding entries in BEdgeNodes.
+It is instantiated together with BFaceEdges.
+"""
+abstract type BFaceEdgeSigns <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
+Adjacency describing nodes for boundary edges. If provided externally
+(e.g. by the seven-array `simplexgrid` constructor), it defines the boundary
+edge numbering: dependent components (BEdgeEdges, BFaceEdges, BFaceEdgeSigns)
+are matched to it and it is never modified by lazy component creation.
 """
 abstract type BEdgeNodes <: AbstractGridAdjacency end
 
@@ -511,6 +530,10 @@ end
 
 
 # FaceNodes = nodes for each face (implicitly defines the enumerations of faces)
+# Cluster A (faces): the FaceNodes generator instantiates these components
+# together from a single face enumeration, and each member is also reachable
+# through its own instantiate shim below:
+# FaceNodes, FaceGeometries, FaceCells, CellFaces, CellFaceSigns
 function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceNodes}) where {Tc, Ti}
 
     if haskey(xgrid, ParentGrid) && haskey(xgrid, ParentGridRelation)
@@ -867,6 +890,10 @@ function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{NodePatchGroups}) whe
     return group4node
 end
 
+# Cluster B (edges): the EdgeNodes generator instantiates these components
+# together from a single edge enumeration, and each member is also reachable
+# through its own instantiate shim below:
+# EdgeNodes, EdgeGeometries, EdgeRegions, EdgeCells, CellEdges, CellEdgeSigns
 # EdgeNodes = nodes for each edge (implicitly defines the enumerations of edges)
 function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeNodes}) where {Tc, Ti}
 
@@ -957,19 +984,22 @@ function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{EdgeNodes}) where {Tc
 
     # in 1D edges = cells
     if dim == 1
-        xgrid[EdgeNodes] = xgrid[CellNodes]
+        # copy arrays to avoid aliasing with components of other clusters
+        xgrid[EdgeNodes] = copy(xgrid[CellNodes])
         xgrid[EdgeGeometries] = xgrid[CellGeometries]
         xgrid[CellEdges] = reshape(collect(Ti, 1:size(xCellNodes, 2)), (1, size(xCellNodes, 2)))
-        xgrid[EdgeCells] = xgrid[CellEdges]
+        xgrid[CellEdgeSigns] = ones(Ti, 1, size(xCellNodes, 2))
+        xgrid[EdgeCells] = copy(xgrid[CellEdges])
         return xgrid[EdgeNodes]
     end
 
     # in 2D edges = faces
     if dim == 2
-        xgrid[CellEdges] = xgrid[CellFaces]
-        xgrid[CellEdgeSigns] = xgrid[CellFaceSigns]
-        xgrid[EdgeCells] = xgrid[FaceCells]
-        xgrid[EdgeNodes] = xgrid[FaceNodes]
+        # copy arrays to avoid aliasing with components of the face cluster
+        xgrid[CellEdges] = copy(xgrid[CellFaces])
+        xgrid[CellEdgeSigns] = copy(xgrid[CellFaceSigns])
+        xgrid[EdgeCells] = copy(xgrid[FaceCells])
+        xgrid[EdgeNodes] = copy(xgrid[FaceNodes])
         xgrid[EdgeGeometries] = xgrid[FaceGeometries]
         return xgrid[EdgeNodes]
         #        return  prepare_edges!(xgrid) # keep compatible to VoronoiFVM
@@ -1220,8 +1250,16 @@ function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{CellFaceOrientations}
     return xCellFaceOrientations
 end
 
+# Cluster B2 (face-edge link, 3D): the FaceEdges generator instantiates these
+# components together from a single local face-edge enumeration:
+# FaceEdges, FaceEdgeSigns
 # FaceEdges = Edges for each face (in 3D)
 function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{FaceEdges}) where {Tc, Ti}
+    if size(xgrid[Coordinates], 1) <= 2
+        # in 1D/2D, faces are points/segments and have no edges
+        xgrid[FaceEdgeSigns] = zeros(Ti, 0, num_sources(xgrid[FaceNodes]))
+        return xgrid[FaceEdges] = zeros(Ti, 0, num_sources(xgrid[FaceNodes]))
+    end
     xFaceNodes = xgrid[FaceNodes]
     xFaceCells = xgrid[FaceCells]
     xEdgeNodes = xgrid[EdgeNodes]
@@ -1455,6 +1493,9 @@ function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeVolumes}) where 
 end
 
 
+# Cluster C (bface-face link): instantiates BFaceFaces and, as a side effect,
+# normalizes the node order of the basic component BFaceNodes to the node order
+# of its faces
 function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFaceFaces}) where {Tc, Ti}
     # get links to other stuff
     xCoordinates = xgrid[Coordinates]
@@ -1540,6 +1581,11 @@ function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFaceFaces}) where {T
 end
 
 
+# Cluster D (boundary edges): the BEdgeNodes generator instantiates BEdgeNodes
+# and BEdgeEdges together, the BFaceEdges generator BFaceEdges and
+# BFaceEdgeSigns together. An externally provided BEdgeNodes (e.g. from the
+# seven-array simplexgrid constructor) defines the boundary edge numbering and
+# is never modified (see match_bedge_numbering)
 function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeNodes}) where {Tc, Ti}
 
     dim = size(xgrid[Coordinates], 1)
@@ -1550,8 +1596,9 @@ function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeNodes}) where {T
     end
 
     if dim == 2
-        xgrid[BEdgeEdges] = xgrid[BFaceFaces]
-        xgrid[BEdgeNodes] = xgrid[BFaceNodes]
+        # boundary faces are edges; copy data to avoid aliasing with BFaceNodes/BFaceFaces
+        xgrid[BEdgeEdges] = copy(xgrid[BFaceFaces])
+        xgrid[BEdgeNodes] = copy(xgrid[BFaceNodes])
         return xgrid[BEdgeNodes]
     end
 
@@ -1591,9 +1638,166 @@ function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeNodes}) where {T
 end
 
 
+"""
+    match_bedge_numbering(xgrid)
+
+Helper for externally provided bedgenodes (grid[BEdgeNodes], e.g. created by the
+seven-array `simplexgrid` constructor). Returns a vector `BEdgeEdges` mapping each
+externally numbered boundary edge to its number in the global edge enumeration.
+Errors if an externally provided boundary edge is not a (unique) boundary edge
+of the grid. The provided grid[BEdgeNodes] is never modified.
+"""
+function match_bedge_numbering(xgrid::ExtendableGrid{Tc, Ti}) where {Tc, Ti}
+    xBEdgeNodes = xgrid[BEdgeNodes]
+    nbedges = num_sources(xBEdgeNodes)
+    nbedges == 0 && return zeros(Ti, 0)
+    dim_space(xgrid) == 1 && error("grid has no edges")
+
+    xEdgeNodes = xgrid[EdgeNodes]
+    nedges = num_sources(xEdgeNodes)
+
+    # lookup of global edge numbers by node pair
+    pair2edge = Dict{Tuple{Ti, Ti}, Ti}()
+    for edge in 1:nedges
+        n1 = xEdgeNodes[1, edge]
+        n2 = xEdgeNodes[2, edge]
+        pair2edge[n1 < n2 ? (n1, n2) : (n2, n1)] = edge
+    end
+
+    # lookup table of boundary edges in global edge numbering
+    boundary_edge = zeros(Bool, nedges)
+    if dim_space(xgrid) == 2
+        # boundary faces are boundary edges
+        xBFaceNodes = xgrid[BFaceNodes]
+        for bface in 1:num_sources(xBFaceNodes)
+            n1 = xBFaceNodes[1, bface]
+            n2 = xBFaceNodes[2, bface]
+            edge = get(pair2edge, n1 < n2 ? (n1, n2) : (n2, n1), zero(Ti))
+            if edge > 0
+                boundary_edge[edge] = true
+            end
+        end
+    else
+        xBFaceFaces = xgrid[BFaceFaces]
+        xFaceEdges = xgrid[FaceEdges]
+        for bface in eachindex(xBFaceFaces)
+            face = xBFaceFaces[bface]
+            for k in 1:num_targets(xFaceEdges, face)
+                boundary_edge[xFaceEdges[k, face]] = true
+            end
+        end
+    end
+
+    xBEdgeEdges = zeros(Ti, nbedges)
+    seen = zeros(Bool, nedges)
+    for bedge in 1:nbedges
+        n1 = xBEdgeNodes[1, bedge]
+        n2 = xBEdgeNodes[2, bedge]
+        pair = n1 < n2 ? (n1, n2) : (n2, n1)
+        edge = get(pair2edge, pair, zero(Ti))
+        if edge == 0
+            error("boundary edge ($n1, $n2) #$bedge of bedgenodes is not an edge of the grid")
+        elseif !boundary_edge[edge]
+            error("boundary edge ($n1, $n2) #$bedge of bedgenodes is not a boundary edge of the grid")
+        elseif seen[edge]
+            error("boundary edge ($n1, $n2) #$bedge of bedgenodes duplicates another boundary edge")
+        end
+        seen[edge] = true
+        xBEdgeEdges[bedge] = edge
+    end
+    return xBEdgeEdges
+end
+
+
 function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeEdges}) where {Tc, Ti}
+    if haskey(xgrid, BEdgeNodes)
+        # externally provided bedgenodes define the boundary edge numbering:
+        # derive a matching BEdgeEdges from them without touching grid[BEdgeNodes];
+        # note that the canonical creation below always writes both keys together,
+        # so this case implies external data
+        xgrid[BEdgeEdges] = match_bedge_numbering(xgrid)
+        return xgrid[BEdgeEdges]
+    end
     instantiate(xgrid, BEdgeNodes)
     return xgrid[BEdgeEdges]
+end
+
+
+# BFaceEdges = edges for each boundary face, referring to the boundary edge
+# enumeration of grid[BEdgeNodes] (canonical or externally provided);
+# BFaceEdgeSigns records the orientation sign (+1/-1) of the referenced boundary
+# edge relative to the bface-local edge orientation (same convention as FaceEdgeSigns).
+# Entries are 0 if the respective edge is not among the boundary edges of grid[BEdgeNodes].
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFaceEdges}) where {Tc, Ti}
+    nbfaces = num_bfaces(xgrid)
+    xBEdgeNodes = xgrid[BEdgeNodes]
+    xBFaceNodes = xgrid[BFaceNodes]
+    xBFaceGeometries = xgrid[BFaceGeometries]
+
+    # lookup of boundary edge numbers by node pair
+    pair2bedge = Dict{Tuple{Ti, Ti}, Ti}()
+    for bedge in 1:num_sources(xBEdgeNodes)
+        n1 = xBEdgeNodes[1, bedge]
+        n2 = xBEdgeNodes[2, bedge]
+        pair2bedge[n1 < n2 ? (n1, n2) : (n2, n1)] = bedge
+    end
+
+    EG = unique(xBFaceGeometries)
+    singleEG = length(EG) == 1
+    if singleEG
+        xBFaceEdges = zeros(Ti, num_edges(EG[1]), nbfaces)
+        xBFaceEdgeSigns = zeros(Ti, num_edges(EG[1]), nbfaces)
+    else
+        xBFaceEdges = VariableTargetAdjacency(Ti)
+        xBFaceEdgeSigns = VariableTargetAdjacency(Ti)
+        for bface in 1:nbfaces
+            append!(xBFaceEdges, zeros(Ti, num_edges(xBFaceGeometries[bface])))
+            append!(xBFaceEdgeSigns, zeros(Ti, num_edges(xBFaceGeometries[bface])))
+        end
+    end
+
+    # local edge node numbering rules per bface geometry
+    edge_rules = [local_celledgenodes(g) for g in EG]
+
+    bfaceEG = EG[1]
+    iEG = 1
+    for bface in 1:nbfaces
+        if !singleEG
+            bfaceEG = xBFaceGeometries[bface]
+            for j in eachindex(EG)
+                if EG[j] == bfaceEG
+                    iEG = j
+                    break
+                end
+            end
+        end
+        cen = edge_rules[iEG]
+        for k in 1:num_edges(bfaceEG)
+            n1 = xBFaceNodes[cen[1, k], bface]
+            n2 = xBFaceNodes[cen[2, k], bface]
+            bedge = get(pair2bedge, n1 < n2 ? (n1, n2) : (n2, n1), zero(Ti))
+            sign = zero(Ti)
+            if bedge > 0
+                sign = xBEdgeNodes[1, bedge] == n1 ? one(Ti) : -one(Ti)
+            end
+            if singleEG
+                xBFaceEdges[k, bface] = bedge
+                xBFaceEdgeSigns[k, bface] = sign
+            else
+                xBFaceEdges.colentries[xBFaceEdges.colstart[bface] + k - 1] = bedge
+                xBFaceEdgeSigns.colentries[xBFaceEdgeSigns.colstart[bface] + k - 1] = sign
+            end
+        end
+    end
+
+    xgrid[BFaceEdgeSigns] = xBFaceEdgeSigns
+    return xgrid[BFaceEdges] = xBFaceEdges
+end
+
+
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFaceEdgeSigns}) where {Tc, Ti}
+    instantiate(xgrid, BFaceEdges)
+    return xgrid[BFaceEdgeSigns]
 end
 
 
