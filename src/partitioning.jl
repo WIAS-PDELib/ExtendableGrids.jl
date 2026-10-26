@@ -10,6 +10,16 @@ be performed in parallel.
 the partition colors ("pcolors") of a grid. 
 Let `p=grid[PColorPartitions]`. Then all partitions with numbers
 `i ∈ p[c]:p[c+1]-1`  have "color" `c`. See also [`pcolors`](@ref).
+
+Note that this is a two level scheme: a color selects a range of partitions,
+and the corresponding `PartitionCells`/`PartitionNodes`/`PartitionEdges` keys
+select the elements of each of these partitions. The parallelity guarantee
+refers to *partitions*: elements in different partitions of the same color do
+not interfere, whereas elements *within* a partition generally do (e.g.
+neighboring cells share nodes). Parallel tasks should therefore be formed per
+partition, processing its elements sequentially; treating a whole color range
+as one flat range of independently processable elements is only valid if each
+partition contains exactly one element (see [`PartitionEdges`](@ref)).
 """
 abstract type PColorPartitions <: AbstractGridIntegerArray1D end
 
@@ -60,6 +70,13 @@ Key type describing the edges of a given partition.
 the edges of a partition  given by its number.
 Let `pe=grid[PartitionEdges]`. Then all edges with index
 `i ∈ pe[p]:pe[p+1]-1`  belong to partition p.
+
+See [`PColorPartitions`](@ref) for the correspondence of colors and
+partitions. Note that edges within one partition generally share nodes with
+each other. Element granular edge colorings — where each color class is a set
+of node-disjoint edges that can be processed in one flat concurrent loop, e.g.
+in a GPU kernel — are stored in this scheme by letting each edge form its own
+partition, i.e. `grid[PartitionEdges] = collect(1:(size(grid[EdgeNodes], 2) + 1))`.
 """
 abstract type PartitionEdges <: AbstractGridIntegerArray1D end
 
@@ -274,6 +291,12 @@ If `cellpartonly==false` check correctness of node partitioning necessary
 for parallel sparse matrix multiplication and ILU preconditioning
 - Check if no node belongs to two node partitions of the same color at once
 - Check if no node is a neighbor of nodes from two node partitions of the same color
+
+Note that these checks refer to cells and nodes of partitions. In particular,
+a passing check does not imply that edges of a given color form a set of
+node-disjoint edges: induced edge partitionings (see
+[`induce_edge_partitioning!`](@ref)) assign whole edge ranges to partitions,
+and edges within a partition share nodes by construction.
 """
 function check_partitioning(grid::ExtendableGrid{Tc, Ti}; verbose = true, cellpartonly = false) where {Tc, Ti}
     cn = grid[CellNodes]
@@ -677,6 +700,14 @@ The algorithm assumes that nodes get the partition number from the partition
 numbers of the cells having this node in common. If these are different, the highest
 number is taken.
 
+Edges inherit the colors of the cell partitions: the edges of one cell
+partition form one edge partition. Thus, edge partitions of the same color
+share no nodes, but edges within one edge partition do.
+
+Note that in the non-trivial case this method renumbers edges and updates
+`EdgeNodes`, `EdgeCells` and `CellEdges` accordingly. Edge numbers do not
+match those of the original grid anymore.
+
 This method triggers creation of rather complex edge information and should be called
 only if this information is really necessary.
 """
@@ -785,7 +816,13 @@ Keyword arguments:
   nodes is created such that all nodes belong to partition 1 and all others are empty.
 - `keep_nodepermutation`: if true, keep the node permutation with respect to the original grid in `grid[`[`NodePermutation`](@ref)`]`.
 - `edges`: if true, induce partitioning of edges from cell partitioning. Used for node/edgewise FVM assembly.
-   This step creates a number of relatively expensive additional adjacencies.  If `false` (default), a trivial partitioning of the 
+   This step creates a number of relatively expensive additional adjacencies. Edges inherit the colors of the
+   cell partitions, so the parallel schedule for edges is the same as for cells: parallel over the partitions
+   of a color, sequential over the edges within a partition. Edges of different partitions of the same color
+   do not share nodes, but edges within one partition do; a color must therefore not be collapsed into a flat
+   concurrent edge range (in particular not into a single GPU kernel launch). For element granular node-disjoint
+   edge colorings, color the edges themselves and store them with one edge per partition (see
+   [`PartitionEdges`](@ref)). If `false` (default), a trivial partitioning of the 
    edges is created such that all edges belong to partition 1 and all others are empty.
 
 Access:
