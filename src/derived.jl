@@ -183,6 +183,20 @@ abstract type BFaceFaces <: AbstractGridIntegerArray1D end
 """
 $(TYPEDEF)
 
+Adjacency describing nodes of boundary faces in the node order of their
+associated faces (grid[FaceNodes][:, grid[BFaceFaces]), i.e. consistently
+oriented with respect to the owning cells. Unlike grid[BFaceNodes], which
+keeps the node order provided by the user and is never modified by lazy
+component creation, this component provides the canonical orientation view
+for consumers (e.g. boundary subgrid creation) that need bface-local node
+order to coincide with face-local node order.
+It is instantiated together with BFaceFaces.
+"""
+abstract type BFaceNodesCanonical <: AbstractGridAdjacency end
+
+"""
+$(TYPEDEF)
+
 Vector with local positions of bfaces in their adjacent cell
 """
 abstract type BFaceCellPos <: AbstractGridIntegerArray1D end # position of bface in adjacent cell
@@ -1493,9 +1507,9 @@ function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BEdgeVolumes}) where 
 end
 
 
-# Cluster C (bface-face link): instantiates BFaceFaces and, as a side effect,
-# normalizes the node order of the basic component BFaceNodes to the node order
-# of its faces
+# Cluster C (bface-face link): instantiates BFaceFaces and, together with it,
+# BFaceNodesCanonical (bface nodes in the node order of their faces). The basic
+# component BFaceNodes is never modified.
 function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFaceFaces}) where {Tc, Ti}
     # get links to other stuff
     xCoordinates = xgrid[Coordinates]
@@ -1562,22 +1576,37 @@ function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFaceFaces}) where {T
         end
     end
 
-    # enforce that BFaceNodes have same ordering as FaceNodes
-    newBFaceNodes = deepcopy(xBFaceNodes)
-    for bface in 1:nbfaces
-        nodes_per_face = num_targets(xBFaceNodes, bface)
-        for j in 1:nodes_per_bface
-            if typeof(xBFaceNodes) <: VariableTargetAdjacency
-                newBFaceNodes.colentries[newBFaceNodes.colstart[bface] + j - 1] = xFaceNodes[j, xBFaceFaces[bface]]
-            else
-                newBFaceNodes[j, bface] = xFaceNodes[j, xBFaceFaces[bface]]
+    # bface nodes in the node order of their faces (canonical orientation view);
+    # note that the basic component BFaceNodes keeps the order provided by the user
+    # and is never modified here
+    if typeof(xFaceNodes) <: VariableTargetAdjacency
+        xBFaceNodesCanonical = VariableTargetAdjacency(Ti)
+        for bface in 1:nbfaces
+            face = xBFaceFaces[bface]
+            col = Vector{Ti}(undef, 0)
+            for j in 1:num_targets(xFaceNodes, face)
+                push!(col, xFaceNodes[j, face])
+            end
+            append!(xBFaceNodesCanonical, col)
+        end
+    else
+        xBFaceNodesCanonical = zeros(Ti, size(xFaceNodes, 1), nbfaces)
+        for bface in 1:nbfaces
+            face = xBFaceFaces[bface]
+            for j in 1:size(xFaceNodes, 1)
+                xBFaceNodesCanonical[j, bface] = xFaceNodes[j, face]
             end
         end
     end
-    xgrid[BFaceNodes] = newBFaceNodes
+    xgrid[BFaceNodesCanonical] = xBFaceNodesCanonical
 
     # xgrid[BFaceGeometries] = xBFaceGeometries
-    return xBFaceFaces
+    return xgrid[BFaceFaces] = xBFaceFaces
+end
+
+function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFaceNodesCanonical}) where {Tc, Ti}
+    instantiate(xgrid, BFaceFaces)
+    return xgrid[BFaceNodesCanonical]
 end
 
 
@@ -1727,6 +1756,9 @@ end
 # enumeration of grid[BEdgeNodes] (canonical or externally provided);
 # BFaceEdgeSigns records the orientation sign (+1/-1) of the referenced boundary
 # edge relative to the bface-local edge orientation (same convention as FaceEdgeSigns).
+# "bface-local" here means the local edge rules applied to grid[BFaceNodes]
+# (the user-provided node order), consistent with how consumers such as
+# VoronoiFVM index bface local degrees of freedom.
 # Entries are 0 if the respective edge is not among the boundary edges of grid[BEdgeNodes].
 function instantiate(xgrid::ExtendableGrid{Tc, Ti}, ::Type{BFaceEdges}) where {Tc, Ti}
     nbfaces = num_bfaces(xgrid)

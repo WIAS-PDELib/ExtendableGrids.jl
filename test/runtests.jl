@@ -612,6 +612,7 @@ end
         BFaceEdges,
         BFaceEdgeSigns,
         BFaceFaces,
+        BFaceNodesCanonical,
         BFaceNormals,
         BFaceVolumes,
         CellAssemblyGroups,
@@ -674,7 +675,7 @@ end
         FaceNodes, FaceGeometries, FaceCells, CellFaces, CellFaceSigns,
         FaceEdges, FaceEdgeSigns,
         EdgeNodes, EdgeGeometries, EdgeRegions, EdgeCells, CellEdges, CellEdgeSigns,
-        BFaceFaces, BFaceNodes,
+        BFaceFaces, BFaceNodes, BFaceNodesCanonical,
         BEdgeNodes, BEdgeEdges, BFaceEdges, BFaceEdgeSigns,
     ]
     same_component(a, b) = typeof(a) == typeof(b) &&
@@ -731,6 +732,54 @@ end
                     @test (bedges[1, bedge], bedges[2, bedge]) == (n2, n1)
                 end
             end
+        end
+
+        # BFaceNodesCanonical provides the face-ordered view of BFaceNodes
+        @test !(gB[BFaceNodesCanonical] === gB[BFaceNodes])
+        @test collect(gB[BFaceNodesCanonical]) == collect(gB[FaceNodes][:, gB[BFaceFaces]])
+    end
+
+    # BFaceNodes with non-canonical node order must survive all component
+    # accesses unmodified; canonical consumers must see the face node order
+    for makegrid in (
+            (() -> simplexgrid(0:1.0, 0:1.0)),
+            (() -> simplexgrid(0:1.0, 0:1.0, 0:1.0)),
+        )
+        g0 = makegrid()
+        g0[BFaceFaces]
+        bfacenodes = copy(g0[BFaceNodes])
+        bfaceregions = copy(g0[BFaceRegions])
+
+        # reverse the node order of every bface column
+        flipped = bfacenodes[(size(bfacenodes, 1)):-1:1, :]
+        g = simplexgrid(
+            g0[Coordinates], g0[CellNodes], g0[CellRegions], flipped, bfaceregions
+        )
+        g[BFaceNodesCanonical]
+        g[BFaceEdges]
+        g[BFaceEdgeSigns]
+        g[BEdgeNodes]
+        g[BEdgeEdges]
+        regions = unique(g[BFaceRegions])
+        # project=false: the 1D projection in subgrid re-sorts NodeParents
+        # independently of the cell node numbering
+        sg = subgrid(g, regions; boundary = true, project = false)
+
+        # the provided BFaceNodes are never replaced or modified
+        @test g[BFaceNodes] === flipped
+        @test collect(g[BFaceNodes]) == collect(flipped)
+
+        # canonical view agrees with the linked faces, not with flipped input
+        ff = g[BFaceFaces]
+        fn = g[FaceNodes]
+        @test collect(g[BFaceNodesCanonical]) == collect(fn[:, ff])
+
+        # boundary subgrid cells are built from the canonical view
+        np = sg[NodeParents]
+        cp = sg[CellParents]
+        for k in 1:num_cells(sg)
+            @test collect(np[sg[CellNodes][:, k]]) ==
+                collect(g[BFaceNodesCanonical][:, cp[k]])
         end
     end
 
