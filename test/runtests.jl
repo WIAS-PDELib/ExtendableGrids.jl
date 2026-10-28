@@ -610,7 +610,9 @@ end
         BFaceCellPos,
         BFaceCells,
         BFaceEdges,
+        BFaceEdgeSigns,
         BFaceFaces,
+        BFaceNodesCanonical,
         BFaceNormals,
         BFaceVolumes,
         CellAssemblyGroups,
@@ -665,4 +667,198 @@ end
     grid = ExtendableGrids.trim(grid)
 
     @test all([!haskey(grid, c) for c in component_list])
+end
+
+@testset "cluster sequence independence (#24)" begin
+    # components produced by the face/edge/bedge generator clusters (A, B, B2, C, D)
+    cluster_components = [
+        FaceNodes, FaceGeometries, FaceCells, CellFaces, CellFaceSigns,
+        FaceEdges, FaceEdgeSigns,
+        EdgeNodes, EdgeGeometries, EdgeRegions, EdgeCells, CellEdges, CellEdgeSigns,
+        BFaceFaces, BFaceNodes, BFaceNodesCanonical,
+        BEdgeNodes, BEdgeEdges, BFaceEdges, BFaceEdgeSigns,
+    ]
+    same_component(a, b) = typeof(a) == typeof(b) &&
+        (a isa VariableTargetAdjacency ? a == b : collect(a) == collect(b))
+
+    for makegrid in (
+            (() -> simplexgrid(0:0.5:1)),
+            (() -> simplexgrid(0:0.5:1, 0:0.5:1)),
+            (() -> grid_unitsquare(Quadrilateral2D)),
+            (() -> grid_unitcube(Tetrahedron3D)),
+        )
+        # sequence A: cluster components requested in forward order
+        gA = makegrid()
+        for c in cluster_components
+            gA[c]
+        end
+
+        # sequence B: cluster components requested in reverse order
+        gB = makegrid()
+        for c in Iterators.reverse(cluster_components)
+            gB[c]
+        end
+
+        for c in cluster_components
+            @test same_component(gA[c], gB[c])
+        end
+
+        # BEdgeNodes must not alias BFaceNodes
+        @test !(gB[BEdgeNodes] === gB[BFaceNodes])
+
+        # edge cluster must not alias cell/face cluster arrays
+        @test !(gB[EdgeNodes] === gB[FaceNodes])
+        @test !(gB[EdgeNodes] === gB[CellNodes])
+        @test !(gB[CellEdges] === gB[CellFaces])
+
+        # consistency of BFaceEdges/BFaceEdgeSigns with bface-local edge orientation
+        bedges = gB[BEdgeNodes]
+        bfaceedges = gB[BFaceEdges]
+        signs = gB[BFaceEdgeSigns]
+        bfacenodes = gB[BFaceNodes]
+        bfacegeoms = gB[BFaceGeometries]
+        @test num_sources(bfaceedges) == num_bfaces(gB)
+        for bface in 1:num_bfaces(gB)
+            cen = local_celledgenodes(bfacegeoms[bface])
+            for k in 1:num_targets(bfaceedges, bface)
+                bedge = bfaceedges[k, bface]
+                @test bedge > 0
+                n1 = bfacenodes[cen[1, k], bface]
+                n2 = bfacenodes[cen[2, k], bface]
+                if signs[k, bface] == 1
+                    @test (bedges[1, bedge], bedges[2, bedge]) == (n1, n2)
+                else
+                    @test signs[k, bface] == -1
+                    @test (bedges[1, bedge], bedges[2, bedge]) == (n2, n1)
+                end
+            end
+        end
+
+        # BFaceNodesCanonical provides the face-ordered view of BFaceNodes
+        @test !(gB[BFaceNodesCanonical] === gB[BFaceNodes])
+        @test collect(gB[BFaceNodesCanonical]) == collect(gB[FaceNodes][:, gB[BFaceFaces]])
+    end
+
+    # BFaceNodes with non-canonical node order must survive all component
+    # accesses unmodified; canonical consumers must see the face node order
+    for makegrid in (
+            (() -> simplexgrid(0:1.0, 0:1.0)),
+            (() -> simplexgrid(0:1.0, 0:1.0, 0:1.0)),
+        )
+        g0 = makegrid()
+        g0[BFaceFaces]
+        bfacenodes = copy(g0[BFaceNodes])
+        bfaceregions = copy(g0[BFaceRegions])
+
+        # reverse the node order of every bface column
+        flipped = bfacenodes[(size(bfacenodes, 1)):-1:1, :]
+        g = simplexgrid(
+            g0[Coordinates], g0[CellNodes], g0[CellRegions], flipped, bfaceregions
+        )
+        g[BFaceNodesCanonical]
+        g[BFaceEdges]
+        g[BFaceEdgeSigns]
+        g[BEdgeNodes]
+        g[BEdgeEdges]
+        regions = unique(g[BFaceRegions])
+        # project=false: the 1D projection in subgrid re-sorts NodeParents
+        # independently of the cell node numbering
+        sg = subgrid(g, regions; boundary = true, project = false)
+
+        # the provided BFaceNodes are never replaced or modified
+        @test g[BFaceNodes] === flipped
+        @test collect(g[BFaceNodes]) == collect(flipped)
+
+        # canonical view agrees with the linked faces, not with flipped input
+        ff = g[BFaceFaces]
+        fn = g[FaceNodes]
+        @test collect(g[BFaceNodesCanonical]) == collect(fn[:, ff])
+
+        # boundary subgrid cells are built from the canonical view
+        np = sg[NodeParents]
+        cp = sg[CellParents]
+        for k in 1:num_cells(sg)
+            @test collect(np[sg[CellNodes][:, k]]) ==
+                collect(g[BFaceNodesCanonical][:, cp[k]])
+        end
+    end
+
+    # 1D: no edges at all
+    g = simplexgrid(0:1.0)
+    @test size(g[BFaceEdges]) == (0, num_bfaces(g))
+    @test size(g[BFaceEdgeSigns]) == (0, num_bfaces(g))
+
+    # externally provided bedgenodes define the boundary edge numbering
+    # and must never be modified or renumbered
+    for makegrid in (
+            (() -> simplexgrid(0:1.0, 0:1.0)),
+            (() -> simplexgrid(0:1.0, 0:1.0, 0:1.0)),
+        )
+        g0 = makegrid()
+        bedges = g0[BEdgeNodes]
+        nbedges = size(bedges, 2)
+
+        # reversed order, flipped orientation
+        ext = bedges[:, end:-1:1][[2; 1], :]
+        bedgeregions = Int32[mod1(b, 3) for b in 1:nbedges]
+        g = simplexgrid(
+            g0[Coordinates], g0[CellNodes], g0[CellRegions],
+            g0[BFaceNodes], g0[BFaceRegions], ext, bedgeregions
+        )
+
+        @test g[BEdgeNodes] === ext
+        @test num_bedges(g) == nbedges
+        @test length(g[BEdgeRegions]) == nbedges
+
+        # BEdgeEdges maps external bedges to global edges with matching node pairs
+        xEdgeNodes = g[EdgeNodes]
+        for j in 1:nbedges
+            edge = g[BEdgeEdges][j]
+            @test (
+                min(xEdgeNodes[1, edge], xEdgeNodes[2, edge]),
+                max(xEdgeNodes[1, edge], xEdgeNodes[2, edge]),
+            ) ==
+                (min(ext[1, j], ext[2, j]), max(ext[1, j], ext[2, j]))
+        end
+
+        # BFaceEdges/BFaceEdgeSigns refer to the external numbering
+        bfaceedges = g[BFaceEdges]
+        signs = g[BFaceEdgeSigns]
+        bfacenodes = g[BFaceNodes]
+        bfacegeoms = g[BFaceGeometries]
+        @test g[BEdgeNodes] === ext
+        for bface in 1:num_bfaces(g)
+            cen = local_celledgenodes(bfacegeoms[bface])
+            for k in 1:num_targets(bfaceedges, bface)
+                bedge = bfaceedges[k, bface]
+                @test bedge > 0
+                n1 = bfacenodes[cen[1, k], bface]
+                n2 = bfacenodes[cen[2, k], bface]
+                if signs[k, bface] == 1
+                    @test (ext[1, bedge], ext[2, bedge]) == (n1, n2)
+                else
+                    @test (ext[1, bedge], ext[2, bedge]) == (n2, n1)
+                end
+            end
+        end
+
+        # incompatible bedgenodes are rejected
+        bad = copy(ext)
+        bad[2, 1] += 100
+        gb = simplexgrid(
+            g0[Coordinates], g0[CellNodes], g0[CellRegions],
+            g0[BFaceNodes], g0[BFaceRegions], bad, bedgeregions
+        )
+        @test_throws ErrorException gb[BEdgeEdges]
+
+        # a subset of boundary edges is fine, missing edges yield zero entries
+        gs = simplexgrid(
+            g0[Coordinates], g0[CellNodes], g0[CellRegions],
+            g0[BFaceNodes], g0[BFaceRegions], ext[:, 1:2], bedgeregions[1:2]
+        )
+        @test gs[BEdgeNodes] == ext[:, 1:2]
+        gs[BEdgeEdges]
+        gs[BFaceEdges]
+        @test any(==(0), vec(gs[BFaceEdges]))
+    end
 end

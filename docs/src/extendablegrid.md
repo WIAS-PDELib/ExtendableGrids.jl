@@ -52,6 +52,22 @@ using ExtendableGrids # hide
 gridcomponents() #hide
 ```
 
+### Generator clusters
+
+Derived components are created lazily upon access. Some of them share a common
+element enumeration and are therefore instantiated *together* by a single
+generator; the result does not depend on the order in which the components of a
+cluster are accessed first.
+
+| Cluster | Components instantiated together | Roots |
+| --- | --- | --- |
+| A (faces) | `FaceNodes`, `FaceGeometries`, `FaceCells`, `CellFaces`, `CellFaceSigns` | `CellNodes`, `CellGeometries` |
+| B (edges) | `EdgeNodes`, `EdgeGeometries`, `EdgeRegions`, `EdgeCells`, `CellEdges`, `CellEdgeSigns` | `CellNodes`, `CellGeometries` (in 2D: cluster A) |
+| B2 (face-edge link, 3D) | `FaceEdges`, `FaceEdgeSigns` | cluster A, cluster B |
+| C (bface-face link) | `BFaceFaces`, `BFaceNodesCanonical` (bface nodes in the node order of their faces; the basic `BFaceNodes` keeps the user-provided order and is never modified) | cluster A, `BFaceNodes` |
+| D (boundary edges) | `BEdgeNodes` + `BEdgeEdges`, and `BFaceEdges` + `BFaceEdgeSigns` | clusters B, C (or an externally provided `BEdgeNodes`, which then defines the boundary edge enumeration and is never modified) |
+
+
 ### Additional components
 Additional components can be added by defining  a subtype of [`AbstractGridComponent`](@ref) or
 a fitting subtype thereof, and assigning the value to the corresponding Dict entry:

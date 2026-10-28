@@ -17,13 +17,20 @@ struct VariableTargetAdjacency{T}
 end
 
 """
-    $(SIGNATURES)
+$(TYPEDSIGNATURES)
 
 Comparison of two adjacencies
 """
 function Base.:(==)(a::VariableTargetAdjacency{Ta}, b::VariableTargetAdjacency{Tb}) where {Ta, Tb}
     return Ta == Tb && a.colentries == b.colentries &&  a.colstart == b.colstart
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Copy an adjacency (data is not shared with the original)
+"""
+Base.copy(adj::VariableTargetAdjacency{T}) where {T} = VariableTargetAdjacency{T}(copy(adj.colentries), copy(adj.colstart))
 
 """
 $(TYPEDSIGNATURES)

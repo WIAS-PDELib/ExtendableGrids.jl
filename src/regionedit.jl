@@ -138,6 +138,7 @@ function bfacemask!(
 
     # This adjacency is not true anymore...
     delete!(grid, BFaceFaces)
+    delete!(grid, BFaceNodesCanonical)
 
     if allow_new
         grid[BFaceNodes] = Array{Ti, 2}(new_bfacenodes)

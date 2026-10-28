@@ -151,7 +151,9 @@ function subgrid(
 
     if support == ON_BFACES
         xregions = parent[BFaceRegions]
-        xnodes = parent[BFaceNodes]
+        # canonical view: consistently oriented boundary cells independent of
+        # the node order provided in parent[BFaceNodes]
+        xnodes = parent[BFaceNodesCanonical]
         xct = parent[BFaceGeometries]
         sub_gdim = dim_grid(parent) - 1
     elseif support == ON_FACES
@@ -239,7 +241,8 @@ function subgrid(
             subgrid[CoordinateSystem] = coordinatesystem
         end
     else
-        bfacenodes = parent[BFaceNodes]
+        # canonical view for consistent orientation w.r.t. the subgrid's own cells
+        bfacenodes = parent[BFaceNodesCanonical]
         bfaceregions = parent[BFaceRegions]
         bfacetypes = parent[BFaceGeometries]
         bfacecells = parent[BFaceCells]

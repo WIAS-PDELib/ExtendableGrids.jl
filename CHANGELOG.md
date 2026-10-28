@@ -1,5 +1,46 @@
 # Changelog
 
+## [1.19.0] - 2026-10-28
+- Fix #24: `grid[BFaceEdges]` no longer recomputes boundary edges with a separate
+  enumeration and silently overwrites `grid[BEdgeNodes]` (the
+  `instantiate(::Type{BFaceEdges}) = prepare_bedges!` hook and `prepare_bedges!`
+  are removed); `BFaceEdges` is now derived from the canonical
+  `BEdgeNodes`/`BEdgeEdges`/`EdgeNodes` enumeration and thus independent of the
+  sequence of grid component access
+- Add `BFaceEdgeSigns` grid component: orientation sign (+1/-1) of the boundary
+  edge referenced by `BFaceEdges` relative to the bface-local edge orientation
+  (same convention as `FaceEdgeSigns`), instantiated together with `BFaceEdges`
+- In 2D, `BEdgeNodes` and `BEdgeEdges` no longer alias `BFaceNodes`/`BFaceFaces`
+- Externally provided `BEdgeNodes` (e.g. the seven-array `simplexgrid` constructor)
+  now define the boundary edge numbering: `BEdgeEdges`, `BFaceEdges` and
+  `BFaceEdgeSigns` are matched to it via node-pair lookup instead of recomputing
+  (and previously overwriting) `BEdgeNodes`; `bedgenodes` that are not unique
+  boundary edges of the grid raise an error; subsets of boundary edges are allowed
+  (`BFaceEdges` entries referring to them are 0)
+- Deprecated `prepare_edges!` (superseded by lazy `grid[EdgeNodes]` etc.)
+- Add `BFaceNodesCanonical` grid component: nodes of boundary faces in the node
+  order of their associated faces (consistently oriented w.r.t. the owning
+  cells), instantiated together with `BFaceFaces`
+- Behavior change: `instantiate(::Type{BFaceFaces})` no longer normalizes
+  (replaces) the basic component `grid[BFaceNodes]` as a lazy side effect;
+  `BFaceNodes` now permanently keeps the user-provided node order. That
+  replacement could silently invalidate components and consumer caches
+  computed from the pre-normalization values (root cause of downstream
+  result changes e.g. in VoronoiFVM for grids whose bface node order is not
+  canonical, such as imported meshes). Code that needs rule-consistent bface
+  node order should read `grid[BFaceNodesCanonical]`;
+  `subgrid(...; boundary=true)` now uses it internally, preserving
+  consistently oriented boundary grids; `bfacemask!` invalidates
+  `BFaceNodesCanonical` together with `BFaceFaces`
+- In 1D/2D, edge cluster components (`EdgeNodes`, `EdgeCells`, `CellEdges`,
+  `CellEdgeSigns`) no longer alias arrays of the cell/face clusters
+- Documented generator clusters (see "Generator clusters" in the docs); added
+  order-independence tests for all components of the face/edge/bedge clusters
+- Bugfix: in 1D, accessing `grid[CellEdgeSigns]` caused infinite recursion;
+  accessing `grid[FaceEdges]`/`grid[FaceEdgeSigns]` failed for 1D/2D grids
+  (faces are points/segments there and have no edges). Surfaced by the new
+  cluster tests.
+
 ## [1.18.0] - 2026-10-14
 - `interpolate`/`interpolate!`: reconstruct values with the shape functions of the actually found cell
   (bilinear on Parallelogram2D, trilinear on Parallelepiped3D) instead of the simplex-only

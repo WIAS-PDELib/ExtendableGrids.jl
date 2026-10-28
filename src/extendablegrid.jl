@@ -170,7 +170,11 @@ abstract type CellNodes <: AbstractGridAdjacency end
 """
 $(TYPEDEF)
 
-Adjacency describing nodes per grid boundary face
+Adjacency describing nodes per grid boundary face.
+The node order within each bface column is the one provided by the user and
+is never modified by lazy component creation. Consumers which need bface
+local node order to coincide with face local node order (e.g. consistently
+oriented boundary grids) should use grid[BFaceNodesCanonical].
 """
 abstract type BFaceNodes <: AbstractGridAdjacency end
 
@@ -797,7 +801,9 @@ function trim!(grid::ExtendableGrid; keep = [])
         BFaceCellPos,
         BFaceCells,
         BFaceEdges,
+        BFaceEdgeSigns,
         BFaceFaces,
+        BFaceNodesCanonical,
         BFaceNormals,
         BFaceVolumes,
         CellAssemblyGroups,
