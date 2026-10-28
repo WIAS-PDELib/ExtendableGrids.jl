@@ -1,6 +1,6 @@
 # Changelog
 
-## [unreleased]
+## [1.19.0] - 2026-10-28
 - Fix #24: `grid[BFaceEdges]` no longer recomputes boundary edges with a separate
   enumeration and silently overwrites `grid[BEdgeNodes]` (the
   `instantiate(::Type{BFaceEdges}) = prepare_bedges!` hook and `prepare_bedges!`
