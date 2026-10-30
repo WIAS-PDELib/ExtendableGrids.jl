@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.20.0] - 2026-10-29
+- Raise minimum supported Julia version from 1.9 to 1.10 (`julia` and
+  compat entries updated accordingly)
+
 ## [1.19.0] - 2026-10-28
 - Fix #24: `grid[BFaceEdges]` no longer recomputes boundary edges with a separate
   enumeration and silently overwrites `grid[BEdgeNodes]` (the
