@@ -12,7 +12,7 @@ using DocStringExtensions: DocStringExtensions, SIGNATURES, TYPEDEF,
 using ElasticArrays: ElasticArrays, ElasticArray
 using Graphs: Graph, add_edge!
 using InteractiveUtils: InteractiveUtils, subtypes
-using LinearAlgebra: LinearAlgebra, dot, norm
+using LinearAlgebra: LinearAlgebra, ×, ⋅, dot, norm
 using Printf: Printf, @printf, @sprintf
 using Random: Random, randsubseq
 using SparseArrays: SparseArrays, SparseMatrixCSC, dropzeros!, nzrange

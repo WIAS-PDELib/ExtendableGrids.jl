@@ -1,5 +1,8 @@
 # Changelog
 
+## Next release
+- Previous volume formulas, which were hard to read and easy to disorient, have been changed to the new ones, which are much shorter and clearer.
+
 ## [1.20.0] - 2026-10-29
 - Raise minimum supported Julia version from 1.9 to 1.10 (`julia` and
   compat entries updated accordingly)
