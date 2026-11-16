@@ -419,71 +419,64 @@ local_celledgenodes(::Type{<:Hexahedron3D}) = _local_celledgenodes_Hexahedron3D
 ### VOLUMES ###
 ###############
 
+# The following function extracts the coordinates of the local nodes selected by `indices`
+# and returns them as a tuple of chosen type 'SV'.
+@inline function extract_static_coords(Coords, Nodes, item, indices::NTuple{N, Int}, ::Type{SV}) where {N, SV}
+    return ntuple(Val(N)) do k
+        node_number = Nodes[indices[k], item]
+        SV(@view Coords[:, node_number])
+    end
+end
+
 function volume(Coords, Nodes, item, ::Type{<:Vertex0D}, ::Type{<:AbstractCoordinateSystem})
     return 1
 end
 
 function volume(Coords, Nodes, item, ::Type{<:Edge1D}, ::Type{Cartesian1D})
-    return abs(Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]])
+    c1, c2 = extract_static_coords(Coords, Nodes, item, (1, 2), SVector{1})
+    return norm(c2 - c1)
 end
 
 
 function volume(Coords, Nodes, item, ::Type{<:Edge1D}, ::Type{Cartesian2D})
-    return sqrt((Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]) .^ 2 + (Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]) .^ 2)
+    c1, c2 = extract_static_coords(Coords, Nodes, item, (1, 2), SVector{2})
+    return norm(c2 - c1)
 end
 
 function volume(Coords, Nodes, item, ::Type{<:Edge1D}, ::Type{Cartesian3D})
-    return sqrt((Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]) .^ 2 + (Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]) .^ 2 + (Coords[3, Nodes[2, item]] - Coords[3, Nodes[1, item]]) .^ 2)
+    c1, c2 = extract_static_coords(Coords, Nodes, item, (1, 2), SVector{3})
+    return norm(c2 - c1)
 end
-
 
 function volume(Coords, Nodes, item, ::Type{Triangle2D}, ::Type{Cartesian2D})
-    return 1 // 2 * (
-        Coords[1, Nodes[1, item]] * (Coords[2, Nodes[2, item]] - Coords[2, Nodes[3, item]])
-            + Coords[1, Nodes[2, item]] * (Coords[2, Nodes[3, item]] - Coords[2, Nodes[1, item]])
-            + Coords[1, Nodes[3, item]] * (Coords[2, Nodes[1, item]] - Coords[2, Nodes[2, item]])
-    )
+    c1, c2, c3 = extract_static_coords(Coords, Nodes, item, (1, 2, 3), SVector{2})
+    return 1 // 2 * ((c2 - c1) × (c3 - c1))
 end
 
-
 function volume(Coords, Nodes, item, ::Type{<:Quadrilateral2D}, ::Type{Cartesian2D})
-    return 1 // 2 * (
-        (Coords[1, Nodes[1, item]] - Coords[1, Nodes[3, item]]) * (Coords[2, Nodes[2, item]] - Coords[2, Nodes[4, item]])
-            + (Coords[1, Nodes[4, item]] - Coords[1, Nodes[2, item]]) * (Coords[2, Nodes[1, item]] - Coords[2, Nodes[3, item]])
-    )
+    c1, c2, c3, c4 = extract_static_coords(Coords, Nodes, item, (1, 2, 3, 4), SVector{2})
+    return 1 // 2 * ((c3 - c1) × (c4 - c2))
 end
 
 function volume(Coords, Nodes, item, ::Type{<:Triangle2D}, ::Type{Cartesian3D})
-    @views d12 = SVector{3}(Coords[:, Nodes[1, item]]) - SVector{3}(Coords[:, Nodes[2, item]])
-    @views d14 = SVector{3}(Coords[:, Nodes[1, item]]) - SVector{3}(Coords[:, Nodes[3, item]])
-    return sqrt((d12[2] * d14[3] - d12[3] * d14[2])^2 + (d12[3] * d14[1] - d12[1] * d14[3])^2 + (d12[1] * d14[2] - d12[2] * d14[1])^2) / 2
+    c1, c2, c3 = extract_static_coords(Coords, Nodes, item, (1, 2, 3), SVector{3})
+    return 1 // 2 * norm((c2 - c1) × (c3 - c1))
 end
-
 
 function volume(Coords::Array{Tc, 2}, Nodes, item, ::Type{<:Parallelogram2D}, ::Type{Cartesian3D}) where {Tc}
-    @views d12 = SVector{3}(Coords[:, Nodes[1, item]]) - SVector{3}(Coords[:, Nodes[2, item]])
-    @views d14 = SVector{3}(Coords[:, Nodes[1, item]]) - SVector{3}(Coords[:, Nodes[3, item]])
-    return sqrt((d12[2] * d14[3] - d12[3] * d14[2])^2 + (d12[3] * d14[1] - d12[1] * d14[3])^2 + (d12[1] * d14[2] - d12[2] * d14[1])^2)
+    c1, c2, c3 = extract_static_coords(Coords, Nodes, item, (1, 2, 3), SVector{3})
+    return norm((c2 - c1) × (c3 - c1))
 end
-
 
 function volume(Coords, Nodes, item, ::Type{<:Parallelepiped3D}, ::Type{Cartesian3D})
-    return (
-        (Coords[1, Nodes[5, item]] - Coords[1, Nodes[1, item]]) * ((Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]) * (Coords[3, Nodes[4, item]] - Coords[3, Nodes[1, item]]) - (Coords[2, Nodes[4, item]] - Coords[2, Nodes[1, item]]) * (Coords[3, Nodes[2, item]] - Coords[3, Nodes[1, item]]))
-            + (Coords[2, Nodes[5, item]] - Coords[2, Nodes[1, item]]) * ((Coords[3, Nodes[2, item]] - Coords[3, Nodes[1, item]]) * (Coords[1, Nodes[4, item]] - Coords[1, Nodes[1, item]]) - (Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]) * (Coords[3, Nodes[4, item]] - Coords[3, Nodes[1, item]]))
-            + (Coords[3, Nodes[5, item]] - Coords[3, Nodes[1, item]]) * ((Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]) * (Coords[2, Nodes[4, item]] - Coords[2, Nodes[1, item]]) - (Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]) * (Coords[1, Nodes[4, item]] - Coords[1, Nodes[1, item]]))
-    )
+    c1, c2, c4, c5 = extract_static_coords(Coords, Nodes, item, (1, 2, 4, 5), SVector{3})
+    return ((c5 - c1) ⋅ ((c2 - c1) × (c4 - c1)))
 end
-
 
 function volume(Coords, Nodes, item, ::Type{<:Tetrahedron3D}, ::Type{Cartesian3D})
-    return 1 // 6 * (
-        (Coords[1, Nodes[4, item]] - Coords[1, Nodes[1, item]]) * ((Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]) * (Coords[3, Nodes[3, item]] - Coords[3, Nodes[1, item]]) - (Coords[2, Nodes[3, item]] - Coords[2, Nodes[1, item]]) * (Coords[3, Nodes[2, item]] - Coords[3, Nodes[1, item]]))
-            + (Coords[2, Nodes[4, item]] - Coords[2, Nodes[1, item]]) * ((Coords[3, Nodes[2, item]] - Coords[3, Nodes[1, item]]) * (Coords[1, Nodes[3, item]] - Coords[1, Nodes[1, item]]) - (Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]) * (Coords[3, Nodes[3, item]] - Coords[3, Nodes[1, item]]))
-            + (Coords[3, Nodes[4, item]] - Coords[3, Nodes[1, item]]) * ((Coords[1, Nodes[2, item]] - Coords[1, Nodes[1, item]]) * (Coords[2, Nodes[3, item]] - Coords[2, Nodes[1, item]]) - (Coords[2, Nodes[2, item]] - Coords[2, Nodes[1, item]]) * (Coords[1, Nodes[3, item]] - Coords[1, Nodes[1, item]]))
-    )
+    c1, c2, c3, c4 = extract_static_coords(Coords, Nodes, item, (1, 2, 3, 4), SVector{3})
+    return 1 // 6 * ((c2 - c1) ⋅ ((c3 - c1) × (c4 - c1)))
 end
-
 
 ###############
 ### NORMALS ###
