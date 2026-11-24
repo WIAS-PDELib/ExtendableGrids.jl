@@ -1,6 +1,9 @@
 # Changelog
 
 ## Next release
+- Recursive Metis partitioning passes the `ccorder` option with `Metis.Options` for each call
+  instead of setting it in the global `Metis.options` array, which also affected later
+  Metis calls in the process. Requires Metis.jl 1.7.
 - Previous volume formulas, which were hard to read and easy to disorient, have been changed to the new ones, which are much shorter and clearer.
 
 ## [1.20.0] - 2026-10-29
