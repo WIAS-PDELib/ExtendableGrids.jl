@@ -45,10 +45,9 @@ end
 
 function coloredpartition(cc; npart = 4, depth = 0, maxdepth = 4, separatorwidth = 2)
     mg = Metis.graph(cc)
-    Metis.options[Int(Metis.METIS_OPTION_CCORDER) + 1] = 1
 
     # primary partition
-    primarypartition = Metis.partition(mg, npart)
+    primarypartition = Metis.partition(mg, npart; options = Metis.Options(ccorder = 1))
     npp = maximum(primarypartition)
     ncells = length(primarypartition)
     sepamark = zeros(Bool, ncells)
