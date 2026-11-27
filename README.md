@@ -35,7 +35,7 @@ typeof(cellnodes) <: Matrix # true: each cell (tetrahedron!) has 4 nodes:
 unitsquare = grid_unitsquare(Triangle2D)
 
 nodecells = unitsquare[NodeCells] # the node index -> cell indices mapping
-typeof(cellnodes) <: Matrix # false!
+typeof(nodecells) <: Matrix # false!
                             # each node has a different number of adjacent cells:
                             # stored as `VariableTargetAdjacency`
 
