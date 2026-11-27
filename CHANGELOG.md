@@ -1,6 +1,7 @@
 # Changelog
 
-## Next release
+## [1.21.0] - 2026-11-28
+- fix `volume` allocation detection/generation by introducing another barrier function
 - Recursive Metis partitioning passes the `ccorder` option with `Metis.Options` for each call
   instead of setting it in the global `Metis.options` array, which also affected later
   Metis calls in the process. Requires Metis.jl 1.7.

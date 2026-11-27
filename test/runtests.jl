@@ -253,6 +253,10 @@ end
     include("test_commongrids.jl")
 end
 
+@testset "Volumes" begin
+    include("test_volumes.jl")
+end
+
 @testset "Base.map" begin
     X = 0:0.1:1
     fx(x) = x
