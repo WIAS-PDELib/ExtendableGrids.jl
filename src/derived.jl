@@ -1472,10 +1472,9 @@ function collectVolumes4Geometries(xgrid::ExtendableGrid{Tc, Ti}, ItemType) wher
         xVolumes = zeros(Tc, nitems)
     end
 
-    nalloc = 0
     # run time dispatch for a specific geometry and coordinate system type
     function volume_barrier!(xVolumes, item, Coords, Nodes, ::Type{GEOM}, ::Type{CS}) where {GEOM, CS}
-        nalloc += @allocated  xVolumes[item] = volume(Coords, Nodes, item, GEOM, CS)
+        xVolumes[item] = volume(Coords, Nodes, item, GEOM, CS)
         return nothing
     end
 
@@ -1487,7 +1486,6 @@ function collectVolumes4Geometries(xgrid::ExtendableGrid{Tc, Ti}, ItemType) wher
         return
     end
     barrier!(xVolumes, xCoordinateSystem)
-    nalloc > 0 && @warn " $nalloc allocations during $ItemType volume calculation"
     return xVolumes
 end
 
