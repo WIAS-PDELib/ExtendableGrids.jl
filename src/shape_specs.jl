@@ -4,6 +4,10 @@
 $(SIGNATURES)
 
 Number of edges in grid.
+
+Note that this returns 0 as long as `EdgeNodes` has not been instantiated
+(it does not trigger its creation). Use `size(grid[EdgeNodes],2)` if the
+number of edges is needed independently of the instantiation state.
 """
 num_edges(grid::ExtendableGrid) = haskey(grid, EdgeNodes) ? num_sources(grid[EdgeNodes]) : 0
 
