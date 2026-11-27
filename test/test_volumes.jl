@@ -3,7 +3,11 @@ using ExtendableGrids: volume
 # static dispatch wrapper so that @allocated measures a single concrete call
 vol4test(Coords, Nodes, item, ::Type{GEOM}, ::Type{CS}) where {GEOM, CS} = volume(Coords, Nodes, item, GEOM, CS)
 
+# every volume method reached by a check_volume call below is recorded here
+tested_volume_methods = Set{Method}()
+
 function check_volume(Coords, Nodes, item, ::Type{GEOM}, ::Type{CS}, expected) where {GEOM, CS}
+    push!(tested_volume_methods, which(volume, Tuple{typeof(Coords), typeof(Nodes), Int, Type{GEOM}, Type{CS}}))
     # first call warms up compilation, second one is measured
     @test vol4test(Coords, Nodes, item, GEOM, CS) ≈ expected
     @test @allocated(vol4test(Coords, Nodes, item, GEOM, CS)) == 0
@@ -96,4 +100,14 @@ end
 let
     Coords = [0.0 2.0 0.0 0.0; 0.0 0.0 3.0 0.0; 0.0 0.0 0.0 4.0]
     check_volume(Coords, col([1, 2, 3, 4]), 1, Tetrahedron3D, Cartesian3D, 4.0)
+end
+
+# ensure that every volume method defined in the package is covered by one of
+# the test cases above; when adding a new volume method, add a test case for it
+let
+    untested = setdiff(collect(methods(volume)), tested_volume_methods)
+    for m in untested
+        println("untested volume method: ", m.sig)
+    end
+    @test isempty(untested)
 end
